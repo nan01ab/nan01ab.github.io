@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <!-- Main JS (navbar.js, katex_init.js and masonry_init.js)-->
+    <script defer=true src="/assets/js/main.min.js"></script>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="/assets/css/main.css">
+
+    <!--Favicon-->
+    <link rel="shortcut icon" href="/assets/favicon.ico" type="image/x-icon">
+
+    <!-- Canonical -->
+    <link rel="canonical" href="http://localhost:4000/2018/09/01/ISA-Wars-Understanding-the-Relevance-of-ISA-being-RISC-or-CISC-to-Performance,-Power,-and-Energy-on-Modern-Architecture.html">
+
+    <!-- RSS -->
+    <link rel="alternate" type="application/atom+xml" title="Personal Blog" href="http://localhost:4000///feed.xml"/>
+
+    <!-- Font Awesome -->
+    <!-- <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"> -->
+    <link rel="stylesheet" type="text/css" href="/assets/css/vendor/font-awesome.min.css">
+    
+    
+
+    <!-- Google Fonts -->
+    
+
+    <!-- KaTeX 0.8.3 -->
+    
+    <link rel="stylesheet" type="text/css" href="/assets/css/vendor/katex.min.css">
+    <script src="/assets/js/vendor/katex.min.js">
+    </script>
+    
+
+    <!-- Google Analytics -->
+    
+    
+    <!-- seo tags -->
+    <!-- Begin Jekyll SEO tag v2.5.0 -->
+<title>ISA Wars | Personal Blog</title>
+<meta name="generator" content="Jekyll v3.8.4" />
+<meta property="og:title" content="ISA Wars" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="ISA Wars: Understanding the Relevance of ISA being RISC or CISC to Performance, Power, and Energy on Modern Architectures(指令集战争：理解现代RISC或CISC处理器架构与性能、能耗和能效的相关性)" />
+<meta property="og:description" content="ISA Wars: Understanding the Relevance of ISA being RISC or CISC to Performance, Power, and Energy on Modern Architectures(指令集战争：理解现代RISC或CISC处理器架构与性能、能耗和能效的相关性)" />
+<link rel="canonical" href="http://localhost:4000/2018/09/01/ISA-Wars-Understanding-the-Relevance-of-ISA-being-RISC-or-CISC-to-Performance,-Power,-and-Energy-on-Modern-Architecture.html" />
+<meta property="og:url" content="http://localhost:4000/2018/09/01/ISA-Wars-Understanding-the-Relevance-of-ISA-being-RISC-or-CISC-to-Performance,-Power,-and-Energy-on-Modern-Architecture.html" />
+<meta property="og:site_name" content="Personal Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2018-09-01T00:00:00+08:00" />
+<script type="application/ld+json">
+{"description":"ISA Wars: Understanding the Relevance of ISA being RISC or CISC to Performance, Power, and Energy on Modern Architectures(指令集战争：理解现代RISC或CISC处理器架构与性能、能耗和能效的相关性)","@type":"BlogPosting","url":"http://localhost:4000/2018/09/01/ISA-Wars-Understanding-the-Relevance-of-ISA-being-RISC-or-CISC-to-Performance,-Power,-and-Energy-on-Modern-Architecture.html","headline":"ISA Wars","dateModified":"2018-09-01T00:00:00+08:00","datePublished":"2018-09-01T00:00:00+08:00","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/2018/09/01/ISA-Wars-Understanding-the-Relevance-of-ISA-being-RISC-or-CISC-to-Performance,-Power,-and-Energy-on-Modern-Architecture.html"},"@context":"http://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+    <!-- Manual seo tags -->
+    <!--
+    <title>ISA Wars | Personal Blog</title>
+    <meta name="description" content="ISA Wars: Understanding the Relevance of ISA being RISC or CISC to Performance, Power, and Energy on Modern Architectures(指令集战争：理解现代RISC或CISC处理器架构与性能、能耗和能效的相关性)">
+    -->
+</head>
+
+  <body>
+    <header class="site-header">
+    
+    <!-- Logo and title -->
+	<div class="branding">
+		<a href="/">
+			<img class="avatar" src="/assets/img/triangle.svg" alt=""/>
+		</a>
+
+		<h1 class="site-title">
+			<a href="/">Personal Blog</a>
+		</h1>
+	</div>
+    
+    <!-- Toggle menu -->
+    <nav class="clear">
+    <a id="pull" class="toggle" href="#">
+    <i class="fa fa-bars fa-lg"></i>
+    </a>
+    
+    <!-- Menu -->
+    <ul class="hide">
+        <!-- Auto Generation of NORMAL pages in the navbar -->
+        
+        
+        
+        
+        
+        
+        
+        <li class="separator"> | </li>
+        <li>
+            <a class="clear" href="/about/">
+                About
+            </a>
+        </li>
+        
+        
+        
+        
+        
+        
+        
+        
+        <li class="separator"> | </li>
+        <li>
+            <a class="clear" href="/gallery/">
+                Gallery
+            </a>
+        </li>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        <li class="separator"> | </li>
+        <li>
+            <a class="clear" href="/portfolio/">
+                Portfolio
+            </a>
+        </li>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+         
+        
+        <!-- Auto Generation of SPECIAL pages in the navbar -->
+        
+          
+            <li class="separator"> | </li>
+            <li>
+                <a class="clear" href="http://localhost:4000/search">
+                    <i class="fa fa-search" aria-hidden="true"></i>
+                </a>
+            </li>
+          
+        
+          
+            <li class="separator"> | </li>
+            <li>
+                <a class="clear" href="http://localhost:4000/tags">
+                    <i class="fa fa-tags" aria-hidden="true"></i>
+                </a>
+            </li>
+          
+        
+    </ul>
+        
+	</nav>
+</header>
+
+    <div class="content">
+      <article >
+  <header id="main" style="background-image: url('/')">
+    <h1 id="ISA+Wars" class="title">
+        ISA Wars
+    </h1>
+    
+    
+      
+  </header>
+  <section class="post-content">
+  
+	<h2 id="isa-wars-understanding-the-relevance-of-isa-being-risc-or-cisc-to-performance-power-and-energy-on-modern-architectures指令集战争理解现代risc或cisc处理器架构与性能能耗和能效的相关性">ISA Wars: Understanding the Relevance of ISA being RISC or CISC to Performance, Power, and Energy on Modern Architectures(指令集战争：理解现代RISC或CISC处理器架构与性能、能耗和能效的相关性)</h2>
+
+<!--more-->
+
+<h2 id="0x00-引言">0x00 引言</h2>
+
+<p>RISC和CISC的比较来源已久，早期的比较大多都集中在性能方面。一般情况下，会认为CISC处理器的性能更加好，而能耗和能效高价低，RISC反之，当然这种说明不一定准确。而现在，CPU架构发展已经相对成熟，单核性能每年增长的幅度很小，CPU多核化，智能手机等移动设备的CPU越来越受关注。那么在CPU发展变化之后，RISC和CISC的指令集类型对处理器的各个关键指标又有什么样的影响呢？这里我们来看一看TPCS 2015上的一篇文章[1]。这篇paper主要做的就是:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code> We present an exhaustive and rigorous analysis using workloads that span smart-phone, desktop, and server applications. In our study, we are primarily interested in whether and, if so, how the ISA being RISC or CISC impacts performance and power.
+ 通过运行智能手机、桌面和服务器应用程序等的不同的应用程序，我们描述了一个详尽的、严格的分析。在我们的研究中，感兴趣的主要是RISC或CISC指令集是否对性能、能耗造成了影响，如果是，是如何影响的。
+</code></pre></div></div>
+
+<h2 id="0x01-所研究的平台">0x01 所研究的平台</h2>
+
+<p>​    这篇paper主要讨论了x86、ARM和MIPS架构。讨论的处理器信息如下：</p>
+
+<p><img src="/assets/img/ISA-Wars-table-2png.png" alt="ISA-Wars-table-2png" /></p>
+
+<p><strong>注：</strong></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Width: 能同时发射几条指令;
+Issue: 指令发射(这里表示的是顺序发射还是乱序发射)；
+OoO: 乱序（out-of-order)；
+In Order: 顺序；
+L1D: 一级数据缓存；
+L1I: 一级指令缓存；
+AVX，SSE：x86架构的SIMD(单指令多数据)指令集拓展;
+NEON: ARM架构的SIMD指令集拓展;
+关于这类处理器效果的基本知识，可以参考参考文献[2,3].
+</code></pre></div></div>
+
+<h2 id="0x02-key-finds">0x02 Key Finds</h2>
+
+<p>关于论文具体是如何做出评价，这里就不具体讨论了，有兴趣的可参考原paper，这里只总结一下论文中的key finds（图表也不一一给出了，比较多，复杂。还是可以参考原论文）。</p>
+
+<ul>
+  <li>
+    <h4 id="key-finding-1-from-execution-time-comparison从执行时间方面">Key Finding 1: (from Execution Time Comparison，从执行时间方面)</h4>
+
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  Large performance gaps exist across the seven platforms studied, as expected, since frequency ranges from 600MHz to 3.4GHz and microarchitectures are very different.
+  因为CPU频率和微架构存在巨大的差异，CPU之间也存在巨大性能差异。
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <h4 id="key-finding-2-from-cycle-count-comparison从运行周期方面">Key Finding 2: (from Cycle-Count Comparison，从运行周期方面)</h4>
+
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  Performance gaps, when normalized to cycle counts, are predominantly less than 3× when comparing in-order cores to each other and out-of-order cores to each other.
+  性能之间的差异，当规范化到执行周期之后，顺序执行的CPU之间、乱序执行的CPU之间的性能差距不超过3x。
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <h4 id="key-finding-3-from-instruction-count-comparison从执行的指令数量方面">Key Finding 3: (from Instruction Count Comparison,从执行的指令数量方面)</h4>
+
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  Despite similar instruction counts across ISAs, CPI can be less on x86 implementations across all suites (as shown in Table VI). This finding disproves prior belief that CISC implementations should have a higher CPI than RISC implementations (due to the complex instructions in CISC). Microarchitecture is the dominant factor that affects performance, not the ISA.
+  尽管不同的指令集的CPU执行的指令数相似，但是x86架构的CPI在各个测试中都更小。这个发现证明了之前关于CISC架构的处理器比RISC架构的处理器会有更高的CPI的观点是错误的(因为CISC架构的处理器指令更加复杂)。微架构是影响性能的主要因素，而不是指令集。
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <h4 id="key-finding-4-from-instruction-format-and-mix从指令格式和各指令组合">Key Finding 4: (from Instruction Format and Mix,从指令格式和各指令组合)</h4>
+
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code> Combining the instruction count and mix findings, we conclude that ISA effects are indistinguishable between x86 and ARM implementations. Due to infrastructure limitations, we do not have enough data to make the same claim for the MIPS platform. However, we suspect that instruction count differences on MIPS platform are due to system software issues and not due to the ISA.
+  组合指令数和指令组合的结果，我们总结出指令集的作用在x86和ARM上无法区分。因为基础设施的限制，我们没有足够的数据对MIPS架构做出同样的总结。然而，我们推测MIPS平台上的指令数的不同是由于系统软件的问题而不是因为指令集。
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <h4 id="key-finding-5-from-microarchitecture从微架构方面">Key Finding 5: (from microarchitecture,从微架构方面)</h4>
+
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  The microarchitecture has the dominant impact on performance. The ARM, x86, and MIPS architectures have similar instruction counts. The microarchitecture, not the ISA, is responsible for performance differences.
+  微架构对性能起支配性的作用。ARM，x86和MIPS有相似的指令数。微架构是造成性能的原因而不是指令集。
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <h4 id="key-finding-6-from-isa-influence-on-microarchitecture-从指令集对微架构的影响">Key Finding 6: (from ISA Influence on Microarchitecture, 从指令集对微架构的影响)</h4>
+
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  As shown in Table VIII, there are significant differences in microarchitectures. Drawing on instruction mix and instruction count analysis, we feel that the only case where the ISA forces larger structures is on the ROB size, physical rename file size, and scheduler size since there are almost the same number of x86 micro-ops in flight compared to ARM and MIPS instructions. The difference is small enough that we argue it is not necessary to quantify further. Beyond the translation to micro-ops, pipelined implementation of an x86 ISA introduces no additional overheads over an ARM or MIPS ISA for these performance levels.
+  如表8所示，微架构之间存在明显的不同。依据指令组合和指令数分析，我们认为指令集迫使更大的结构只在ROB尺寸，物理重命名文件大小和调度器大小，因为运行中x86微操作的数量和ARM、MIPS几乎相同。我们认为没有必要进一步量化，因为差别很小。除了转化到微操作之外，x86指令集流水线的实现在这些性能级别上不会在ARM或MIPS的实现上引入额外的开销。
+</code></pre></div>    </div>
+
+    <p><img src="/assets/img/ISA-Wars-table-8.png" alt="ISA-Wars-table-8" /></p>
+  </li>
+  <li>
+    <h4 id="key-finding-7-from-average-power从平均能耗方面">Key Finding 7: (from Average Power,从平均能耗方面)</h4>
+
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code> Power consumption does not have a direct correlation to the ISA being RISC or CISC.
+ 能源消耗和指令集在RISC或CISC没有之间的关联。
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <h4 id="key-finding-8-from-average-technology-independent-power从技术无关的拼接能耗方面">Key Finding 8: (from Average Technology Independent Power,从技术无关的拼接能耗方面)</h4>
+
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  the choice of power- or performance-optimized core designs impacts core power use more than does ISA.
+  能耗或性能优化的核心设计选择造成的能耗影响大于指令集的影响。
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <h4 id="key-finding-9-from--average-energy-从平均能效方面">Key Finding 9: (from  Average Energy, 从平均能效方面)</h4>
+
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code> Since power and performance are both primarily design choices, energy use is also primarily impacted by design choice. ISA’s impact on energy is insignificant.
+ 因为能耗和性能都是主要的CPU设计选择，能源用途也主要被CPU设计上的选择影响。指令集的对能效的影响是微不足道的。
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <h4 id="key-finding-10-from-power-performance-tradeoffs-从能耗性能权衡方面">Key Finding 10: (from Power-Performance Tradeoffs, 从能耗、性能权衡方面)</h4>
+
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  Regardless of ISA or energy-efficiency, high-performance processors require more power than lower-performance processors. They follow well-established cubic power/performance tradeoffs regardless of ISA.
+  不考虑指令集或能效的情况下，高性能处理器比低性能的处理器有更高的能耗。不考虑指令集情况下，他们服从公认的三次方的功耗/性能比。
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <h4 id="key-finding-11-from-energy-performance-tradeoffs-从能效性能权衡方面">Key Finding 11: (from Energy-Performance Tradeoffs, 从能效、性能权衡方面)</h4>
+
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>It is the microarchitecture and design methodologies that really matter.
+微架构和设计上的选择非常重要。
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<h2 id="0x03-总结">0x03 总结</h2>
+
+<p>​    从本文的一些总结可以看出：处理器的性能、能耗和能效对于处理器的指令集是CISC或者RISC没有多大的联系。这篇paper通过使用一些新的方法，测量现代的一些处理器的性能、功耗和能效的特点(这些处理器的年代在2010年-2013年左右，大约5-8年前)，更加严谨地得出来这样一个观点。关于paper使用的具体方法、工具和测量数据，有兴趣的可以阅读原文。</p>
+
+<h2 id="0x04-参考文献">0x04 参考文献</h2>
+
+<ol>
+  <li>Emily Blem, Jaikrishnan Menon, Thiruvengadam Vijayaraghavan, and Karthikeyan Sankaralingam. 2015. ISA wars: Understanding the relevance of ISA being RISC or CISC to performance, power, and energy on modern architectures. ACM Trans. Comput. Syst. 33, 1, Article 3 (March 2015), 34 pages.  DOI: http://dx.doi.org/10.1145/2699682</li>
+</ol>
+
+
+  
+  </section>
+    
+    
+  <!-- Tag list for portfolio -->
+  
+  
+
+
+<footer>
+  <div class="tag-list">
+    
+      <div class="meta">Tags</div>
+    
+
+    
+    <a class="button" href="/tags#ARM">
+      <p><i class="fa fa-tag fa-fw"></i> ARM</p>
+    </a>
+    
+    <a class="button" href="/tags#ISA+Wars">
+      <p><i class="fa fa-tag fa-fw"></i> ISA Wars</p>
+    </a>
+    
+    <a class="button" href="/tags#Performance">
+      <p><i class="fa fa-tag fa-fw"></i> Performance</p>
+    </a>
+    
+    <a class="button" href="/tags#x86">
+      <p><i class="fa fa-tag fa-fw"></i> x86</p>
+    </a>
+    
+  </div>
+</footer>
+
+    
+</article>
+
+    </div>
+    
+<footer class="site-footer">
+    <p class="text">Powered by <a href="https://jekyllrb.com/">Jekyll</a> with <a href="https://github.com/sylhare/Type-on-Strap">Type on Strap</a>
+</p>
+            <div class="footer-icons">
+                <ul>
+                <!-- Social icons from Font Awesome, if enabled -->
+                
+<li>
+	<a href="http://localhost:4000/feed.xml" title="Follow RSS feed">
+		<span class="fa-stack fa-lg">
+            <i class="fa fa-circle fa-stack-2x"></i>
+            <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+        </span>
+	</a>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li>
+	<a href="https://github.com/hnu2013wwj" title="Follow on GitHub">
+		<span class="fa-stack fa-lg">
+            <i class="fa fa-circle fa-stack-2x"></i>
+            <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+        </span>
+	</a>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                </ul>
+            </div>
+</footer>
+
+
+
+
+  </body>
+</html>
