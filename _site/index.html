@@ -1,320 +1,256 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    
-    <!-- Main JS (navbar.js, katex_init.js and masonry_init.js)-->
-    <script defer=true src="/assets/js/main.min.js"></script>
-    
-    <!-- CSS -->
-    <link rel="stylesheet" href="/assets/css/main.css">
+<html lang="en-us">
 
-    <!--Favicon-->
-    <link rel="shortcut icon" href="/assets/favicon.ico" type="image/x-icon">
+<head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
 
-    <!-- Canonical -->
-    <link rel="canonical" href="http://localhost:4000/">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
 
-    <!-- RSS -->
-    <link rel="alternate" type="application/atom+xml" title="Personal Blog" href="http://localhost:4000///feed.xml"/>
+  <link rel="stylesheet" href="/assets/css/normalize.css"/>
+  <link rel="stylesheet" href="/assets/css/bulma.css"/>
+  <link rel="stylesheet" href="/assets/css/custom.css"/>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <!-- <link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto" rel="stylesheet"> -->
 
-    <!-- Font Awesome -->
-    <!-- <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"> -->
-    <link rel="stylesheet" type="text/css" href="/assets/css/vendor/font-awesome.min.css">
-    
-    
+  <!-- Icons -->
+  <link rel="shortcut icon" href="/assets/images/favicon.ico">
 
-    <!-- Google Fonts -->
-    
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
 
-    <!-- KaTeX 0.8.3 -->
+  <title>
     
-    <link rel="stylesheet" type="text/css" href="/assets/css/vendor/katex.min.css">
-    <script src="/assets/js/vendor/katex.min.js">
-    </script>
+      Well, Hello There! &middot; Abhishek Nagekar's Blog
     
+  </title>
 
-    <!-- Google Analytics -->
-    
-    
-    <!-- seo tags -->
-    <!-- Begin Jekyll SEO tag v2.5.0 -->
-<title>Personal Blog | A website with blog posts and pages</title>
-<meta name="generator" content="Jekyll v3.8.4" />
-<meta property="og:title" content="Personal Blog" />
-<meta property="og:locale" content="en_US" />
-<meta name="description" content="A website with blog posts and pages" />
-<meta property="og:description" content="A website with blog posts and pages" />
-<link rel="canonical" href="http://localhost:4000/" />
-<meta property="og:url" content="http://localhost:4000/" />
-<meta property="og:site_name" content="Personal Blog" />
-<script type="application/ld+json">
-{"name":"Personal Blog","description":"A website with blog posts and pages","@type":"WebSite","url":"http://localhost:4000/","headline":"Personal Blog","@context":"http://schema.org"}</script>
-<!-- End Jekyll SEO tag -->
-
-    <!-- Manual seo tags -->
-    <!--
-    <title> Personal Blog</title>
-    <meta name="description" content="">
-    -->
 </head>
 
-  <body>
-    <header class="site-header">
-    
-    <!-- Logo and title -->
-	<div class="branding">
-		<a href="/">
-			<img class="avatar" src="/assets/img/triangle.svg" alt=""/>
-		</a>
 
-		<h1 class="site-title">
-			<a href="/">Personal Blog</a>
-		</h1>
-	</div>
-    
-    <!-- Toggle menu -->
-    <nav class="clear">
-    <a id="pull" class="toggle" href="#">
-    <i class="fa fa-bars fa-lg"></i>
-    </a>
-    
-    <!-- Menu -->
-    <ul class="hide">
-        <!-- Auto Generation of NORMAL pages in the navbar -->
-        
-        
-        
-        
-        
-        
-        
-        <li class="separator"> | </li>
-        <li>
-            <a class="clear" href="/about/">
-                About
-            </a>
-        </li>
-        
-        
-        
-        
-        
-        
-        
-        
-        <li class="separator"> | </li>
-        <li>
-            <a class="clear" href="/gallery/">
-                Gallery
-            </a>
-        </li>
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        <li class="separator"> | </li>
-        <li>
-            <a class="clear" href="/portfolio/">
-                Portfolio
-            </a>
-        </li>
-        
-        
-        
-        
-        
-        
-        
-        
-        
-         
-        
-        <!-- Auto Generation of SPECIAL pages in the navbar -->
-        
-          
-            <li class="separator"> | </li>
-            <li>
-                <a class="clear" href="http://localhost:4000/search">
-                    <i class="fa fa-search" aria-hidden="true"></i>
-                </a>
-            </li>
-          
-        
-          
-            <li class="separator"> | </li>
-            <li>
-                <a class="clear" href="http://localhost:4000/tags">
-                    <i class="fa fa-tags" aria-hidden="true"></i>
-                </a>
-            </li>
-          
-        
-    </ul>
-        
-	</nav>
-</header>
+<body>
 
-    <div class="content">
-      <div class="home">
-  
-  <div id="main" class="call-out"
-  style="background-image: url('/assets/img/pexels/triangular.jpeg')">
-    <p>There is <code>Nonthing</code> <br>.</p>
-
-  </div>
-  
-
-  <div class="posts">
-    
-    <div class="post-teaser">
-      
-      <span>
-          <header>
-            <h1>
-              <a class="post-link" href="/2018/09/01/ISA-Wars-Understanding-the-Relevance-of-ISA-being-RISC-or-CISC-to-Performance,-Power,-and-Energy-on-Modern-Architecture.html">
-                ISA Wars
-              </a>
-            </h1>
-            <p class="meta">
-              September 1, 2018
-            </p>
-          </header>
-          <div class="excerpt">
-              ISA Wars: Understanding the Relevance of ISA being RISC or CISC to Performance, Power, and Energy on Modern Architectures(指令集战争：理解现代RISC或CISC处理器架构与性能、能耗和能效的相关性)
-
-
-            <!--ISA Wars: Understanding the Relevance of ISA being RISC or CISC to Performance, Power, and Energy on Modern Architectures(指令集战争：理解现代RISC或CISC处理器架构与性能、能耗和能效的相关性)
-
-
-
-0x00 引言
-
-RISC和CISC的比较来源已久，早期的比较大多都集中在性能方面。一般情况下，会认为CISC处理器的性能更加好，而能耗和能效高价低，RISC反之，当...-->
-            <!--<a class="button" href="/2018/09/01/ISA-Wars-Understanding-the-Relevance-of-ISA-being-RISC-or-CISC-to-Performance,-Power,-and-Energy-on-Modern-Architecture.html">
-              Continue reading
-            </a>-->
-          </div>
-      </span>
+<section class="hero is-dark">
+  <div class="hero-body">
+    <div class="container">
+        <h1 class="title">
+          <span class="typewrite" data-period="2000" data-type='[ "hello", "namaste", "assalam o alaikum",
+          "sat srī akāl", "khammaghani", "hola", "bonjour", "nomoskaar", "guten tag", "kumusta", "salut", "nômoshkar"]'>
+            <span class="wrap"></span>
+          </span>
+        </h1>
+      <h4 class="subtitle" id="quote">
+      </h4>
     </div>
-    
-    <div class="post-teaser">
-      
-      <span>
-          <header>
-            <h1>
-              <a class="post-link" href="/2014/11/30/sample-post.html">
-                Sample post
-              </a>
-            </h1>
-            <p class="meta">
-              November 30, 2014
-            </p>
-          </header>
-          <div class="excerpt">
-              Consectetur adipiscing elit. Donec a diam lectus. Sed sit amet ipsum mauris. Maecenas congue ligula ac quam viverra nec consectetur ante hendrerit. Donec et mollis dolor. 
-Praesent et diam eget libero egestas mattis sit amet vitae augue. Nam tincidunt congue enim, ut porta lorem lacinia consectetur.
-
-
-            <!--Consectetur adipiscing elit. Donec a diam lectus. Sed sit amet ipsum mauris. Maecenas congue ligula ac quam viverra nec consectetur ante hendrerit. Donec et mollis dolor. 
-Praesent et diam eget libero egestas mattis sit amet vitae augue. Nam tinci...-->
-            <!--<a class="button" href="/2014/11/30/sample-post.html">
-              Continue reading
-            </a>-->
-          </div>
-      </span>
-    </div>
-    
   </div>
+</section>
 
-  
+<div class="main-container">
+  <div class="tile is-ancestor is-vertical">
+
+
+    <nav class="nav has-shadow">
+
+      <div class="nav-left">
+
+        <a href="/" class="nav-item">
+          <span class="icon">
+            <i class="fa fa-home" aria-hidden="true" title="Homepage"></i>
+          </span>
+        </a>
+
+        <a href="https://github.com/abhn" class="nav-item">
+          <span class="icon">
+            <i class="fa fa-github" aria-hidden="true" title="Github"></i>
+          </span>
+        </a>
+
+        <div class="nav-item" id="searchFieldNav">
+          <div class="field has-addons">
+            <p class="control">
+              <input class="input is-small" type="text" placeholder="Find an article" id="search-text">
+            </p>
+            <p class="control">
+              <a class="button is-dark is-small" onclick="searchHandler();">
+                Search
+              </a>
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="nav-right nav-menu" id='nav-menu'>
+        <a href="/archive" class="nav-item">Archive</a>
+        <a href="/tags" class="nav-item">Tags</a>
+      </div>
+
+      <span class="nav-toggle" id="nav-toggle">
+          <span></span>
+          <span></span>
+          <span></span>
+    </nav>
+
+    <div class="tile is-parent">
+      <div class="tile is-8 is-child main">
+
+        <div class="box">
+    <h1 class="post-title">Well, Hello There!</h1>
+    <hr/>
+    <div class="content"><span class="post-text"><ul class="posts">
+    
+    <li class="post">
+        <small>01 Sep 2018</small>
+        <small><a style="color:grey" href="/2018/09/ISA-Wars-Understanding-the-Relevance-of-ISA-being-RISC-or-CISC-to-Performance,-Power,-and-Energy-on-Modern-Architecture.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2018/09/ISA-Wars-Understanding-the-Relevance-of-ISA-being-RISC-or-CISC-to-Performance,-Power,-and-Energy-on-Modern-Architecture.html">ISA Wars</a>
+        <p class="nice-text">ISA Wars: Understanding the Relevance of ISA being RISC or CISC to Performance, Power, and Energy on Modern Architectures(指令集战争：理解现代RISC或CISC处理器架构与性能、能耗和能效的相关性) 0x00 引言 RISC和CISC的比较来源已久，早期的比较大多都集中在性能方面。一般情况下，会认为CISC处理器的性能更加好，而能耗和能效更加低，RISC反之，当然这种说法不一定准确。而现在，CPU架构发展已经相对成熟，单核性能每年增长的幅度很小，CPU多核化，智能手机等移动设备的CPU越来越受关注。那么在CPU发展变化之后，RISC和CISC的指令集类型对处理器的各个关键指标又有什么样的影响呢？这里我们来看一看TPCS 2015上的一篇文章[1]。这篇paper主要做的就是: We present an exhaustive and rigorous analysis using workloads that span smart-phone, desktop, and server applications. In our study, we are primarily interested in whether and, if... <a href="/2018/09/ISA-Wars-Understanding-the-Relevance-of-ISA-being-RISC-or-CISC-to-Performance,-Power,-and-Energy-on-Modern-Architecture.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>17 Apr 2017</small>
+        <small><a style="color:grey" href="/2017/04/Lorem-Ipsum.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2017/04/Lorem-Ipsum.html">Lorem Ipsum</a>
+        <p class="nice-text">Lorem ipsum dolor sit amet, ut paulo aperiam signiferumque quo. Quaeque pertinacia mnesarchum te vel. Ei tollit habemus delectus mel, pro zril cetero adipiscing an. Eius aliquip legimus ad mea, vix te quod eripuit, munere doctus oporteat qui te. Dolore fierent nam ea. Eos ex tale commune moderatius, ei mel... <a href="/2017/04/Lorem-Ipsum.html">Read more!</a></p>
+    </li>
+    
+</ul>
+
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES * * */
+    var disqus_shortname = 'nagekar';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+</script></span></div>
 </div>
 
-    </div>
-    
-<footer class="site-footer">
-    <p class="text">Powered by <a href="https://jekyllrb.com/">Jekyll</a> with <a href="https://github.com/sylhare/Type-on-Strap">Type on Strap</a>
-</p>
-            <div class="footer-icons">
-                <ul>
-                <!-- Social icons from Font Awesome, if enabled -->
-                
-<li>
-	<a href="http://localhost:4000/feed.xml" title="Follow RSS feed">
-		<span class="fa-stack fa-lg">
-            <i class="fa fa-circle fa-stack-2x"></i>
-            <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
-        </span>
-	</a>
-</li>
 
+      </div>
 
+      <div class="tile is-4 is-child">
+        <div class="tile is-parent is-vertical sidebar">
 
+          <div class="tile is-child widget">
 
-
-
-
-
-
-
-
-
-
-
-
-<li>
-	<a href="https://github.com/hnu2013wwj" title="Follow on GitHub">
-		<span class="fa-stack fa-lg">
-            <i class="fa fa-circle fa-stack-2x"></i>
-            <i class="fa fa-github fa-stack-1x fa-inverse"></i>
-        </span>
-	</a>
-</li>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                </ul>
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Recent Posts
+                </p>
+              </header>
+              <div class="card-content">
+                <div class="content nice-text">
+                  <ul>
+                  
+                  <li><a href="/2018/09/ISA-Wars-Understanding-the-Relevance-of-ISA-being-RISC-or-CISC-to-Performance,-Power,-and-Energy-on-Modern-Architecture.html">
+                    ISA Wars
+                  </a></li>
+                  
+                  <li><a href="/2017/04/Lorem-Ipsum.html">
+                    Lorem Ipsum
+                  </a></li>
+                  
+                  </ul>
+                </div>
+              </div>
             </div>
+          </div>
+
+          <div class="tile is-child widget">
+
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Sponsored
+                </p>
+              </header>
+              <div class="card-content">
+                <div class="content nice-text">
+                  <img src="/assets/images/Dust_Bunny.jpg"/>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="tile is-child widget">
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Recommended Websites
+                </p>
+              </header>
+              <!-- <div class="card-content">
+                <div class="content nice-text">
+                  <ul>
+                    <li>
+                      <a href="https://xkcd.com">xkcd</a>
+                    </li>
+                    <li>
+                      <a href="http://commitstrip.com">Commit Strip</a>
+                    </li>
+                    <li>
+                      <a href="http://www.smbc-comics.com">SMBC Comics</a>
+                    </li>
+                    <li>
+                      <a href="https://blog.codinghorror.com">Coding Horror</a>
+                    </li>
+                    <li>
+                      <a href="http://waitbutwhy.com">Wait Buy Why</a>
+                    </li>
+                    <li>
+                      <a href="https://simplysoch.wordpress.com/">Simply Soch</a>
+                    </li>
+                  </ul>
+                </div> -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <p>
+        Some rights reserved.
+      </p>
+      <p>
+        Made with <i class="fa fa-heart"></i> and <a href="https://github.com/jgthms/bulma">Bulma</a>, <a href="https://jekyllrb.com/">Jekyll</a>. Hosted on <a href="https://github.com/">Github</a>
+      </p>
+      <p>
+        <a class="icon" href="https://github.com/abhn">
+          <i class="fa fa-github" title="Github"></i>
+        </a>
+        <a class="icon" href="https://in.linkedin.com/in/AbhishekNagekar">
+          <i class="fa fa-linkedin" title="Linkedin"></i>
+        </a>
+        <a class="icon" href="mailto:abhishek@nagekar.com">
+          <i class="fa fa-envelope" title="Email"></i>
+        </a>
+      </p>
+    </div>
+  </div>
 </footer>
 
-
-
-
-  </body>
+<!-- js -->
+<script src="/assets/js/custom.js"></script>
+<script src="/assets/js/typewriter.js"></script>
+</body>
 </html>

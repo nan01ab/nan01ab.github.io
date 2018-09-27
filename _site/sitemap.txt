@@ -1,0 +1,11 @@
+
+https://www.nagekar.com/404
+https://www.nagekar.com/archive
+https://www.nagekar.com/atom.xml
+https://www.nagekar.com/
+https://www.nagekar.com/rss.xml
+https://www.nagekar.com/sitemap.txt
+https://www.nagekar.com/tags
+
+https://www.nagekar.com/2018/09/ISA-Wars-Understanding-the-Relevance-of-ISA-being-RISC-or-CISC-to-Performance,-Power,-and-Energy-on-Modern-Architecture.html
+https://www.nagekar.com/2017/04/Lorem-Ipsum.html

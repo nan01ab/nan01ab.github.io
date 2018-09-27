@@ -12,7 +12,7 @@ excerpt_separator: <!--more-->
 
 ## 0x00 引言 
 
-   RISC和CISC的比较来源已久，早期的比较大多都集中在性能方面。一般情况下，会认为CISC处理器的性能更加好，而能耗和能效高价低，RISC反之，当然这种说明不一定准确。而现在，CPU架构发展已经相对成熟，单核性能每年增长的幅度很小，CPU多核化，智能手机等移动设备的CPU越来越受关注。那么在CPU发展变化之后，RISC和CISC的指令集类型对处理器的各个关键指标又有什么样的影响呢？这里我们来看一看TPCS 2015上的一篇文章[1]。这篇paper主要做的就是:
+   RISC和CISC的比较来源已久，早期的比较大多都集中在性能方面。一般情况下，会认为CISC处理器的性能更加好，而能耗和能效更加低，RISC反之，当然这种说法不一定准确。而现在，CPU架构发展已经相对成熟，单核性能每年增长的幅度很小，CPU多核化，智能手机等移动设备的CPU越来越受关注。那么在CPU发展变化之后，RISC和CISC的指令集类型对处理器的各个关键指标又有什么样的影响呢？这里我们来看一看TPCS 2015上的一篇文章[1]。这篇paper主要做的就是:
 
 ```
  We present an exhaustive and rigorous analysis using workloads that span smart-phone, desktop, and server applications. In our study, we are primarily interested in whether and, if so, how the ISA being RISC or CISC impacts performance and power.
