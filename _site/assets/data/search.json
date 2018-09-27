@@ -5,7 +5,7 @@
         "title"    : "Sample post",
         "category" : "",
         "tags"     : " A Tag, Test, Lorem, Ipsum",
-        "url"      : "/hnu2013wwj/2014/11/30/sample-post.html",
+        "url"      : "/2014/11/30/sample-post.html",
         "date"     : "November 30, 2014",
         "excerpt"  : "<p>Consectetur adipiscing elit. Donec a diam lectus. Sed sit amet ipsum mauris. Maecenas congue ligula ac quam viverra nec consectetur ante hendrerit. Donec et mollis dolor. \nPraesent et diam eget libero egestas mattis sit amet vitae augue. Nam ti...",
         "content"  : "<p>Consectetur adipiscing elit. Donec a diam lectus. Sed sit amet ipsum mauris. Maecenas congue ligula ac quam viverra nec consectetur ante hendrerit. Donec et mollis dolor. \nPraesent et diam eget libero egestas mattis sit amet vitae augue. Nam tincidunt congue enim, ut porta lorem lacinia consectetur. \n<!--more-->\nDonec ut libero sed arcu vehicula ultricies a non tortor. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean ut gravida lorem.</p>\n\n<ul>\n  <li>Consectetur adipiscing elit</li>\n  <li>Donec a diam lectus</li>\n  <li>Sed sit amet ipsum mauris</li>\n</ul>\n\n<p>Ut turpis felis, pulvinar a semper sed, adipiscing id dolor. Pellentesque auctor nisi id magna consequat sagittis. Curabitur dapibus enim sit amet elit pharetra tincidunt feugiat nisl imperdiet. Ut convallis libero in urna ultrices accumsan. Donec sed odio eros. Donec viverra mi quis quam pulvinar at malesuada arcu rhoncus. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In rutrum accumsan ultricies. Mauris vitae nisi at sem facilisis semper ac in est.</p>\n\n<p>Nunc diam velit, adipiscing ut tristique vitae, sagittis vel odio. Maecenas convallis ullamcorper ultricies. Curabitur ornare, ligula <em>semper consectetur sagittis</em>, nisi diam iaculis velit, id fringilla sem nunc vel mi. Nam dictum, odio nec pretium volutpat, arcu ante placerat erat, non tristique elit urna et turpis. Quisque mi metus, ornare sit amet fermentum et, tincidunt et orci. Fusce eget orci a orci congue vestibulum.</p>\n\n<p>Ut dolor diam, elementum et vestibulum eu, porttitor vel elit. Curabitur venenatis pulvinar tellus gravida ornare. Sed et erat faucibus nunc euismod ultricies ut id justo. Nullam cursus suscipit nisi, et ultrices justo sodales nec. Fusce venenatis facilisis lectus ac semper. Aliquam at massa ipsum. Quisque bibendum purus convallis nulla ultrices ultricies. Nullam aliquam, mi eu aliquam tincidunt, purus velit laoreet tortor, viverra pretium nisi quam vitae mi. Fusce vel volutpat elit. Nam sagittis nisi dui.</p>\n\n<blockquote>\n  <p>Suspendisse lectus leo, consectetur in tempor sit amet, placerat quis neque</p>\n</blockquote>\n\n<p>Etiam luctus porttitor lorem, sed suscipit est rutrum non. Curabitur lobortis nisl a enim congue semper. Aenean commodo ultrices imperdiet. Vestibulum ut justo vel sapien venenatis tincidunt.</p>\n\n<p>Phasellus eget dolor sit amet ipsum dapibus condimentum vitae quis lectus. Aliquam ut massa in turpis dapibus convallis. Praesent elit lacus, vestibulum at malesuada et, ornare et est. Ut augue nunc, sodales ut euismod non, adipiscing vitae orci. Mauris ut placerat justo. Mauris in ultricies enim. Quisque nec est eleifend nulla ultrices egestas quis ut quam. Donec sollicitudin lectus a mauris pulvinar id aliquam urna cursus. Cras quis ligula sem, vel elementum mi. Phasellus non ullamcorper urna.</p>\n"
@@ -18,10 +18,10 @@
           "title"    : "Ninja",
           "category" : "",
           "tags"     : " Lorem",
-          "url"      : "/hnu2013wwj/portfolio/ninja",
+          "url"      : "/portfolio/ninja",
           "date"     : "April 8, 2014",
-          "excerpt"  : "<p><img src=\"/hnu2013wwj/assets/img/portfolio/ninja.png\" alt=\"image\" /></p>\n\n<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et qua...",
-          "content"  : "<p><img src=\"/hnu2013wwj/assets/img/portfolio/ninja.png\" alt=\"image\" /></p>\n\n<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et qua..."
+          "excerpt"  : "<p><img src=\"/assets/img/portfolio/ninja.png\" alt=\"image\" /></p>\n\n<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architec...",
+          "content"  : "<p><img src=\"/assets/img/portfolio/ninja.png\" alt=\"image\" /></p>\n\n<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architec..."
        
      } ,
    
@@ -30,7 +30,7 @@
           "title"    : "Creative",
           "category" : "",
           "tags"     : " Ipsum",
-          "url"      : "/hnu2013wwj/portfolio/safe",
+          "url"      : "/portfolio/safe",
           "date"     : "August 16, 2014",
           "excerpt"  : "<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem <...",
           "content"  : "<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem <..."
@@ -42,10 +42,10 @@
           "title"    : "Circus",
           "category" : "",
           "tags"     : " Ipsum",
-          "url"      : "/hnu2013wwj/portfolio/circus",
+          "url"      : "/portfolio/circus",
           "date"     : "September 1, 2014",
-          "excerpt"  : "<p><img src=\"/hnu2013wwj/assets/img/portfolio/circus.png\" alt=\"image\" /></p>\n\n<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et qu...",
-          "content"  : "<p><img src=\"/hnu2013wwj/assets/img/portfolio/circus.png\" alt=\"image\" /></p>\n\n<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et qu..."
+          "excerpt"  : "<p><img src=\"/assets/img/portfolio/circus.png\" alt=\"image\" /></p>\n\n<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi archite...",
+          "content"  : "<p><img src=\"/assets/img/portfolio/circus.png\" alt=\"image\" /></p>\n\n<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi archite..."
        
      } ,
    
@@ -54,10 +54,10 @@
           "title"    : "Tower of Hanoi",
           "category" : "",
           "tags"     : " ",
-          "url"      : "/hnu2013wwj/portfolio/hanoi",
+          "url"      : "/portfolio/hanoi",
           "date"     : "September 1, 2014",
-          "excerpt"  : "<p><img src=\"/hnu2013wwj/assets/img/portfolio/toh.png\" alt=\"image\" /></p>\n\n<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi...",
-          "content"  : "<p><img src=\"/hnu2013wwj/assets/img/portfolio/toh.png\" alt=\"image\" /></p>\n\n<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi..."
+          "excerpt"  : "<p><img src=\"/assets/img/portfolio/toh.png\" alt=\"image\" /></p>\n\n<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto...",
+          "content"  : "<p><img src=\"/assets/img/portfolio/toh.png\" alt=\"image\" /></p>\n\n<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto..."
        
      } ,
    
@@ -66,7 +66,7 @@
           "title"    : "Tic tac toe",
           "category" : "",
           "tags"     : " ",
-          "url"      : "/hnu2013wwj/portfolio/tictactoe",
+          "url"      : "/portfolio/tictactoe",
           "date"     : "September 1, 2014",
           "excerpt"  : "<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem <...",
           "content"  : "<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem <..."
@@ -78,7 +78,7 @@
           "title"    : "Cake",
           "category" : "",
           "tags"     : " Lorem, Ipsum, Portfolio",
-          "url"      : "/hnu2013wwj/portfolio/cake",
+          "url"      : "/portfolio/cake",
           "date"     : "September 27, 2015",
           "excerpt"  : "<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem <...",
           "content"  : "<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem <..."
@@ -90,7 +90,7 @@
           "title"    : "Jekyll",
           "category" : "",
           "tags"     : " ",
-          "url"      : "/hnu2013wwj/portfolio/jekyllblog",
+          "url"      : "/portfolio/jekyllblog",
           "date"     : "May 26, 2017",
           "excerpt"  : "<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem <...",
           "content"  : "<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem <..."
@@ -102,7 +102,7 @@
           "title"    : "Lorem Ipsum",
           "category" : "",
           "tags"     : " ",
-          "url"      : "/hnu2013wwj/portfolio/submarine",
+          "url"      : "/portfolio/submarine",
           "date"     : "September 3, 2017",
           "excerpt"  : "<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem <...",
           "content"  : "<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem <..."
@@ -114,10 +114,10 @@
           "title"    : "Github",
           "category" : "",
           "tags"     : " Lorem, Portfolio",
-          "url"      : "/hnu2013wwj/portfolio/gitlecture",
+          "url"      : "/portfolio/gitlecture",
           "date"     : "October 20, 2017",
-          "excerpt"  : "<p><img src=\"/hnu2013wwj/assets/img/portfolio/github.png\" alt=\"image\" /></p>\n\n<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et qu...",
-          "content"  : "<p><img src=\"/hnu2013wwj/assets/img/portfolio/github.png\" alt=\"image\" /></p>\n\n<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et qu..."
+          "excerpt"  : "<p><img src=\"/assets/img/portfolio/github.png\" alt=\"image\" /></p>\n\n<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi archite...",
+          "content"  : "<p><img src=\"/assets/img/portfolio/github.png\" alt=\"image\" /></p>\n\n<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi archite..."
        
      } 
    

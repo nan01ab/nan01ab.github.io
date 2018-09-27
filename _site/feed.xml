@@ -2,15 +2,15 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
         <title>Personal Blog</title>
-        <atom:link href="/hnu2013wwj/feed.xml" rel="self" type="application/rss+xml"/>
-        <link>http://localhost:4000/hnu2013wwj/</link>
+        <atom:link href="/feed.xml" rel="self" type="application/rss+xml"/>
+        <link>http://localhost:4000/</link>
         <description></description>
-        <pubDate>Thu, 27 Sep 2018 18:46:50 +0800</pubDate>
+        <pubDate>Thu, 27 Sep 2018 19:00:33 +0800</pubDate>
         
         <item>
             <title>Sample post</title>
-            <link>/hnu2013wwj/2014/11/30/sample-post.html</link>
-            <guid isPermaLink="true">/hnu2013wwj/2014/11/30/sample-post.html</guid>
+            <link>/2014/11/30/sample-post.html</link>
+            <guid isPermaLink="true">/2014/11/30/sample-post.html</guid>
             <description>&lt;p&gt;Consectetur adipiscing elit. Donec a diam lectus. Sed sit amet ipsum mauris. Maecenas congue ligula ac quam viverra nec consectetur ante hendrerit. Donec et mollis dolor. 
 Praesent et diam eget libero egestas mattis sit amet vitae augue. Nam tincidunt congue enim, ut porta lorem lacinia consectetur. 
 &lt;!--more--&gt;
