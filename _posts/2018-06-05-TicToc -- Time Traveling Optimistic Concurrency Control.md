@@ -1,0 +1,131 @@
+---
+layout: page
+title: Time Traveling Optimistic Concurrency Control
+tags: [Concurrency Control, Database]
+excerpt_separator: <!--more-->
+typora-root-url: ../
+---
+
+
+
+## TicToc: Time Traveling Optimistic Concurrency Control 
+
+
+
+## 0x00 引言
+
+  这篇文章是关于内存数据库的Optimistic Concurrency Control优化的一篇paper(对OCC没有了解的可以先看看论文[2])。Timestamp ordering (T/O) concurrency control 是数据库并发控制一种非常重要的方法，一般而言，系统会以事务为粒度分配timestamp，而这种方式存在一个缺点：
+
+```
+ A common way to implement the allocator is through an atomic add instruction that increments a global counter for each new transaction. This approach, however, is only able to generate less than 5 million instructions per second on a modern multi-core system due to the long latency incurred by the CPU’s cache coherence protocol [11, 35]. As such, most state-of-the-art T/O-based algorithms suffer from the timestamp allocation bottleneck [37].
+```
+
+  即使使用一些硬件上的优化，还是存在一些问题[具体参看论文]。
+
+​	TicToc使用的方式是不将timestamp分配给事务，而是分配给数据项。使用每一个数据项的timestamp来检查事务是否可以提交。这样有2个主要的好处：
+
+1. 不存在同一的时间戳分配，不相关的事务不会相互影响；
+2. 可以推迟时间戳分配，使用逻辑顺序来达到serializability ，即使这些事务在物理时间上是重叠的。减少了事务的abort；
+
+
+
+## 0x01 基本算法
+
+#### Lazy Timestamp Management
+
+对于一下的顺序，一般的OCC可能不能提交A的，但是实际上A提交不影响正确性：
+
+```
+1. A read(x) 
+2. B write(x) 
+3. B commits 
+4. A write(y)
+```
+
+TicToc就可以解决这个问题，它不是静态的分配timestamp，而是使用x y实际read/write的最新版本计算timestamp，而不是整个database现在的timestamp。这个就可以将A提前到B(逻辑上)，就可以提交。TicToc中的wts和rts的含义如下(值得注意的是它们都是逻辑上的)[3]：
+
+```
+wts: The logical timestamp of the last committed txn that wrote to the record.
+rts: The logical timestamp of the last txn that read the record.
+```
+
+![tic-toc-ts](/assets/img/tic-toc-ts.png)
+
+TicToc中，一个数据项在wts创建特定的版本在rts之前都是合法的。一个事务是合法的，必须满足以下2点：
+
+1. 事务的提交的ts必须在事务读取的(所有的)项的wts到rts之间；
+2. 对于事务写的项，提交的ts必须大于数据项的rts；
+
+
+
+TicToc读的方法如下：
+
+![tic-toc-read](/assets/img/tic-toc-read.png)
+
+ 回到这小节的例子，如果A赋予一个更大的timestamp，传统的OCC是不能提交的，2而如果赋予一个一个更加小的timestamp，那么就可以提交(满足OCC的有效性)。而在tic-toc中就可以推迟到事务提交是才计算出合适的timestamp，而不需要abort事务。
+
+
+
+#### Protocol Specification 
+
+  protocol分为三步：
+
+* Read Phase 
+* Validation Phase 
+* Write Phase 
+
+read的算法如Algorithm1所示。 Validation Phase是最复杂的(注意这里会更改rts)：
+
+![tic-toc-alg2](/assets/img/tic-toc-alg2.png)
+
+在通过了第二步之后，就可以完成写入操作：
+
+![tic-toc-alg3](/assets/img/tic-toc-alg3.png)
+
+
+
+#### 举个例子
+
+![tic-toc-example](/assets/img/tic-toc-example.png)
+
+```
+step 1: A读x，此时x(wts = 2 and rts = 3)，x保存在A的read set；
+step 2: B写x，在4时刻commit，B提交之后会变成x(wts = 4 and rts = 4)；
+step 3: A写y，此时新的y在A的write set里面，对其它不可见；
+step 4: A进入检验步骤，根据算法2，提交时间戳读数据项最大的wts，写数据项的最大rts+1。x在timestamp 2 and 3是合法的, 可以通过校验，然后提交(timestamp=3)；
+```
+
+ 
+
+### 0x02 正确性证明
+
+正确性基于以下三个LEMMA:
+
+```
+LEMMA 1. Transactions writing to the same tuple must have different commit timestamps.
+	不同的事务写相同的touple时必须是不同的时间戳；
+	
+LEMMA 2. Transactions that commit at the same timestamp and physical time do not conflict with each other.
+	同一时间戳提交的事务不相互影响。这里我们可以知道，lemma1中的情形不可能出现，而read-write，write-read冲突时，写者的提交时间戳总是会更加大。
+
+
+LEMMA 3. A read operation from a committed transaction returns the value of the latest write to the tuple in the serial schedule.
+  已经提交的事务总是会读取最新的数据。
+
+```
+
+
+
+### 0x03 优化和评估
+
+ 不讲了，看论文吧。
+
+
+
+
+
+## 参考
+
+1. TicToc: Time Traveling Optimistic Concurrency Control， SIGMOD 2016；
+2. H. T. Kung and J. T. Robinson. On optimistic methods for concurrency control. ACM Trans. Database Syst., 6(2):213–226, June 1981. 
+3. CMU Advanced Database 2018课程课件。

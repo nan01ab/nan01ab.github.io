@@ -1,13 +1,16 @@
 ---
 layout: page
 title: ISA Wars
-tags: [ISA Wars, x86, ARM, Performance]
+tags: [Architecture]
 excerpt_separator: <!--more-->
+typora-root-url: ../
 ---
 
-## ISA Wars: Understanding the Relevance of ISA being RISC or CISC to Performance, Power, and Energy on Modern Architectures(指令集战争：理解现代RISC或CISC处理器架构与性能、能耗和能效的相关性)
 
-<!--more-->
+
+## ISA Wars: Understanding the Relevance of ISA being RISC or CISC to Performance, Power, and Energy on Modern Architectures(指令集战争：理解现代RISC或CISC处理器架构与性能、能耗和能效的相关性
+
+
 
 
 ## 0x00 引言 

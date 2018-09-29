@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <link rel="stylesheet" href="/assets/css/normalize.css"/>
+  <link rel="stylesheet" href="/assets/css/bulma.css"/>
+  <link rel="stylesheet" href="/assets/css/custom.css"/>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <!-- <link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto" rel="stylesheet"> -->
+
+  <!-- Icons -->
+  <link rel="shortcut icon" href="/assets/images/favicon.ico">
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+
+  <title>
+    
+      A Receiver-Driven Low-Latency Transport Protocol &middot; Columba M71's Blog
+    
+  </title>
+
+</head>
+
+
+<body>
+
+<section class="hero is-dark">
+  <div class="hero-body">
+    <div class="container">
+        <h1 class="title">
+          <span class="typewrite" data-period="2000" data-type='[ "hello", "namaste", "assalam o alaikum",
+          "sat srī akāl", "khammaghani", "hola", "bonjour", "nomoskaar", "guten tag", "kumusta", "salut", "nômoshkar"]'>
+            <span class="wrap"></span>
+          </span>
+        </h1>
+      <h4 class="subtitle" id="quote">
+      </h4>
+    </div>
+  </div>
+</section>
+
+<div class="main-container">
+  <div class="tile is-ancestor is-vertical">
+
+
+    <nav class="nav has-shadow">
+
+      <div class="nav-left">
+
+        <a href="/" class="nav-item">
+          <span class="icon">
+            <i class="fa fa-home" aria-hidden="true" title="Homepage"></i>
+          </span>
+        </a>
+
+        <a href="https://github.com/hnu2013wwj" class="nav-item">
+          <span class="icon">
+            <i class="fa fa-github" aria-hidden="true" title="Github"></i>
+          </span>
+        </a>
+
+        <div class="nav-item" id="searchFieldNav">
+          <div class="field has-addons">
+            <p class="control">
+              <input class="input is-small" type="text" placeholder="Find an article" id="search-text">
+            </p>
+            <p class="control">
+              <a class="button is-dark is-small" onclick="searchHandler();">
+                Search
+              </a>
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="nav-right nav-menu" id='nav-menu'>
+        <a href="/archive" class="nav-item">Archive</a>
+        <a href="/tags" class="nav-item">Tags</a>
+      </div>
+
+      <span class="nav-toggle" id="nav-toggle">
+          <span></span>
+          <span></span>
+          <span></span>
+    </nav>
+
+    <div class="tile is-parent">
+      <div class="tile is-8 is-child main">
+
+        <div class="box">
+    <h1 class="post-title">A Receiver-Driven Low-Latency Transport Protocol</h1>
+    <hr/>
+    <div class="content"><span class="post-text"><h2 id="homa--a-receiver-driven-low-latency-transport-protocol-using-network-priorities">Homa – A Receiver-Driven Low-Latency Transport Protocol Using Network Priorities</h2>
+
+<h2 id="0x00-引言">0x00 引言</h2>
+
+<p>最近几年为数据中心设计的新的传输协议不少，这篇时SIGCOMM上最新的一篇(截止写这篇论文时)，总而言之，这篇论文做到了:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>In simulations, Homa’s latency is roughly equal to pFabric and significantly better than pHost, PIAS, and NDP for almost all message sizes and workloads. Homa can also sustain higher network loads than pFabric, pHost, or PIAS.
+
+-----
+
+Our implementation of Homa achieves 99th percentile round trip latencies less than 15 μs for small messages at 80% network load with 10 Gbps link speeds, and it does this even in the presence of competing large messages. Across a wide range of message sizes and work- loads, Homa achieves 99th percentile latencies at 80% network load that are within a factor of 2–3.5x of the minimum possible latency on an unloaded network. 
+</code></pre></div></div>
+
+<p>Homa倾向于为short messages设计。</p>
+
+<h3 id="0x01-key-ideas">0x01 KEY IDEAS</h3>
+
+<p>Homa的设计有4个key design principles ：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>(i) transmitting short messages blindly;
+
+(ii) using in-network priorities;
+
+(iii) allocating priorities dynamically at receivers in conjunction with receiver-driven rate control;
+
+(iv) controlled overcommitment of receiver downlinks.
+</code></pre></div></div>
+
+<p>Homa这么设计出于一下的考虑：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>1. There is no time to schedule every packet. 
+</code></pre></div></div>
+
+<p>特别在意延时的情况下，schedule带来的延时都不可以接受。所以有了principle 1。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>2. Buffering is a necessary evil.
+</code></pre></div></div>
+
+<p>没有一个protocol在没有导致buffering的同时实现low latency，讽刺的是，buffering又会带来latency。buffer，latency，throughput，欢喜冤家，emmmmmmm这里是不是可以写一本书了。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>3. In-network priorities are a must. 
+</code></pre></div></div>
+
+<p>由于上一条，为了减少延时，不同的packet区分处理能获得一些效果。这个方法在很多类似的protocol中都有使用。这样就有了principle 2.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>4. Making best use of limited priorities requires receiver control.
+</code></pre></div></div>
+
+<p>简而言之就是recevier控制更加好。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>5. Receivers must allocate priorities dynamically.
+</code></pre></div></div>
+
+<p>Homa 使用Receivers动态分配优先级的方式解决了之前类似协议的一些问题(pHost )，比如large的messag使用高优先级带来的问题，只使用一种优先级可能导致的delay。这样就有了principl 3。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>6. Receivers must overcommit their downlink in a controlled manner.
+</code></pre></div></div>
+
+<p>为了解决一些情况下链路利用率低的问题，比如一个sender项多个recevier发送数据(注意Homa使用的是receiver控制的传输方式)。为了解决这个问题，一个receiver可以过量使用downlink，比如同时给几个sender发送可以向receiver发送数据的grants。这样可能造成packet queuing ，但是对于提高利用率来说是必要的。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>7. Senders need SRPT(shortest remaining processing time first) also. 
+</code></pre></div></div>
+
+<p>排队也可能在sender端出现，Sender知道SRPT能跟好的解决这些问题。</p>
+
+<h3 id="0x02-基本设计">0x02 基本设计</h3>
+
+<p>先来一张论文中的图：</p>
+
+<p><img src="/assets/img/homa-arch.png" alt="homa-arch" /></p>
+
+<p>Homa有以下特点：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Homa contains several unusual features: 
+it is receiver-driven; 
+it is message-oriented, rather than stream-oriented; 
+it is connectionless; 
+it uses no explicit acknowledgments; 
+and it implements at-least-once semantics, rather than the more traditional at-most-once semantics.
+</code></pre></div></div>
+
+<h4 id="rpcs-not-connections">RPCs, not connections</h4>
+
+<p>Homa是无连接的，一个来讲client的request message 对应一个来自server的 response message。由一个全局唯一的RPCid表示(id由客户端生成)。有以下的packet类型：</p>
+
+<p><img src="/assets/img/homa-packet-types.png" alt="homa-packet-types" /></p>
+
+<h4 id="basic-sender-behavior">Basic sender behavior</h4>
+
+<h4 id="flow-control">Flow control</h4>
+
+<h4 id="packet-priorities">Packet priorities</h4>
+
+<h2 id="参考">参考</h2>
+
+<ol>
+  <li>Homa: A Receiver-Driven Low-Latency Transport Protocol Using Network Priorities, SIGCOMM 2018</li>
+  <li></li>
+</ol>
+
+</span></div>
+</div>
+
+
+      </div>
+
+      <div class="tile is-4 is-child">
+        <div class="tile is-parent is-vertical sidebar">
+
+          <div class="tile is-child widget">
+
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Recent Posts
+                </p>
+              </header>
+              <div class="card-content">
+                <div class="content nice-text">
+                  <ul>
+                  
+                  <li><a href="/2018/09/Homa-A-Receiver-Driven-Low-Latency-Transport-Protocol-Using-Network-Priorities.html">
+                    A Receiver-Driven Low-Latency Transport Protocol
+                  </a></li>
+                  
+                  <li><a href="/2018/09/Re-architecting-datacenter-networks-and-stacks-for-low-latency-and-high-performance.html">
+                    NDP transport protocol
+                  </a></li>
+                  
+                  <li><a href="/2018/09/ISA-Wars-Understanding-the-Relevance-of-ISA-being-RISC-or-CISC-to-Performance,-Power,-and-Energy-on-Modern-Architecture.html">
+                    ISA Wars
+                  </a></li>
+                  
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tile is-child widget">
+
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Sponsored
+                </p>
+              </header>
+              <div class="card-content">
+                <div class="content nice-text">
+                  <img src="/assets/images/Dust_Bunny.jpg"/>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="tile is-child widget">
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Recommended Websites
+                </p>
+              </header>
+              <!-- <div class="card-content">
+                <div class="content nice-text">
+                  <ul>
+                    <li>
+                      <a href="https://xkcd.com">xkcd</a>
+                    </li>
+                    <li>
+                      <a href="http://commitstrip.com">Commit Strip</a>
+                    </li>
+                    <li>
+                      <a href="http://www.smbc-comics.com">SMBC Comics</a>
+                    </li>
+                    <li>
+                      <a href="https://blog.codinghorror.com">Coding Horror</a>
+                    </li>
+                    <li>
+                      <a href="http://waitbutwhy.com">Wait Buy Why</a>
+                    </li>
+                    <li>
+                      <a href="https://simplysoch.wordpress.com/">Simply Soch</a>
+                    </li>
+                  </ul>
+                </div> -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <p>
+        Some rights reserved.
+      </p>
+      <p>
+        Made with <i class="fa fa-heart"></i> and <a href="https://github.com/jgthms/bulma">Bulma</a>, <a href="https://jekyllrb.com/">Jekyll</a>. Hosted on <a href="https://github.com/">Github</a>
+      </p>
+      <p>
+        <a class="icon" href="https://github.com/abhn">
+          <i class="fa fa-github" title="Github"></i>
+        </a>
+        <a class="icon" href="https://in.linkedin.com/in/AbhishekNagekar">
+          <i class="fa fa-linkedin" title="Linkedin"></i>
+        </a>
+        <a class="icon" href="mailto:abhishek@nagekar.com">
+          <i class="fa fa-envelope" title="Email"></i>
+        </a>
+      </p>
+    </div>
+  </div>
+</footer>
+
+<!-- js -->
+<script src="/assets/js/custom.js"></script>
+<script src="/assets/js/typewriter.js"></script>
+</body>
+</html>

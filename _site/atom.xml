@@ -1,25 +1,147 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
  
- <title>Abhishek Nagekar's Blog</title>
+ <title>Columba M71's Blog</title>
  <link href="https://www.nagekar.com/atom.xml" rel="self"/>
  <link href="https://www.nagekar.com"/>
- <updated>2018-09-27T20:13:51+08:00</updated>
+ <updated>2018-09-29T10:03:02+08:00</updated>
  <id>https://www.nagekar.com</id>
  <author>
-   <name>Abhishek Nagekar</name>
-   <email>abhishek@nagekar.com</email>
+   <name>Columba M71</name>
+   <email>none</email>
  </author>
 
+ 
+ <entry>
+   <title>A Receiver-Driven Low-Latency Transport Protocol</title>
+   <link href="https://www.nagekar.com/2018/09/Homa-A-Receiver-Driven-Low-Latency-Transport-Protocol-Using-Network-Priorities.html"/>
+   <updated>2018-09-20T00:00:00+08:00</updated>
+   <id>https://www.nagekar.com/2018/09/Homa -- A Receiver-Driven Low-Latency Transport Protocol Using Network Priorities</id>
+   <content type="html">&lt;h2 id=&quot;homa--a-receiver-driven-low-latency-transport-protocol-using-network-priorities&quot;&gt;Homa – A Receiver-Driven Low-Latency Transport Protocol Using Network Priorities&lt;/h2&gt;
+
+&lt;h2 id=&quot;0x00-引言&quot;&gt;0x00 引言&lt;/h2&gt;
+
+&lt;p&gt;最近几年为数据中心设计的新的传输协议不少，这篇时SIGCOMM上最新的一篇(截止写这篇论文时)，总而言之，这篇论文做到了:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;In simulations, Homa’s latency is roughly equal to pFabric and significantly better than pHost, PIAS, and NDP for almost all message sizes and workloads. Homa can also sustain higher network loads than pFabric, pHost, or PIAS.
+
+-----
+
+Our implementation of Homa achieves 99th percentile round trip latencies less than 15 μs for small messages at 80% network load with 10 Gbps link speeds, and it does this even in the presence of competing large messages. Across a wide range of message sizes and work- loads, Homa achieves 99th percentile latencies at 80% network load that are within a factor of 2–3.5x of the minimum possible latency on an unloaded network. 
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Homa倾向于为short messages设计。&lt;/p&gt;
+
+&lt;h3 id=&quot;0x01-key-ideas&quot;&gt;0x01 KEY IDEAS&lt;/h3&gt;
+
+&lt;p&gt;Homa的设计有4个key design principles ：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;(i) transmitting short messages blindly;
+
+(ii) using in-network priorities;
+
+(iii) allocating priorities dynamically at receivers in conjunction with receiver-driven rate control;
+
+(iv) controlled overcommitment of receiver downlinks.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Homa这么设计出于一下的考虑：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;1. There is no time to schedule every packet. 
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;特别在意延时的情况下，schedule带来的延时都不可以接受。所以有了principle 1。&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;2. Buffering is a necessary evil.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;没有一个protocol在没有导致buffering的同时实现low latency，讽刺的是，buffering又会带来latency。buffer，latency，throughput，欢喜冤家，emmmmmmm这里是不是可以写一本书了。&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;3. In-network priorities are a must. 
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;由于上一条，为了减少延时，不同的packet区分处理能获得一些效果。这个方法在很多类似的protocol中都有使用。这样就有了principle 2.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;4. Making best use of limited priorities requires receiver control.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;简而言之就是recevier控制更加好。&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;5. Receivers must allocate priorities dynamically.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Homa 使用Receivers动态分配优先级的方式解决了之前类似协议的一些问题(pHost )，比如large的messag使用高优先级带来的问题，只使用一种优先级可能导致的delay。这样就有了principl 3。&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;6. Receivers must overcommit their downlink in a controlled manner.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;为了解决一些情况下链路利用率低的问题，比如一个sender项多个recevier发送数据(注意Homa使用的是receiver控制的传输方式)。为了解决这个问题，一个receiver可以过量使用downlink，比如同时给几个sender发送可以向receiver发送数据的grants。这样可能造成packet queuing ，但是对于提高利用率来说是必要的。&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;7. Senders need SRPT(shortest remaining processing time first) also. 
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;排队也可能在sender端出现，Sender知道SRPT能跟好的解决这些问题。&lt;/p&gt;
+
+&lt;h3 id=&quot;0x02-基本设计&quot;&gt;0x02 基本设计&lt;/h3&gt;
+
+&lt;p&gt;先来一张论文中的图：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/homa-arch.png&quot; alt=&quot;homa-arch&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Homa有以下特点：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Homa contains several unusual features: 
+it is receiver-driven; 
+it is message-oriented, rather than stream-oriented; 
+it is connectionless; 
+it uses no explicit acknowledgments; 
+and it implements at-least-once semantics, rather than the more traditional at-most-once semantics.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h4 id=&quot;rpcs-not-connections&quot;&gt;RPCs, not connections&lt;/h4&gt;
+
+&lt;p&gt;Homa是无连接的，一个来讲client的request message 对应一个来自server的 response message。由一个全局唯一的RPCid表示(id由客户端生成)。有以下的packet类型：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/homa-packet-types.png&quot; alt=&quot;homa-packet-types&quot; /&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;basic-sender-behavior&quot;&gt;Basic sender behavior&lt;/h4&gt;
+
+&lt;h4 id=&quot;flow-control&quot;&gt;Flow control&lt;/h4&gt;
+
+&lt;h4 id=&quot;packet-priorities&quot;&gt;Packet priorities&lt;/h4&gt;
+
+&lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Homa: A Receiver-Driven Low-Latency Transport Protocol Using Network Priorities, SIGCOMM 2018&lt;/li&gt;
+  &lt;li&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>NDP transport protocol</title>
+   <link href="https://www.nagekar.com/2018/09/Re-architecting-datacenter-networks-and-stacks-for-low-latency-and-high-performance.html"/>
+   <updated>2018-09-18T00:00:00+08:00</updated>
+   <id>https://www.nagekar.com/2018/09/Re-architecting datacenter networks and stacks for low latency and high performance</id>
+   <content type="html">&lt;h2 id=&quot;re-architecting-datacenter-networks-and-stacks-for-low-latency-and-high-performance&quot;&gt;Re-architecting datacenter networks and stacks for low latency and high performance&lt;/h2&gt;
+
+&lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Re-architecting datacenter networks and stacks for low latency and high performance，SIGCOMM 2017.&lt;/li&gt;
+&lt;/ol&gt;
+
+</content>
+ </entry>
  
  <entry>
    <title>ISA Wars</title>
    <link href="https://www.nagekar.com/2018/09/ISA-Wars-Understanding-the-Relevance-of-ISA-being-RISC-or-CISC-to-Performance,-Power,-and-Energy-on-Modern-Architecture.html"/>
    <updated>2018-09-01T00:00:00+08:00</updated>
    <id>https://www.nagekar.com/2018/09/ISA Wars -- Understanding the Relevance of ISA being RISC or CISC to Performance, Power, and Energy on Modern Architecture</id>
-   <content type="html">&lt;h2 id=&quot;isa-wars-understanding-the-relevance-of-isa-being-risc-or-cisc-to-performance-power-and-energy-on-modern-architectures指令集战争理解现代risc或cisc处理器架构与性能能耗和能效的相关性&quot;&gt;ISA Wars: Understanding the Relevance of ISA being RISC or CISC to Performance, Power, and Energy on Modern Architectures(指令集战争：理解现代RISC或CISC处理器架构与性能、能耗和能效的相关性)&lt;/h2&gt;
-
-&lt;!--more--&gt;
+   <content type="html">&lt;h2 id=&quot;isa-wars-understanding-the-relevance-of-isa-being-risc-or-cisc-to-performance-power-and-energy-on-modern-architectures指令集战争理解现代risc或cisc处理器架构与性能能耗和能效的相关性&quot;&gt;ISA Wars: Understanding the Relevance of ISA being RISC or CISC to Performance, Power, and Energy on Modern Architectures(指令集战争：理解现代RISC或CISC处理器架构与性能、能耗和能效的相关性&lt;/h2&gt;
 
 &lt;h2 id=&quot;0x00-引言&quot;&gt;0x00 引言&lt;/h2&gt;
 
@@ -148,25 +270,1426 @@ NEON: ARM架构的SIMD指令集拓展;
  </entry>
  
  <entry>
-   <title>Lorem Ipsum</title>
-   <link href="https://www.nagekar.com/2017/04/Lorem-Ipsum.html"/>
-   <updated>2017-04-17T00:00:00+08:00</updated>
-   <id>https://www.nagekar.com/2017/04/Lorem-Ipsum</id>
-   <content type="html">&lt;p&gt;
-Lorem ipsum dolor sit amet, ut paulo aperiam signiferumque quo. Quaeque pertinacia mnesarchum te vel. Ei tollit habemus delectus mel, pro zril cetero adipiscing an. Eius aliquip legimus ad mea, vix te quod eripuit, munere doctus oporteat qui te. Dolore fierent nam ea. Eos ex tale commune moderatius, ei mel malorum suscipit neglegentur. Has quod falli alienum ne.
-&lt;/p&gt;
-&lt;p&gt;
+   <title>Read-Log-Update</title>
+   <link href="https://www.nagekar.com/2018/08/Read-Log-Update.html"/>
+   <updated>2018-08-01T00:00:00+08:00</updated>
+   <id>https://www.nagekar.com/2018/08/Read-Log-Update</id>
+   <content type="html">&lt;h2 id=&quot;read-log-update--a-lightweight-synchronization-mechanism-for-concurrent-programming&quot;&gt;Read-Log-Update – A Lightweight Synchronization Mechanism for Concurrent Programming&lt;/h2&gt;
 
-Wisi impedit albucius cum no. Pri nibh posse in. Tollit copiosae mei at, summo perfecto gubergren cum cu. Pri verterem dissentiet te, error option legendos te ius. Nihil sapientem expetenda in qui, usu no dicit option.
-&lt;/p&gt;
-&lt;p&gt;
-Eam ad illud constituto, ne urbanitas reprimique qui. Ad duo quas quando vivendo, insolens accusamus ne vim. Ne vel lorem legimus commune, eam autem laudem ne, oratio cetero voluptatibus in cum. Ea tamquam assueverit philosophia vix, erroribus eloquentiam consectetuer est ea. Enim feugait concludaturque ad ius, ne vel stet placerat.
-&lt;/p&gt;
-&lt;p&gt;
-Te mea everti platonem sententiae, ius te cibo partem suavitate, at qui quidam urbanitas. Qui inimicus repudiandae ne, nobis vivendo te sea, his alia vivendum in. Vitae imperdiet vis at, eu impetus volutpat expetendis duo. Vel sonet commune ne, aliquid adipisci te vis. Pri in simul rationibus signiferumque, aperiri constituto ei vel.
-&lt;/p&gt;
-&lt;p&gt;
-Et modo dolorem referrentur usu. Exerci lobortis id mei, mel putant everti te. Qui error detraxit te, in vis ignota eripuit scripserit. Ut labore patrioque dissentiet has, feugiat propriae invidunt est ei, mei nostrud volutpat rationibus ei. Mea at graeci tritani, sint mediocrem vituperata no nec. Eu pri mazim vitae ocurreret, iudico graeco consectetuer mel cu, quo dico maiorum ei.&lt;/p&gt;</content>
+&lt;h2 id=&quot;0x00-引言&quot;&gt;0x00 引言&lt;/h2&gt;
+
+&lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Read-Log-Update: A Lightweight Synchronization Mechanism for Concurrent Programming, SOSP 2015.&lt;/li&gt;
+&lt;/ol&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>A Height Optimized Trie Index for Main-Memory Database Systems</title>
+   <link href="https://www.nagekar.com/2018/07/HOT-Height-Optimized-Trie-Index.html"/>
+   <updated>2018-07-20T00:00:00+08:00</updated>
+   <id>https://www.nagekar.com/2018/07/HOT--Height Optimized Trie Index</id>
+   <content type="html">&lt;h2 id=&quot;hot-a-height-optimized-trie-index-for-main-memory-database-systems&quot;&gt;HOT: A Height Optimized Trie Index for Main-Memory Database Systems&lt;/h2&gt;
+
+&lt;h2 id=&quot;0x00-引言&quot;&gt;0x00 引言&lt;/h2&gt;
+
+&lt;p&gt;Height Optimized Trie (HOT) 是一种新的为Main-Memory Database设计的新的数据结构。&lt;/p&gt;
+
+&lt;h3 id=&quot;参考&quot;&gt;参考&lt;/h3&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;HOT: A Height Optimized Trie Index for Main-Memory Database Systems，SIGMOD 2018；&lt;/li&gt;
+&lt;/ol&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Contention-Aware Lock Scheduling</title>
+   <link href="https://www.nagekar.com/2018/07/Contention-Aware-Lock-Scheduling-for-Transactional-Databases.html"/>
+   <updated>2018-07-15T00:00:00+08:00</updated>
+   <id>https://www.nagekar.com/2018/07/Contention-Aware Lock Scheduling for Transactional Databases</id>
+   <content type="html">&lt;h2 id=&quot;contention-aware-lock-scheduling-for-transactional-databases&quot;&gt;Contention-Aware Lock Scheduling for Transactional Databases&lt;/h2&gt;
+
+&lt;h3 id=&quot;0x00-引言&quot;&gt;0x00 引言&lt;/h3&gt;
+
+&lt;p&gt;这是我目前读过的最喜欢的一篇论文之一。首先，论文写的非常通俗易懂，即使你之前对Lock Schedule没有什么了解，通过这篇论文也能很清楚的知道Contention-Aware Lock Scheduling的原理。另外，这个算法不仅仅是一个理论上的，只存在于实验室中，这个算法已经被MySQL 8.0采用了。简直赞的不行，如此快速的在真正的实际的被广泛使用软件中得到应用，也侧面印证了这个研究very excellent。&lt;/p&gt;
+
+&lt;h3 id=&quot;0x01-背景与动机&quot;&gt;0x01 背景与动机&lt;/h3&gt;
+
+&lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Contention-Aware Lock Scheduling for Transactional Databases ，VLDB 2018.&lt;/li&gt;
+&lt;/ol&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Time Traveling Optimistic Concurrency Control</title>
+   <link href="https://www.nagekar.com/2018/06/TicToc-Time-Traveling-Optimistic-Concurrency-Control.html"/>
+   <updated>2018-06-05T00:00:00+08:00</updated>
+   <id>https://www.nagekar.com/2018/06/TicToc -- Time Traveling Optimistic Concurrency Control</id>
+   <content type="html">&lt;h2 id=&quot;tictoc-time-traveling-optimistic-concurrency-control&quot;&gt;TicToc: Time Traveling Optimistic Concurrency Control&lt;/h2&gt;
+
+&lt;h2 id=&quot;0x00-引言&quot;&gt;0x00 引言&lt;/h2&gt;
+
+&lt;p&gt;这篇文章是关于内存数据库的Optimistic Concurrency Control优化的一篇paper(对OCC没有了解的可以先看看论文[2])。Timestamp ordering (T/O) concurrency control 是数据库并发控制一种非常重要的方法，一般而言，系统会以事务为粒度分配timestamp，而这种方式存在一个缺点：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; A common way to implement the allocator is through an atomic add instruction that increments a global counter for each new transaction. This approach, however, is only able to generate less than 5 million instructions per second on a modern multi-core system due to the long latency incurred by the CPU’s cache coherence protocol [11, 35]. As such, most state-of-the-art T/O-based algorithms suffer from the timestamp allocation bottleneck [37].
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;即使使用一些硬件上的优化，还是存在一些问题[具体参看论文]。&lt;/p&gt;
+
+&lt;p&gt;​	TicToc使用的方式是不将timestamp分配给事务，而是分配给数据项。使用每一个数据项的timestamp来检查事务是否可以提交。这样有2个主要的好处：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;不存在同一的时间戳分配，不相关的事务不会相互影响；&lt;/li&gt;
+  &lt;li&gt;可以推迟时间戳分配，使用逻辑顺序来达到serializability ，即使这些事务在物理时间上是重叠的。减少了事务的abort；&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;0x01-基本算法&quot;&gt;0x01 基本算法&lt;/h2&gt;
+
+&lt;h4 id=&quot;lazy-timestamp-management&quot;&gt;Lazy Timestamp Management&lt;/h4&gt;
+
+&lt;p&gt;对于一下的顺序，一般的OCC可能不能提交A的，但是实际上A提交不影响正确性：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;1. A read(x) 
+2. B write(x) 
+3. B commits 
+4. A write(y)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;TicToc就可以解决这个问题，它不是静态的分配timestamp，而是使用x y实际read/write的最新版本计算timestamp，而不是整个database现在的timestamp。这个就可以将A提前到B(逻辑上)，就可以提交。TicToc中的wts和rts的含义如下(值得注意的是它们都是逻辑上的)[3]：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;wts: The logical timestamp of the last committed txn that wrote to the record.
+rts: The logical timestamp of the last txn that read the record.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/tic-toc-ts.png&quot; alt=&quot;tic-toc-ts&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;TicToc中，一个数据项在wts创建特定的版本在rts之前都是合法的。一个事务是合法的，必须满足以下2点：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;事务的提交的ts必须在事务读取的(所有的)项的wts到rts之间；&lt;/li&gt;
+  &lt;li&gt;对于事务写的项，提交的ts必须大于数据项的rts；&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;TicToc读的方法如下：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/tic-toc-read.png&quot; alt=&quot;tic-toc-read&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;回到这小节的例子，如果A赋予一个更大的timestamp，传统的OCC是不能提交的，2而如果赋予一个一个更加小的timestamp，那么就可以提交(满足OCC的有效性)。而在tic-toc中就可以推迟到事务提交是才计算出合适的timestamp，而不需要abort事务。&lt;/p&gt;
+
+&lt;h4 id=&quot;protocol-specification&quot;&gt;Protocol Specification&lt;/h4&gt;
+
+&lt;p&gt;protocol分为三步：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Read Phase&lt;/li&gt;
+  &lt;li&gt;Validation Phase&lt;/li&gt;
+  &lt;li&gt;Write Phase&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;read的算法如Algorithm1所示。 Validation Phase是最复杂的(注意这里会更改rts)：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/tic-toc-alg2.png&quot; alt=&quot;tic-toc-alg2&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;在通过了第二步之后，就可以完成写入操作：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/tic-toc-alg3.png&quot; alt=&quot;tic-toc-alg3&quot; /&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;举个例子&quot;&gt;举个例子&lt;/h4&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/tic-toc-example.png&quot; alt=&quot;tic-toc-example&quot; /&gt;&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;step 1: A读x，此时x(wts = 2 and rts = 3)，x保存在A的read set；
+step 2: B写x，在4时刻commit，B提交之后会变成x(wts = 4 and rts = 4)；
+step 3: A写y，此时新的y在A的write set里面，对其它不可见；
+step 4: A进入检验步骤，根据算法2，提交时间戳读数据项最大的wts，写数据项的最大rts+1。x在timestamp 2 and 3是合法的, 可以通过校验，然后提交(timestamp=3)；
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;0x02-正确性证明&quot;&gt;0x02 正确性证明&lt;/h3&gt;
+
+&lt;p&gt;正确性基于以下三个LEMMA:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;LEMMA 1. Transactions writing to the same tuple must have different commit timestamps.
+	不同的事务写相同的touple时必须是不同的时间戳；
+	
+LEMMA 2. Transactions that commit at the same timestamp and physical time do not conflict with each other.
+	同一时间戳提交的事务不相互影响。这里我们可以知道，lemma1中的情形不可能出现，而read-write，write-read冲突时，写者的提交时间戳总是会更加大。
+
+
+LEMMA 3. A read operation from a committed transaction returns the value of the latest write to the tuple in the serial schedule.
+  已经提交的事务总是会读取最新的数据。
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;0x03-优化和评估&quot;&gt;0x03 优化和评估&lt;/h3&gt;
+
+&lt;p&gt;不讲了，看论文吧。&lt;/p&gt;
+
+&lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;TicToc: Time Traveling Optimistic Concurrency Control， SIGMOD 2016；&lt;/li&gt;
+  &lt;li&gt;H. T. Kung and J. T. Robinson. On optimistic methods for concurrency control. ACM Trans. Database Syst., 6(2):213–226, June 1981.&lt;/li&gt;
+  &lt;li&gt;CMU Advanced Database 2018课程课件。&lt;/li&gt;
+&lt;/ol&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Consistency Tradeoffs in Modern Distributed Database System Design</title>
+   <link href="https://www.nagekar.com/2017/10/Consistency-Tradeoffs-in-Modern-Distributed-Database-System-Design.html"/>
+   <updated>2017-10-12T00:00:00+08:00</updated>
+   <id>https://www.nagekar.com/2017/10/Consistency Tradeoffs in Modern Distributed Database System Design</id>
+   <content type="html">&lt;h1 id=&quot;consistency-tradeoffs-in-modern-distributed-database-system-design&quot;&gt;Consistency Tradeoffs in Modern Distributed Database System Design&lt;/h1&gt;
+
+&lt;p&gt;CAP理论深刻地影响了分布式数据库的设计，另外一个方面，一致性和延迟之间的权衡也对现在的数据库产生了直接的影响。未来融合这个两者，一个新的理论&lt;em&gt;PACELC&lt;/em&gt;[2]被提出。&lt;/p&gt;
+
+&lt;p&gt;DDBSs正在正在变得越来越”大”, 2个主要的原因促使了这种变化，第1个是现在的应用需要越来越多的数据和越来越高的事务处理能力，第2个是因为增长的跨国企业的需要在全球范围内开展业务，需要将数据中心建立在靠近客户的地方。在过去10年开发的DDBSs都具有高可用性或(和)全球范围内范围的能力，比如SimpleDB/DynamoDB，Cassandra，Voldmort，HBase/BigTable,MongoDB，VoltDB/H-Store以及Megastore等。&lt;/p&gt;
+
+&lt;p&gt;DDBSs是一个复杂的系统，开发这样一个系统是非常困难的。DDBS的设计是一门权衡的艺术，其中CAP理论是很重要的一个部分。虽然CAP很重要，但是论文[1]认为CAP被滥用了，仅仅只考虑C A P之间的权衡是不够的。实际上，CAP讨论的是故障复发生之后的一些限制。正常情况下，更为常见的权衡是一致性和延时之间的权衡，它也深刻地影响了DDBS的设计。PACELC被提出统一这些权衡，PACELC的含义为: P then AC else LC，意为在网络分区发生的时候系统需要在可用性和一致性之间做出权衡，而没有网络分区的情况下，系统需要在一致性和延时之间做出权衡。&lt;/p&gt;
+
+&lt;h2 id=&quot;cap是关于故障的&quot;&gt;CAP是关于故障的&lt;/h2&gt;
+
+&lt;p&gt;由于CAP理论中三个最多只能取其二，只有以下几种类型的系统是可能的: CA，没有网络分区；CP，不能保证高可用；AP，不能保证一致性。现在很多的DDBS(默认情况下)都不保证C，比如SimpleDB/Dynamo, Cassandra等。
+  早起的DDBS的研究的关注点在一致性，很自然的认为CAP是影响数据库架构的主要因素。DDBS是必须要能容忍出现网络分区的，这样的话，DDBS这能在A和C之间做出选择。对于可靠性有高要求的应用就只能舍弃C。
+  看上去这里是没有问题的。但是实际上还是有一些瑕疵，这个观点不仅仅是一致性和可用性之间的权衡，而且还包括了&lt;em&gt;网络分区和网络分区的存在这个件事情&lt;/em&gt;。也就是，这里只是简单地认为网络分区的存在得让我们在一致性和可用性之间做出选择。但是网络分区可能性是多种原因决定的: 系统在WAN上运行？或者知识一个局部的集群？使用了什么样的硬件？等等。通常网络分区是很少见的，发生的频率低于系统中的其它类型的故障。在没有网络分区的情况下，CAP允许系统完整的实现ACID的前提下也实现高可用性。CAP理论不是这些在正常的情况下减弱一致性的理由(比如SimpleDB/Dynamo, Cassandra等)。&lt;/p&gt;
+
+&lt;h2 id=&quot;一致性和延时之间的权衡&quot;&gt;一致性和延时之间的权衡&lt;/h2&gt;
+
+&lt;p&gt;理解现代一些DDBS的设计要先了解它们面向的使用场景，现在的很多DDBS(比如SimpleDB/Dynamo, Cassandra等)面向的使用场景是在线活动，对交互的延时比较敏感，延时多上100ms可能就导致用户的流失。
+  不幸的事，在一致性、可用性和延时之间存在基本的权衡，即使没有网络分区，这种权衡也会存在，这种权衡与CAP无关。及时如此，这张权衡也是这些系统设计的关键因素。
+  高可用性机遇就意味着复制数据。为了实现尽可能高的可用性，DDBS就得在WLN复制数据，防治一个数据中心因为某些原因被整个损坏(比如地震、飓风)等。
+   当出现数据复制时，就会有一致性和延时之间的权衡。只有3种方法来实现数据复制: 1. 系统同时发送更新给所有副本；2. 发送给特殊的master节点；3. 随机发送给一个节点。无论哪一种方法，都存在一致性和延时之间的权衡。&lt;/p&gt;
+
+&lt;h3 id=&quot;同时发送给所有副本&quot;&gt;同时发送给所有副本&lt;/h3&gt;
+&lt;p&gt;如果更新不经过预处理合作其它的协议，因为每个副本得到的更新的顺序可能是不同的，这样就会导致明显的缺失一致性。而如果经过预处理合作通过其它协议来保证副本应用更新的顺序，这样的话，这些操作就是延时的来源。如果使用的是使用某种协议的方法，那么协议本身就是一种延时的来源。
+   在使用预处理方法的情况下，主要有两个延时的来源，第一个是附加的预处理会增加延时，第二，预处理器由几台机器或者一台机器组成，多台机器的情况下又需要某种协议来保证更新的顺序，一台机器的情况下任何位置的更新都得像这个单一的节点请求更新。&lt;/p&gt;
+
+&lt;h3 id=&quot;数据更新发送到一个商定的位置&quot;&gt;数据更新发送到一个商定的位置&lt;/h3&gt;
+
+&lt;p&gt;这个商定的位置可以称为master。Master节点所有的请求然后更新数据。由于只由master来处理请求，所以更新执行的顺序是可以保证的。Master执行玩操作后，会复制到其它的节点。
+   这个复制有3种不同的选项:
+      1. 同步复制: Master节点会一直等待知道所有的副本都已经复制完成。这样一致性是有保障的，但是延时不可避免地会增大。
+      2. 异步复制: 系统会认为在复制完成之前就认为更新已经完成。通常会保证更新的数据以及被持久化保存，但不保证更新已经同步到所有的节点，这种情况下，一致性和延时的权衡取决于系统如何读取:
+     i. 如果读取请求全部有master节点处理，那么不会有一致性的问题，但是这种方法可能造成2个延时:
+       a: 发送读取请求的客户端可能距离master节点很远，即可可能存在离这个客户端很近的副本，但是不能使用;
+       b: 如果master节点负载过高或者失败，则客户端必须等待master节点负载降低或者从失败中恢复，缺乏负载均&lt;br /&gt;
+       衡会增加延时。
+     ii. 如果可以由任意的节点上读取，则会带来一致性的问题，因为节点之间的数据可能是一致的。虽然可以实
+     现sequential/timeline一致性或者read-your-writes一致性，也是一致性的降低。 此外，接受写入请求的节点
+     在物理上原理写入请求的发起者也会增加延时。
+      3. 结合同步和异步复制: 系统也可以结合1和2，将更新同步发送给系统的子集，然后异步发送给剩余的部分。这种情况下一致性和延时的权衡也取决于系统如何处理读取:
+    i. 假设至少有一个节点已经应用更新，那么在W + R &amp;gt; N 的情况下，一致性是可以保障的，前面讲过的延时增加的问题依然存在。
+    ii. 当 W + R &amp;lt;= N的情况下，客户端可能读取不到一些更新的数据，就会造成一致性的问题。&lt;/p&gt;
+
+&lt;h3 id=&quot;数据更新发送带一个随机的位置&quot;&gt;数据更新发送带一个随机的位置&lt;/h3&gt;
+
+&lt;p&gt;这种做法的主要区别在发送更新的位置，这种方法下发送的目的位置是不确定的。如果同步复制更新，照样会存在上面讲到的延时增加的问题。如果是一步的，同理，一致性的问题也照样存在。&lt;/p&gt;
+
+&lt;h2 id=&quot;pacelc&quot;&gt;PACELC&lt;/h2&gt;
+
+&lt;p&gt;所以，可以将CAP重新表示为PACELC来实现更为完整的描述：如果存在分区（P），则系统如何权衡可用性和一致性（A 和C）,else（E）当系统在没有分区的情况下正常运行时，系统如何权衡延迟（L）和一致性（C）。 ELC部分只使用与数据复制的系统。
+   Dynamo, Cassandra和Riak默认情况下是一个PA/EL的系统，在没有网络分区的情况下，会选择降低一致性来实现更低的延时，在发生网络分区的情况下，会选择放弃一致性来实现高可用。
+  完整支持ACID的系统，比如oltDB/H-Store和Megastore 是一个PC/EC的系统，它们没有放弃一致性，所以在可用性和延时上做了付出了一些代价。
+   MongoDB可以认为是PA/EC的系统，在正常的情况下，系统可以保障一致性，但是在出现Master不可用或者网络分区是，就会产生一致性的问题。
+   PNUTS是一个PC/EL的系统，看起来有些困惑，在正常的情况下不能保证一致性，而在网络分区的情况下能保证一致性？？不过，这里的PC/EL一个理解为在正常的情况下选择更低的延时，而网络的分区的情况下，PC不能代表完全一致，而是不选择降低一致性，而是选择降低可用性。&lt;/p&gt;
+
+&lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Consistency Tradeoffs in Modern Distributed Database System Design: http://dl.acm.org/citation.cfm?id=2360959&lt;/li&gt;
+  &lt;li&gt;PACELC theorem: https://en.wikipedia.org/wiki/PACELC_theorem&lt;/li&gt;
+&lt;/ol&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Adaptive Radix Tree</title>
+   <link href="https://www.nagekar.com/2017/10/Adaptive-Radix-Tree.html"/>
+   <updated>2017-10-06T00:00:00+08:00</updated>
+   <id>https://www.nagekar.com/2017/10/Adaptive Radix Tree</id>
+   <content type="html">&lt;h2 id=&quot;the-adaptive-radix-tree--artful-indexing-for-main-memory-databases&quot;&gt;The Adaptive Radix Tree:  ARTful Indexing for Main-Memory Databases&lt;/h2&gt;
+
+&lt;h3 id=&quot;0x00-引言&quot;&gt;0x00 引言&lt;/h3&gt;
+
+&lt;p&gt;​	Adaptive Radix Tree是最近出现的为Main-Memory Database设计的的支持范围数据结构里面个人认为最优美的一种了，不如Masstree，Bwtree那么复杂，另外，相比于传统的一些结构如T-tree，也更好的适应了现代的多核处理器。这篇时关于Adaptive Radix Tree(ART)的基本结构的，另外有一篇时关于ART的Concurrency Control的，之后会加上。&lt;/p&gt;
+
+&lt;p&gt;​	ART的主要思路时使用不同大小的Node，来减少内存使用。同时加上一些额外的如高度上的优化。&lt;/p&gt;
+
+&lt;h3 id=&quot;0x01-基本结构&quot;&gt;0x01 基本结构&lt;/h3&gt;
+
+&lt;p&gt;前面提到，ART的内部Node有不同的大小。一般而言，离root比较远的Node里面保护的数据项时比较小的。一般的Radix Tree使用完整的Node的话，会浪费很多的内存，而ART就解决了这个问题：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/art-node.png&quot; alt=&quot;art-node&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;ART可以做到 &lt;strong&gt;With 32 bit keys, for example, a radix tree using s = 1 has 32 levels, while a span of 8 results in only 4 levels.&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;内部 Node描述：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;* Node4: The smallest node type can store up to 4 child pointers and uses an array of length 4 for keys and another array of the same length for pointers. The keys and pointers are stored at corresponding positions and the keys are sorted.
+* Node16: This node type is used for storing between 5 and 16 child pointers. Like the Node4, the keys and pointers are stored in separate arrays at corresponding positions, but both arrays have space for 16 entries. A key can be found efficiently with binary search or, on modern hardware, with parallel comparisons using SIMD instructions.
+* Node48: As the number of entries in a node increases, searching the key array becomes expensive. Therefore, nodes with more than 16 pointers do not store the keys explicitly. Instead, a 256-element array is used, which can be indexed with key bytes directly. If a node has between 17 and 48 child pointers, this array stores indexes into a second array which contains up to 48 pointers. This indirection saves space in comparison to 256 pointers of 8 bytes, because the indexes only require 6 bits (we use 1 byte for simplicity).
+* Node256: The largest node type is simply an array of 256 pointers and is used for storing between 49 and 256 entries. With this representation, the next node can be found very efficiently using a single lookup of the key byte in that array. No additional indirection is necessary. If most entries are not null, this representation is also very space efficient because only pointers need to be stored.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;对于Leaf Node，也有不同的策略：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;• Single-value leaves: The values are stored using an additional leaf node type which stores one value.
+
+• Multi-value leaves: The values are stored in one of four different leaf node types, which mirror the structure of inner nodes, but contain values instead of pointers.
+
+• Combined pointer/value slots: If values fit into point- ers, no separate node types are necessary. Instead, each pointer storage location in an inner node can either store a pointer or a value. Values and pointers can be distinguished using one additional bit per pointer or with pointer tagging.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;对于inner Node，不仅仅可以表示一个串的一个字符，还可以是一个prefix，这样可以在一些情况下减少树的高度，节约内存，也可以提高缓存友好性。&lt;/p&gt;
+
+&lt;p&gt;综合这些之后，基本的搜索算法如下：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;search (node, key, depth) 
+  if node==NULL
+	return NULL if isLeaf(node)
+  if leafMatches(node, key, depth) return node
+	return NULL
+  if checkPrefix(node,key,depth)!=node.prefixLen
+     return NULL 
+  depth=depth+node.prefixLen 
+  next=findChild(node, key[depth]) 
+  return search(next, key, depth+1)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;此外的较为复杂的就是insert的算法了，基本的算法如下：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/art-insert.png&quot; alt=&quot;art-insert&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;主要要考虑一下情况：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;为空，则要添加节点；&lt;/li&gt;
+  &lt;li&gt;添加到的节点时leaf节点，则要考虑到prefix；而且会对原来的leaf node做相应的修改；&lt;/li&gt;
+  &lt;li&gt;inner node对应的prefix不同时，则表明要重新处理这个prefix&lt;/li&gt;
+  &lt;li&gt;之后查找对于对应的下一个节点，存在，递归查找，不存在，这个节点满了的话，需要拓展节点，之后添加新的子节点。&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;删除操作就看作是insert的逆操作即可。&lt;/p&gt;
+
+&lt;h3 id=&quot;0x02-分析&quot;&gt;0x02 分析&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;内存&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;ART一个主要优点就是更小的内存使用：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/art-memory.png&quot; alt=&quot;art-memory&quot; /&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;性能&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;关于性能这里只关注了缓存相关的，一个paper中的表格如下：在密集的key的情况下，ART的缓存命中率高了不少。这是因为ART的节点很”紧凑”。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/art-cache.png&quot; alt=&quot;art-cache&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;总之，ART时非常优美的，相比于其它的一些数据结构来说(Bwtree的算法复杂程度比ART高了几个数量级)，简单性能有很不错。&lt;/p&gt;
+
+&lt;h3 id=&quot;参考&quot;&gt;参考&lt;/h3&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;The Adaptive Radix Tree: ARTful Indexing for Main-Memory Databases,  ICDE 2013.&lt;/li&gt;
+&lt;/ol&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Reducing the Storage Overhead of Main-Memory OLTP Databases</title>
+   <link href="https://www.nagekar.com/2017/09/Reducing-the-Storage-Overhead-of-Main-Memory-OLTP-Databases.html"/>
+   <updated>2017-09-23T00:00:00+08:00</updated>
+   <id>https://www.nagekar.com/2017/09/Reducing the Storage Overhead of Main-Memory OLTP Databases</id>
+   <content type="html">&lt;h2 id=&quot;reducing-the-storage-overhead-of-main-memory-oltp-databases-with-hybrid-indexes&quot;&gt;Reducing the Storage Overhead of Main-Memory OLTP Databases with Hybrid Indexes&lt;/h2&gt;
+
+&lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Reducing the Storage Overhead of Main-Memory OLTP Databases with Hybrid Indexes , SIGMOD2016.&lt;/li&gt;
+&lt;/ol&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>PacificA -- Replication in Log-Based Distributed Storage Systems</title>
+   <link href="https://www.nagekar.com/2017/09/PacificA-Replication-in-Log-Based-Distributed-Storage-Systems.html"/>
+   <updated>2017-09-14T00:00:00+08:00</updated>
+   <id>https://www.nagekar.com/2017/09/PacificA -- Replication in Log-Based Distributed Storage Systems</id>
+   <content type="html">&lt;h1 id=&quot;pacifica-replication-in-log-based-distributed-storage-systems&quot;&gt;PacificA: Replication in Log-Based Distributed Storage Systems&lt;/h1&gt;
+&lt;p&gt;PacificA是微软推出的一个通用的复制框架。论文[1]中强调PacificA是一个简单、实用和强一致性的。也许是基于Paxos的方法被太多的吐槽了关于复杂，难以理解难以实现，Raft、PacificA等算法都特别强调自己简单易于理解也相对容易实现。
+  选择一个合适的复制算法就算选择一个正确的架构设计，简单和模块化是设计的几个要点。PacificA的设计有以下的特点:
+    1. PacificA将配置管理和数据复制分离，由基于Paxos的模块来负责管理配置，主副本(primary/backup)策略来复制数据；
+    2. 去中心化的错误检测和触发配置，监控流量遵循数据复制的策略；
+    3. PacificA是一个通用的抽象的模型，易于验证，可以有不同的策略实现。&lt;/p&gt;
+
+&lt;p&gt;系统有以下的假设: 系统运行在一个分布式的环境之中，一些server组成集群，这些server随时可能失败，这里假设的情况是失败之后就停止运行(fail-stop failures)，信息在传输的过程中可能被延时任意长的时间达到，也可能丢失，可能会发生网络分区。时钟也是不可靠的。PacificA可以在一个n+1个副本的系统中最多容忍n个副本故障。&lt;/p&gt;
+
+&lt;h2 id=&quot;主副本数据复制&quot;&gt;主副本数据复制&lt;/h2&gt;
+
+&lt;p&gt;系统将客户端的请求分为两种: queries请求只请求数据而不会更新数据，而updates请求会更新数据。所有的请求都会发送个primary，primary会处理全部的请求，而只会在updates请求的时候才会让副本参与进来。这样的主副本的策略好处就是简单易于实现。
+  如果更新操作的结果是确定的，且所有的服务器都以系统的顺序处理了相同的请求集合，那么就可以实现强一致性。为了实现这个目标，primary(主副本)会赋予每一个请求一个唯一的单调递增的序号给所有的updates请求，每个次副本都的安装这个序号表示的顺序进行处理。这里可以表示为每个副本都维持了一个包含了它收到的所有请求的prepared list和一个对于这个list的一个commited point。这个list会根据序号排序，commited point之前的prepred list部分就是commited list。&lt;/p&gt;
+
+&lt;h3 id=&quot;正常情况情况下的查询和更新协议&quot;&gt;正常情况情况下的查询和更新协议&lt;/h3&gt;
+
+&lt;p&gt;正常情况下，primary对于接受到的queries的请求，直接就查询commited list之中的结果如何回复客户端即可。
+  对于updates请求，primary会先给这个请求赋予下一个的编号(编号可以初始化为0)，然后将这个请求带上编号和当前配置版本号(prepare message)发送给所有的次副本。
+  在收到prepare message后，次副本会将这个请求插入prepared list(注意要按照编号的顺序)，在次副本确认这个请求被安置妥当之后，就发送给primary一个ack以告知自己已经将这个请求安置妥当。当primary在收到了&lt;em&gt;所有的&lt;/em&gt;次副本的ack之后，primary就会提交这个请求(The request is committed when the primary receives acknowledgments from all replicas)。然后，primary会移动它的committed point，然后向所有的次副本发送消息通知它们已经处理完毕，在收到了primary确认成功的消息之后，次副本也就可以移动它的committed point的了。
+  在这种处理方式之中，会有以下的结论：&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;  Commit Invariant: Let p be the primary and q be any replica in the current configuration, committed(q) ⊆ committed(p) ⊆ prepared(q) holds.
+   即: primary已经commit的请求是已经准备好的一个子集，一个次副本已经commit的请求是primary已经commit的请求的子集。
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;配置管理&quot;&gt;配置管理&lt;/h2&gt;
+
+&lt;p&gt;全局的配置管理器复制管理所有副本组的配置，对于每一个副本组，配置管理器都会保存这个组当前的配置和配置版本。当服务器通过故障检测认为一个副本发生故障时，服务器会启用新配置；配置管理器可以将故障的副本从配置中移除；此外，服务器可以提出添加新的副本(包括过去失败的副本重新恢复)给配置管理器。这些情况下，配置管理器都会提出新的配置以及当前的配置版本好到配置管理器。只有在这个版本与配置管理中的版本号相同时，配置管理器才会处理这个请求。然后，配置管理器将会递增配置版本号，然后保存这个配置。
+  在网络分区方式时，一个次副本可能尝试移除primary，而primary会尝试移除次副本。由于这个改变的决定都得有配置管理器来决定，所以配置管理只要接受第一个请求即可而拒绝之后的请求，因为在接受第一个请求之后，当前的配置版本号以及变了。
+  我们可以得到以下的结论：&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;   Primary Invariant: At any time, a server p considers itself a primary only if the configuration manager has p as the primary in the current configuration it maintains. Hence, at any time, there exists at most one server that considers itself a primary for the replica group. 
+  即: Primary认为自己是primary只在在配置管理中认为自己是primary的情况下，任何情况下，都只有一个的primary。
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;租约和错误发现&quot;&gt;租约和错误发现&lt;/h2&gt;
+
+&lt;p&gt;根据上面配置管理的方法，可以知道只有配置管理器保存了准确的配置，而primary or其它任何次副本保存的消息都不一定是正确的当前配置。这种情况下，我们必须解决这样一个问题: old primary和new primary都在处理请求，这会造成错误。
+  这里使用的解决方案是&lt;em&gt;leases&lt;/em&gt;(租赁)，primary通过定期的向次副本发送beacons消息等待确认。Primary会在距发送beacons消息过了一段lease period之后没有收到ack情况下认为租赁过期。对于任何次副本的租赁到期之后，primary都会认为自己不在是primary，并通停止处理请求。这种情况下，primary会联系配置管理请求从当前配置中移除这个次副本。
+  如果一个次副本距离上次收到primary的消息已经过了一段grace period，这个次副本会认为primary的租赁已经到期，它会向配置管理请求移除当前的primary并请求自己成为新的primary。
+  假设没有时钟偏移，只要有grace period &amp;gt;= lease period，就可以保证primary在次副本认为已经过期之前过期。就可以解决上面的问题。
+  系统的故障检测流量总是发生在需要有通信两个节点之间: 处理updates请求时主副本之间的通信，primary发送beacons消息和次副本回应ack消息时主副本之间的通信。数据处理通信业本身就可以当作beacons信息，使用只有在通信通道空闲的时候primary才需要发送beacons消息。PacificA的租约机制时一个去中心化的租约机制。&lt;/p&gt;
+
+&lt;h2 id=&quot;reconfiguration-reconciliation-and-recovery&quot;&gt;Reconfiguration, Reconciliation, and Recovery&lt;/h2&gt;
+
+&lt;p&gt;Replication Protocol的一个很大的复杂性来与就是Reconfiguration。这里，PacificA将此分为了三种情况: 移除一个次副本、移除primary和添加一个次副本。&lt;/p&gt;
+
+&lt;h3 id=&quot;移除次副本&quot;&gt;移除次副本&lt;/h3&gt;
+
+&lt;p&gt;当primary人认为一个or多个次副本发生故障时，它会向配置管理器提出一个新的配置请求，用于移除认为可能故障的副本，在获得配置管理器的通过之后继续运行。&lt;/p&gt;
+
+&lt;h3 id=&quot;改变primary&quot;&gt;改变primary&lt;/h3&gt;
+
+&lt;p&gt;当一个次副本认为primary故障时，次副本会向配置管理器提出一个新配置，这个配置会把自己当作新的primary，且会把旧的primary排除在外。当这个配置获得通过时，这个新的primary只有在完成reconciliation过程之后才开始处理请求。在reconciliation阶段，新primary将提交prepared list中的没有提交的，然后会将自己的记录同步到其它副本。因为prepared的可能多了or少了，但是已经提交了的大家都是一样的，对于次副本少了的情况，需要补齐，而对于多了的情况，设sn为新primary reconciliation之后committed point指向的记录的编号，p会要求其它副本都截断prepared list到sn。根据上面的Commit Invariant，是不会发生已经提交的被截断的，只会是哪些已经prepared但是没有提交的记录。此外，Reconciliation期间也可能提出新的configuration。
+  因为次副本上的prepared list总是包含了所有的已经提交的请求，通过将prepared list中的请求提交，因此reconciliation会有:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;  Reconfiguration Invariant: If a new primary p completes reconciliation at time t, any committed list that is maintained by any replica in the replica group at any time before t is guaranteed to be a prefix of committed(p) at time t. Commit Invariant holds in the new configuration. 
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;添加次副本&quot;&gt;添加次副本&lt;/h3&gt;
+
+&lt;p&gt;新副本添加是要保证Commit Invariant，这要求新副本在加入之前准备好prepared list。一个简单的方法是primary暂定执行知道新副本复制完成prepared list。另外一种方法是先作为一个候选副本加入，新副本逐渐获得数据”赶上”来。&lt;/p&gt;
+
+&lt;h2 id=&quot;replication-for-distributed-log-based-storage-systems&quot;&gt;Replication for Distributed Log-Based Storage Systems&lt;/h2&gt;
+
+&lt;p&gt;论文[1]还讲了Replication for Distributed Log-Based Storage Systems。有兴趣的可以具体参考论文[1]。&lt;/p&gt;
+
+&lt;h2 id=&quot;extend&quot;&gt;Extend&lt;/h2&gt;
+
+&lt;h3 id=&quot;kafka-isr&quot;&gt;Kafka ISR&lt;/h3&gt;
+&lt;p&gt;Kafka为了保证高可用使用了ISR(In-Sync Replicas)的方法，这个方法与PacificA非常相似。具体内容可以参考Kafka问到中的Replication章节[2]。&lt;/p&gt;
+
+&lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;PacificA: Replication in Log-Based Distributed Storage Systems: http://www.microsoft.com/en-us/research/publication/pacifica-replication-in-log-based-distributed-storage-systems/&lt;/li&gt;
+  &lt;li&gt;Kafka Replication Document: http://kafka.apache.org/documentation.html#replication&lt;/li&gt;
+&lt;/ol&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>A Quorum-Based Commit Protocol</title>
+   <link href="https://www.nagekar.com/2017/09/A-Quorum-Based-Commit-Protocol.html"/>
+   <updated>2017-09-12T00:00:00+08:00</updated>
+   <id>https://www.nagekar.com/2017/09/A Quorum-Based Commit Protocol</id>
+   <content type="html">&lt;h1 id=&quot;a-quorum-based-commit-protocol&quot;&gt;A Quorum-Based Commit Protocol&lt;/h1&gt;
+&lt;p&gt;在distributed computing中，quorum是指分布式执行时必须获得的最小的票数[2]，常被用于分布式的commit protocol和replica control。这里我们来看看论文[1]描述的一种quorum-based commit protocol。&lt;/p&gt;
+
+&lt;h2 id=&quot;介绍&quot;&gt;介绍&lt;/h2&gt;
+
+&lt;p&gt;这个Quorum-Based Commit Protocol(下文简称protocol or 协议)使用quorum的方式来解决错误发生之后的冲突。当有一个错误发生之后，一个事务只能在被一个quorum commit的情况下commit，这个quorum称为commit quorum，表示为V(C)，同理，一个事务abort只有在一个quorum abort的情况下abort，这个quorum称为abort quorum，表示为V(A)。
+  这个protocol有以下的一些的特点：
+    1. 这是一个集中式(centralized)的协议(也就是说存在中心节点)；
+    2. 当所有的错误(failure)被解决之后，协议最终会终止；
+    3. 这是一个阻塞的协议，只有当错误被修复之后才能继续运行。&lt;/p&gt;
+
+&lt;p&gt;此外，协议可以从多种的失败中快速恢复，但是主要关注的错误的网络分区，主要是以下两种类型: 节点失败和消息丢失，这个两类情况都可以被视为是网络分区错误。&lt;/p&gt;
+
+&lt;h2 id=&quot;协议&quot;&gt;协议&lt;/h2&gt;
+
+&lt;p&gt;在介绍这个协议之前，先来看一看经典的2PC协议[3]，2PC可以用下图简单地表示:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;                 +---------+
+                 |         |
+                 |   q     |
+                 |         |
+                ++---------+
+                |          |
++----------+    |          |   +----------+
+|          |    |          +-&amp;gt; |          |
+|   w      | &amp;lt;--+              |   a      |
+|          +-----------------&amp;gt; |          |
++------+---+                   +----------+
+       |
+       |
+       v
++----------+
+|          |
+|   c      |
+|          |
++----------+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;2PC协议包含了以下的几个状态,初始状态(q)、等待状态(w)、abort状态(a)和commit状态(c)。一个事务中，可以分为可提交(committable)和不可提交(noncommitable)两种状态，2PC中，相同只有在所有节点处理可以提交的状态时整个系统才处理可提交的状态，也就是说，2PC中只有c状态时一个可提交状态。&lt;/p&gt;
+
+&lt;h3 id=&quot;提交&quot;&gt;提交&lt;/h3&gt;
+
+&lt;p&gt;现在来看看这个quorum-based的协议，前面提到，这个协议中存在V(C)和V(A)。不同于2PC中的操作是对于所有节点而言的，这个协议中的操作时对于V(C) or V(A) 而言的。此外，这个协议还有以下的要求:
+    1. V(A) + V(C) &amp;gt; V， 0 &amp;lt; V(C),V(A) &amp;lt;= V, V表示总票数；
+    2. 任意一个节点处于commit状态时，至少有一个处于可提交状态的quorum；
+    3. 任意一个节点处于abort状态时，至少有一个处于不可提交状态的quorum。&lt;/p&gt;
+
+&lt;p&gt;这些要求保证了协议会在一个一致的状态下结束(all commit or all abort)，其中，第2条可以理解为有2条子要求组成:
+  2.1 在第一个节点commit之前，必须有一个到达可提交状态的quorum；
+  2.2 在任意节点提交之后，必须维持这个quorum。这一条表明了一个节点可以安全的有可提交状态变为不可提交状态只能在没有任何节点已经commit的情况下。
+  同理，对于第3条要求，可以类比到第2条。
+  我们可以发现，2PC协议提交操作时不能满足上面提到的要求(不能保证所有节点最终都是提交了or最终都是没有提交)。为了解决这个问题，在这个协议中添加了一个prepared to commit（pc)的状态，所以，这个协议用图表示如下:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;                 +---------+
+                 |         |
+                 |   q     |
+                 |         |
+                ++---------+
+                |          |
++----------+    |          |   +----------+
+|          |    |          +-&amp;gt; |          |
+|   w      | &amp;lt;--+              |   a      |
+|          +-----------------&amp;gt; |          |
++------+---+                   +----------+
+       |
+       |
+       v
++----------+
+|          |
+|  p       |
+|          |
++------+---+
+       |
+       v
++----------+
+|          |
+|  c       |
+|          |
++----------+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;添加的p状态类似于3PC[4]中的对应状态，到了这一状态表了节点时可以执行提交的。此外，这个协议是一个悲观的协议，如果任意节点在w状态时失败，事务会被abort。&lt;/p&gt;
+
+&lt;h3 id=&quot;恢复&quot;&gt;恢复&lt;/h3&gt;
+
+&lt;p&gt;协议中的恢复包含了2个方面，包括错误发生之后的termination protocol和错误恢复之后的merge protocol。&lt;/p&gt;
+
+&lt;h4 id=&quot;termination-protocol&quot;&gt;Termination Protocol&lt;/h4&gt;
+
+&lt;p&gt;网络分区发生之后(论文中只讨论了网络分区的错误)，当一组节点发现它们在一个网络分区之中之后，它们会先选举中一个surrogate coordinater，至于具体如何选举，则不是这个协议所关心的。
+  当surrogate选举出来之后，它要做的是继续执行。Termination protocol主要因为两个原因变得更加复杂，第1个原因是一个surrogate不知道全局的情况，也不知道一个事务是否可以提交，第2个原因是会有多个surrogate在各自分区中操作。&lt;br /&gt;
+  对于第1个问题，这个分区只有在这个分区包含了处于可提交状态的节点才可以尝试提交。对于第2个问题，surrogate必须明确地组建abort quorum，一个节点通过进入prepared to abort状态来表明自己的意愿（原文: A surrogate must explicitly form abort quorum. A site indicates its willingness to participate in an abort quorum by moving into a prepared to abort state）。
+  surrogate通过轮询每一个节点来获取它们的状态信息，如果有任意节点已经commit(or abort)，事务也应该立即在所有节点上commit(or abort)。如果没有节点已经commit or abort，则当至少一个节点处于prepared to commit状态，且prepared to commit状态 + wait状态的节点大于等于了V(C)，surrogate会尝试将所有的节点的状态转为prepared to commit状态，在没有其它错误的情况下，它会提交这个事务，否则就阻塞(等待错误修复)。同理，对于abort也是这样。
+  在增加了这些之后，协议的图示如下:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;            +----------+                   +----------+
+            |          |                   |          |
+            |   w      +----------------&amp;gt;  |  pa      |
++-----------+          |                   |          |
+|           |          +---------+         |          |
+|           +------+---+         |         +-----+----+
+|                  |             |        +      |
+|                  |             |        |      |
+|                  v       +--------------+      v
+|                          |     |
+|           +----------+   |     |        +-----------+
+|           |          |   |     +-----&amp;gt;  |           |
+|           |  pc      |   |              |           |
+|           |          | +-------------&amp;gt;  |  a        |
+|           |          |   |              |           |
+|           +------+---+   |              +-----------+
+|                  |       |
+|                  v       |
+|           +----------+   |
+|           |          |   |
++---------&amp;gt; |  c       |   |
+            |          | &amp;lt;-+
+            |          |
+            +----------+
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h4 id=&quot;merge-protocol&quot;&gt;Merge Protocol&lt;/h4&gt;
+
+&lt;p&gt;恢复之后的merge protocol比较简单，在发现网络分区问题被修复之后，执行上面描述过的termination protocol。新的coordinator可以直接从旧的coordinator选选取，比如选取最少节点分区中的coordinator。&lt;/p&gt;
+
+&lt;h2 id=&quot;总结&quot;&gt;总结&lt;/h2&gt;
+
+&lt;p&gt;Quorum的思想在分布式中一个比较基础的思想，也有很多实际的应用，比如在Amazon Dynamo。不过在这个协议之中，使用quorum并没有完全解决分布式系统中提交存在的问题，比如节点可能一致阻塞在termination protocol中，依赖于错误的修复来解决这个问题，所以论文中也只是说这个是一种 “可以快速恢复” 的算法。&lt;/p&gt;
+
+&lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
+&lt;ol&gt;
+  &lt;li&gt;A Quorum-based Commit Protocol: https://ecommons.cornell.edu/bitstream/handle/1813/6323/82-483.pdf?sequence=1&lt;/li&gt;
+  &lt;li&gt;Quorum: https://en.wikipedia.org/wiki/Quorum_%28distributed_computing%29&lt;/li&gt;
+  &lt;li&gt;2PC: https://en.wikipedia.org/wiki/Two-phase_commit_protocol&lt;/li&gt;
+  &lt;li&gt;3PC: https://en.wikipedia.org/wiki/Three-phase_commit_protocol&lt;/li&gt;
+  &lt;li&gt;Amazon Dynamo: https://en.wikipedia.org/wiki/Dynamo_(storage_system)&lt;/li&gt;
+&lt;/ol&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>In Search of an Understandable Consensus Algorithm</title>
+   <link href="https://www.nagekar.com/2017/09/In-Search-of-an-Understandable-Consensus-Algorithm.html"/>
+   <updated>2017-09-11T00:00:00+08:00</updated>
+   <id>https://www.nagekar.com/2017/09/In Search of an Understandable Consensus Algorithm</id>
+   <content type="html">&lt;h1 id=&quot;in-search-of-an-understandable-consensus-algorithm&quot;&gt;In Search of an Understandable Consensus Algorithm&lt;/h1&gt;
+&lt;p&gt;Raft算法[2]是一致性新晋的热门选手。Raft在一些方面和Viewstamped Replication[4]相似。Raft也有一它自己的特点[1,3]:
+    1. 强领导者: Raft中领导者的地位更高，日志条目指由leader发送给其它部分。这个方式更加简单且易于理解；
+    2. 领导选举: Raft在领导选举中使用了一随机的计数器，这在解决领导选举的冲突时会更加有效；
+    3. 成为变更: Raft在成员变更时使用了一种新的joint consensus方法，这使得及时在成员变更时Raft也能工作。&lt;/p&gt;
+
+&lt;p&gt;Raft存在以下概念: 
+    1. Leader: 通常情况下，系统中只有一个leader。
+    2. Follower: 通常情况下，出leader之外的都是follower。
+    3. Candidate: 领导人选举时的一种身份状态。
+    4. Term: 一个成员担任领导人的这段时间，算法中会用一个递增的数字(任期号)表示。&lt;/p&gt;
+
+&lt;p&gt;Raft主要分为3个部分: 
+    1. 领导选举；
+    2. 日志复制；
+    3. 安全性。&lt;/p&gt;
+
+&lt;h2 id=&quot;领导选举&quot;&gt;领导选举&lt;/h2&gt;
+
+&lt;p&gt;到Follower发现自己和Leader之间的心跳出现问题时，它就会启动一次新的选举。Foller首先要递增它当前的任期号，然后转变自己为Candidate状态，然后并行地向其它成员发送投票请求，知道以下情况发生然后停止:
+    1. 它赢得了选举;
+    2. 其它成员成为Leader；
+    3. 一段时间过后没有选举出领导人。&lt;/p&gt;
+
+&lt;p&gt;当一个Candidate获得半数以上的选票时，它就赢得了选举。每个领导者只会对一个任期号的第一个投票请求投票。在赢得选举之中，就会向其它成员发送消息来确定自己的地位。在等待投票的时候，它就可能收到其它成员的投票的请求，如果这个请求中的任期号比自己当前的任期号，那么它就会投这一票并回到Follower的状态，否则，拒绝请求。
+这里可能发生的一种情况时几个候选人争夺Leader位置导致无法选举出Leader，Raft使用的解决方案时选举超时的时间从一个时间区间内随机选择(比如150ms ～ 300ms)，&lt;/p&gt;
+
+&lt;h2 id=&quot;日志复制&quot;&gt;日志复制&lt;/h2&gt;
+
+&lt;p&gt;对于Leader处理的每一条记录，它都会把这条记录追加到自己的日志里面，然后向所有的Follower发送消息，要求他们复制这条记录，当确认这条记录被一半以上的称为保存之后，Leader向客户端返回成功，对于没有及时回复Leader的Follower，Leader会一致重试指到所有的Follower都保存了所有的日志。
+  日志在被复制到多数的成员中之后，Leader就会提交这个日志，同时这日志之前的所有的日志也会被提交。日志在每个成员都是顺序保存的。Raft维护日志有以下的特点:
+    1. 如果不同的日志中的两个条目有相同的索引和任期号，那么它们就保存了相同的内容；
+    2. 如果不同的日志中的两个条目有相同的索引和任期号，那么它们之前的所有条目也相同。&lt;/p&gt;
+
+&lt;h3 id=&quot;对领导选举的限制&quot;&gt;对领导选举的限制&lt;/h3&gt;
+
+&lt;p&gt;不同于其它的一致性算法(包括Viewstamped Replication)一个成员可以被选举为Leader，及时它没有保存所有的已经提交的日志条目。这些算法就需要额外的机制来让新的Leader获取到这个日志。而Raft不同，它可以保证所有的之前的任期号内的已经提交的日志都已经保存在新的Leader之中。
+  Raft使用的方式是一个成员只能在已经包含了所有的已经提交的日志条目的情况下才能赢得选举。一个成员要想赢得选举，它必须获得半数以上的选票，这些选票中一定会有一个成员保存了所有的已经提交的条目，这样就可以达到阻止没有包含所有的已经提交的日志的成员被选举为Leader。
+  Raft通过比较两份日志中最后一条日志条目的索引值和任期号来定义谁比较新，如果最后的条目的任期号不同，那么任期号大的比较新，如果任期号相同，那么索引更大的比较新。在Raft中，Leader处理日志的一些不一致时直接通过强制要求Follower复制自己的日志来解决的，有冲突的日志会被覆盖(只会是那些没有提交的日志)。&lt;/p&gt;
+
+&lt;h2 id=&quot;安全性&quot;&gt;安全性&lt;/h2&gt;
+
+&lt;p&gt;关于Raft的安全性的证明，论文[1]中有详细的描述，这里就不说了。&lt;/p&gt;
+
+&lt;h2 id=&quot;成员变更&quot;&gt;成员变更&lt;/h2&gt;
+
+&lt;p&gt;为了保证在成员(配置)变更的时候算法还是安全的，要求这个过程中不能存在一个时间点有两位Leader。但是直接从旧的配置切换到新的配置都不能做出保证，因为不能保证所有成员在同时配置被更新。
+  为了解决这个问题，在Raft中使用的方式是集群先切换到一个过渡的配置，然后在切换到新的配置。这个过度配置称之为&lt;em&gt;共同一致&lt;/em&gt;，一旦共同一致被提交，那么系统就可以切换到新的配置之上。这里的共同一致时新老配置的结合:
+    1. 日志会被复制给所有新老配置的所有成员；
+    2. 新老配置中的成员都可以作为Leader；
+    3. 达成一致需要分别在新老配置上获得多数支持。&lt;/p&gt;
+
+&lt;p&gt;此外，即使在成员变更的时候，集群依然可以工作。
+对于新加入的成员，它可能没有保存任何的日志条目，这种情况下追赶上来可能需要一段比较长的时间，Raft使用了一个额外的阶段，在这个阶段之中，新的成员会以没有投票权的身份参与进来，知道这个成员追赶上来。
+还存在另外一个问题，移除不在新配置中的成员可能扰乱集群。这些成员将不会再接收到心跳，所以当选举超时，他们就会进行新的选举过程。它们会发送拥有新的任期号的投票请求，这样会导致当前的Leader回退成Follower状态。新的Leader最终会被选出来，但是被移除的服务器将会再次超时，然后这个过程会再次重复，导致整体可用性大幅降低。为了解决这个问题，当服务器确认当前Leader存在时，服务器会忽略投票请求，还有当服务器在当前最小选举超时时间内收到一个投票请求，它不会更新当前的任期号或者投出选票。这不会影响正常的选举，但这有利于避免被移除的服务器扰乱，如果Leader能够发送心跳给集群，那么它就不会失去Leader的身份。&lt;/p&gt;
+
+&lt;h2 id=&quot;日志压缩&quot;&gt;日志压缩&lt;/h2&gt;
+
+&lt;p&gt;这部分旧不赘言了，可以参考论文[1]。&lt;/p&gt;
+
+&lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
+&lt;ol&gt;
+  &lt;li&gt;In Search of an Understandable Consensus Algorithm (Extended Version): https://raft.github.io/raft.pdf&lt;/li&gt;
+  &lt;li&gt;Raft: https://en.wikipedia.org/wiki/Raft&lt;/li&gt;
+  &lt;li&gt;Raft论文中文翻译: https://github.com/maemual/raft-zh_cn&lt;/li&gt;
+  &lt;li&gt;Viewstamped Replication Revisited: http://www.pmg.csail.mit.edu/papers/vr-revisited.pdf&lt;/li&gt;
+&lt;/ol&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Paxos Made Simple</title>
+   <link href="https://www.nagekar.com/2017/09/Paxos-Made-Simple.html"/>
+   <updated>2017-09-10T00:00:00+08:00</updated>
+   <id>https://www.nagekar.com/2017/09/Paxos Made Simple</id>
+   <content type="html">&lt;h1 id=&quot;paxos-made-simple&quot;&gt;Paxos Made Simple&lt;/h1&gt;
+&lt;p&gt;Paxos是分布式系统中的一个非常重要的算法，用于解决容错的分布式系统中对&lt;em&gt;一个值&lt;/em&gt;达成一致的算法。论文[1]以一种很好的理解的方式描述了这个算法(这里讨论的是基础的paxos算法，不是其它的变种)。
+  算法假设有以下的一些条件:
+    1. 进程(or 角色)一任意的速度执行，每个都可能出错、停止运行，也可能错误之后恢复过来。所有进程可能在选定这个值值后都失败重启，它们可能在重启之后不能确定之前被选定的值，除非其中的一些进程保存下了这些信息。
+    2. 信息在传输的过程中可能被延时任意长的时间达到，也可能丢失、重复，但是信息的被人不会被修改。&lt;/p&gt;
+
+&lt;p&gt;总的来说，这篇paper讲的还是很清晰的。&lt;/p&gt;
+
+&lt;h2 id=&quot;提出问题&quot;&gt;提出问题&lt;/h2&gt;
+
+&lt;p&gt;考虑在一个可能发生一些错误的一个分布式系统中，多个进程针可以提出自己的value，最终这个进程将会对这个值达成一致。当然在没有值没有被提出的时候，也就没有值会最终选定。当只有一个值被提出的时候，算法也要保证最终被选定的值就是这个唯一提出的值，多个不同的值被提出来之后，最终只会有一个值被选定。如果一个值一旦被选定，这些进程能知道这个值。
+  总结如下，为了保证safety的要求，算法要求:
+    1. 只有一个值被提出之后才能被选定；
+    2. 只有一个值最终被选定；
+    3. 一个进程认为被选定的值必须是真的最终被选定的值。&lt;/p&gt;
+
+&lt;p&gt;在这个算法之中，有以下的概念:
+  Proposal: 这里可以理解为代表了一个值；
+  Proposer: 提出Proposal；
+  Acceptor: 决定是否接受Proposal；
+  Learner: 接受被选定的值。&lt;/p&gt;
+
+&lt;h2 id=&quot;选定一个值&quot;&gt;选定一个值&lt;/h2&gt;
+
+&lt;p&gt;由于算法要求只有一个进程提出一个值的情况下这个值也会被选定，所以算法必须满足以下的要求:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;  P1: 一个Proposer必须接受它收到的第一个Proposal
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;这又导致另外一个问题，由于系统中可能存在多个的Acceptor，这种做法可能导致不同的Acceptor接受了不同的值，所以这里最初一个规定:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;  规定: 一个Proposal只有在一半以上的Acceptor接受的情况下才能被选定
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;为了实现这个规定，就要求可以选定不同的Proposal(因为不这样的话就可能无法到达半数以上的Acceptor接受)。在这里，为了区分这些Proposal，我们赋予每个Proposal递增的一个编号。为了保证选定了不同的Proposal也能得到最终准确的结果，这里要求被选定的不同的Proposal的值是相等的。所以有如下的要求:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;  P2: 如果一个Proposal被选定了，每个被选定的有更高的编号的Proposal的值必须与此相同
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;为了选定一个Proposal，必须要求有一个Acceptor接受，也就是说:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;  P2a: 如果一个Proposal被选定了，那么每一个被Acceptor接受的Proposal必须与此相同
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;这个算法中，通信是不可靠的，进程也可能失败后又重启，也就可能存在下面这种情况: 一个Acceptor c之前没有收到过之前的Proposal，又有一个”新”(可能从失败之后恢复了过来)的Proposer向其发送了一个有更高编号的带有不同值的Proposal，由于要求P1，c必须接受这个Proposal，这就会导致维持P1和P2a直接的矛盾。为了解决这个问题，提出了以下的要求:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; P2b: 如果一个Proposal被选定了，那么之后的Proposer提出的编号更高的Proposal的值也必须与此相同。
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;从P2b可以推导出P2a，P2a有可以推导出P2(具体证明略，可以参考[1])。&lt;/p&gt;
+
+&lt;p&gt;那么如果保证P2b呢，这里采用的方法就是P2c:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;  P2c: 对于任意的v和n，如果一个值为v，编号为n的Proposal被提出，存在一个半数以上的集合S满足下面两个中的任意一个条件:
+    a: S中的任意Acceptor没见接受过比n小的Proposal；
+    b: S中的所有Acceptor接受过的最大编号的Proposal中，值为v。
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;proposal生成&quot;&gt;Proposal生成&lt;/h3&gt;
+
+&lt;p&gt;为了保证P2c，一个Proposer想要提出一个编号为n的Proposal必须要知道在多数Acceptor以及接受or将要被接受的编号小于n的Proposal的且有最高编号的Proposal。知道过去的情况是比较简单的，但是这里未来的情况是不能预测，所以Proposer不会尝试预测未来，而是要求Acceptor不会接受任何编号小于n的Proposal，这样就可以得到以下的Proposal提出算法：&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;一个Proposer选择一个新的编号 n，然后向一个半数以上的Acceptor的集合发送请求,要求:
+  a. Acceptor不会在接受编号小于n的Proposal；
+     b. 如果Acceptor以及接受过Proposal，那么就向Proposer响应已经接受过的编号小于n的Proposal。
+     这里的请求称为prepare请求。&lt;/li&gt;
+  &lt;li&gt;如果一个Proposer收到了半数以上的Acceptor的响应，那么这个Proposer就可以生成编号为n值为所有响应中编号最大的Proposal的值，如果都没有值，那么就由Proposer自己决定。然后发送给半数以上的Acceptor的集合(1,2中的Acceptor的集合不要求相同。这里的请求称为accept请求。&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;acceptor接受proposal&quot;&gt;Acceptor接受Proposal&lt;/h3&gt;
+
+&lt;p&gt;Acceptor如何处理呢。可以发现这里有两种类型的请求，prepare请求和 accept请求。一个Acceptor和忽略任何请求而不会破坏算法的安全性。那么Acceptor上面时候可以接受请求和，这里做出如下的要求:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; P1a: 一个Acceptor接受一个编号为n的Proposal只能在它没有响应过任何的编号小于n的prepare请求。
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Acceptor可以直接忽略编号小于它已经响应过的prepare请求的prepare请求，也可以忽略一个已经被接受的Proposal的prepare请求。对于Acceptor，它要记得它已accepted的编号最大的Proposal，已responded的请求的Proposal，及时它失败重启。&lt;/p&gt;
+
+&lt;h2 id=&quot;算法描述&quot;&gt;算法描述&lt;/h2&gt;
+
+&lt;p&gt;到这里算法的过程就比较清晰了，算法的过程也就直接给出论文[1]中的原文(避免翻译变味):&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; Phase 1. 
+  (a) A proposer selects a proposal number n and sends a prepare request with number n to a majority of acceptors. 
+  (b) If an acceptor receives a prepare request with number n greater than that of any prepare request to which it has already responded, then it responds to the request with a promise not to accept any more proposals numbered less than n and with the highest-numbered proposal (if any) that it has accepted. 
+
+Phase 2. 
+  (a) If the proposer receives a response to its prepare requests (numbered n) from a majority of acceptors, then it sends an accept request to each of those acceptors for a proposal numbered n with a value v, where v is the value of the highest-numbered proposal among the responses, or is any value if the responses reported no proposals. 
+  (b) If an acceptor receives an accept request for a proposal numbered n, it accepts the proposal unless it has already responded to a prepare request having a number greater than n. 
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;learner&quot;&gt;Learner&lt;/h2&gt;
+
+&lt;p&gt;一个值被选定之后，就想要发送给Learner，这里的方法是整个算法中任意理解的部分。一般来说有以下几种方法:
+    1. 一个Acceptor接受一个Proposal就把值发送给所有的Learner；
+    2. 把值发送给一部分Learner，如果这些Learner发送给其它的Learner；&lt;/p&gt;
+
+&lt;p&gt;由于信息会丢失，一个值可能没有被Learner接受到，Learner可以直接询问Acceptor，但是Acceptor可能失败导致无法获取到这个消息，如果Learner想要得到这个value，可以用上面描述的算法发出Proposal。&lt;/p&gt;
+
+&lt;h2 id=&quot;改进&quot;&gt;改进&lt;/h2&gt;
+
+&lt;p&gt;上面描述的算法存在这样的情况，2连个Proposer交替提出编号递增的Proposal，会导致算法进入死循环。这种情况下使用的解决方案是 选择一个特殊的Proposer，如果这个Proposer与半数以上的Acceptor成功沟通，如果它使用一个的编号为n的Proposal大于了之前的，那么它的Proposal会被获得接受。&lt;/p&gt;
+
+&lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Paxos Made Simple: http://research.microsoft.com/en-us/um/people/lamport/pubs/paxos-simple.pdf&lt;/li&gt;
+  &lt;li&gt;Paxos: https://en.wikipedia.org/wiki/Paxos_(computer_science)&lt;/li&gt;
+&lt;/ol&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Distributed — 分布式互斥</title>
+   <link href="https://www.nagekar.com/2017/09/Distributed-%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%92%E6%96%A5.html"/>
+   <updated>2017-09-03T00:00:00+08:00</updated>
+   <id>https://www.nagekar.com/2017/09/Distributed — 分布式互斥</id>
+   <content type="html">&lt;h1 id=&quot;distributed--分布式互斥&quot;&gt;Distributed — 分布式互斥&lt;/h1&gt;
+
+&lt;p&gt;分布式系统中，Concurrency是很重要的一个部分。任务在不同的进程中执行时，不可避免的会遇到访问相同的资源，这种情况下，就需要保证并发访问情况下的准确性的解决方案。
+  通常情况下，分布式互斥两种基本的策略[1]：
+    1. 基于令牌的算法(token-based)；
+    2. 基于许可的算法(permission-based)。
+        在基于令牌的算法中，所有的进程共享一个token，只有拥有token的进程才可以进入临界区，当临界区执行完之后，token被释放。token的唯一性保证了互斥，死锁也可以简单的被避免，不过一个问题时处理token丢失比较麻烦。
+           对于基于许可的算法，一个进程要到达所有进程的一个子集的允许后才能进入临界入区。&lt;/p&gt;
+
+&lt;p&gt;一个互斥的算法应该满足下面几个基本的要求[2]：
+    1. 安全性：如何情况下只能有一个进程能够进入临界区；
+    2. 活性：不存在死锁和饥饿，每个进程会在有限的时间了得到临界区的机会；
+    3. 公平性：每个进程得到执行临界区的机会时公平的(一般是指执行临界区的顺序是按照它们请求执行临界区的逻辑时间的先后顺序)。&lt;/p&gt;
+
+&lt;p&gt;除了基本的要求之外，对于一个分布式互斥的算法性能也是很重要的:
+    1. 进去临界区需要发送消息的数量；
+    2. 同步延时，从一个节点离开临界区到下一个节点进入需要的时间；
+    3. 响应时间，一个请求消息发出到请求的临界区执行结束的时间；
+    4. 系统吞吐量，系统执行临界区请求的速度，等于同步延时+平均临界区执行时间的倒数；&lt;/p&gt;
+
+&lt;h2 id=&quot;中央服务器算法&quot;&gt;中央服务器算法&lt;/h2&gt;
+
+&lt;p&gt;基于中央服务器的算法是一个简单有效的方法。最基本的思路是使用一个进程作为协调人。如果一个进程要执行临界区，它得向协调人请求，协调人在没有在其它的进程使用临界区的情况下就会授予改进程使用临界区的权限，否则将会拒绝请求，在进程执行完临界区之后，将会发送信息告知协调人释放临界区的锁。
+  这个算法的基本思路很简单，也很实用，现在实际使用的很多相关的系统也是使用了这个模型，比如Google Chubby[3]、Zookper[4]。但是要具体实现还要解决很多的问题，比如进程在临界区内Crash，协调人如何保证可靠性等等，具体可以参考[3，4]。&lt;/p&gt;
+
+&lt;h2 id=&quot;令牌环的算法&quot;&gt;令牌环的算法&lt;/h2&gt;
+
+&lt;p&gt;基于令牌的算法以及令牌环的思路在网络中的一些协议也很常见。在这个算法中，所有的进程被组织位一个逻辑上的环。
+  环上的进程被丛0开始依次编号，初始化时，token个授予编号为0的进程，token在环中由k进程传递到k+1进程(最后一个传回0号进程)。如果一个进程需要执行临界区，需要得到token被传递给它时，将token保留到它执行完临界区，如果进程不对token感兴趣，只需要简单地将token传递给下一个进程即可。
+  因为任何时间，最多有一个进程拥有token，使用互斥时包保证的。改算法也不会导致死锁。该算法也存在不少的问题，第一个就时token丢失的问题，token在传递的过程中可能被丢失，一个在一个持有token的进程在执行临界区时Crash也会造成token丢失。另外一个问题时环中的进程Crash会阻碍token的传递。&lt;/p&gt;
+
+&lt;h2 id=&quot;基与组播和逻辑时钟的算法&quot;&gt;基与组播和逻辑时钟的算法&lt;/h2&gt;
+
+&lt;h3 id=&quot;lamport算法&quot;&gt;Lamport算法&lt;/h3&gt;
+&lt;p&gt;Lamport发明的这种分布式互斥的算法时一种时间同步机制[2]，它要求通信时FIFO的。该算法具体表现为&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;当一个节点S(i)想进入临界区时，它广播REQUEST(ts(i),i)的消息给其它的所有节点，并将改请求放置到request queue(i)队列；&lt;/li&gt;
+  &lt;li&gt;当其它的节点S(j)说到这个消息时，它将S(i)的请求放置到request-queue(j)的队列，并恢复一个带时间戳的REPLY消息。
+ 当下面两个条件满足时，S(i)进入临界区:
+   01: S(i)从其它的所有站点收到一个时间戳大于（ts(i),i)的消息；
+   02: 节点S(i)的请求位于request-queue(i)的队首。&lt;/li&gt;
+  &lt;li&gt;当S(i)执行完临界区后，从自己的请求队列删除自己的请求，并广播一个带时间戳的释放消息给其它节点。&lt;/li&gt;
+  &lt;li&gt;其它节点收到后释放消息，从自己的request-queue删除S(i)的请求。&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;ricard-agrawala-算法&quot;&gt;Ricard-Agrawala 算法&lt;/h3&gt;
+&lt;p&gt;这个算法可以看作是上个算法的一个改良版本[1]，也是通过发送向其它节点REQUEST消息来请求进入临界区的许可，通过回复REPLY来表示通过请求。
+  当节点S(j)收到S(i)的REQUEST的消息时，如何当前没有在请求执行临界区 or 在执行临界区，或者虽然S(j)在请求执行临界区，但是时间戳比S(i)的这次请求的要大，就回复S(i)REPLY消息，否则，延迟发送REPLY消息。
+  S(i)在收到所有节点的REPLY消息时，进入临界区。执行完毕后，S(i)发送所有延迟的REPLY消息。&lt;/p&gt;
+
+&lt;p&gt;相比于上面的Lamport算法，改算法使用了延时发送的方法。这个方法减少了需要发送消息的数量，提高了性能。&lt;/p&gt;
+
+&lt;h2 id=&quot;总结&quot;&gt;总结&lt;/h2&gt;
+
+&lt;p&gt;这里简单的介绍了集中分布式互斥的算法，除此之外，更多的分布式互斥的算法在书[1,2]有更详细的描述。此外，这些算法和实际总工程中使用的分布式互斥的方法还是有很大的区别的。对于在实际工程中使用的分布式互斥的方法，[3,4]是非常好的参考。&lt;/p&gt;
+
+&lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;《Distributed Systems: Principles and Paradigms》第二版，ISBN: 0-13-239227-5。&lt;/li&gt;
+  &lt;li&gt;《分布式计算 – 原理、算法与系统》，ISBN: 978-7-04-032456-3&lt;/li&gt;
+  &lt;li&gt;The Chubby lock service for loosely-coupled distributed systems: http://research.google.com/archive/chubby-osdi06.pdf&lt;/li&gt;
+  &lt;li&gt;Zookeeper: Wait-free coordination for Internet-scale systems: https://www.usenix.org/events/usenix10/tech/full_papers/Hunt.pdf&lt;/li&gt;
+&lt;/ol&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Distributed — 全局状态与快照</title>
+   <link href="https://www.nagekar.com/2017/09/Distributed-%E5%85%A8%E5%B1%80%E7%8A%B6%E6%80%81%E4%B8%8E%E5%BF%AB%E7%85%A7.html"/>
+   <updated>2017-09-01T00:00:00+08:00</updated>
+   <id>https://www.nagekar.com/2017/09/Distributed — 全局状态与快照</id>
+   <content type="html">&lt;h1 id=&quot;distributed--全局状态与快照&quot;&gt;Distributed — 全局状态与快照&lt;/h1&gt;
+
+&lt;p&gt;在没有共享存储器和全局时钟的分布式系统之中有效的纪录系统的全局状态很重要但也不是一件简单的事情。系统全局状态在死锁检测，故障恢复等方面都有很重要的作用。
+  分布式系统的全局状态是进程和通道本地状态的集合，使用符号GS表示[1]。
+  分布式系统中的一致性快照需要处理一下的两个问题:
+    1. 如何判别纪录在快照中的消息和没有在快照中的消息，要求:
+        0x01. 在纪录快照之前的一个进程发送的消息一定都会被记录在全局快照之中；
+           0x02. 在纪录快照之后的一个进程发送的消息一定都不会被记录在全局快照之中。
+    2. 如何确定快照的瞬间。&lt;/p&gt;
+
+&lt;p&gt;这里只讲了一些很基础的东西。&lt;/p&gt;
+
+&lt;h2 id=&quot;fifo通道-chandy---lamport-算法&quot;&gt;FIFO通道: Chandy - Lamport 算法&lt;/h2&gt;
+
+&lt;p&gt;Chandy - Lamport 算法算法假设通信的通道是FIFO的和可靠的，它使用了一个称为标记的控制信息。算法主要由两个部分组成: 标记发送规则和标记接收规则。消息一个进程在记录完它自己的快照之后，向其它所有的进程发送一个标记，这个被称为标记发送规则。因为通信通道是FIFO的，使用标记将在快照之前的消息标示出来，这样可以满足上面的第1点。
+  一个进程在接受到来自一个通道C标记之后，如果它还没有记录自身的状态，则记录接受到标记的通道C的状态为空，并执行上面描述的的标记发送规则。如果已经接受到C的标记，则记录C的状态记录为在该通道上记录了本地状态之后且在接受标记之前的消息的集合。&lt;/p&gt;
+
+&lt;p&gt;算法的过程如下[1，2]:
+	1. 进程p的标记发送规则:
+	  0x01 进程p记录本地状态；
+	  0x02 对其它进程发送标记。
+	2. 进程p的标记接收规则:
+	  进程p在通道C接收到标记后，如何p没有记录自身的状态，则记录C的状态为空并执行标记发送规则，
+	  否则，记录C的状态为消息集。
+	算法在进程p接收到来自所有输入通道的标记之后终止。&lt;/p&gt;
+
+&lt;h3 id=&quot;variants&quot;&gt;Variants&lt;/h3&gt;
+
+&lt;p&gt;以Chandy - Lamport算法为基础，再次之上有多种算法的变种。
+ Spezialetti - Kearns 算法主要在快照收集的并发启动和被记录快照的有效发送。
+ 在一些系统之中，会定期的收集系统的全局快照，Venkatesan快照增量算法优化了这种情况，Venkatesan快照增量算法将上一次获取的快照和记录最后一次快照以来的增量快照结合在一起，形成目前的系统快照。&lt;/p&gt;
+
+&lt;h3 id=&quot;应用&quot;&gt;应用&lt;/h3&gt;
+
+&lt;p&gt;Flink中的创建快照的算法[4]主要收到了Chandy - Lamport算法的启发。在Flink中，为了容错，使用了Checkpoint的机制，在错误发生之后恢复错误时，可以恢复到获取的某个Checkpoint，对于具体细节的描述，可以参考Flink的相关资料和论文[4]。&lt;/p&gt;
+
+&lt;h2 id=&quot;非fifo通道&quot;&gt;非FIFO通道&lt;/h2&gt;
+
+&lt;p&gt;在FIFO的通道中，Chandy - Lamport 算法的标记很好的区分了快照之前的消息和快照之后的消息。但是在非FIFO的通道之中，这种办法就想不通了。
+  为了实现和Chandy - Lamport 算法区分消息的效果，Lai - Yang算法使用了着色的方法，方法如下:
+    每个进程开始的时候是白色的，拍快照的时候变成了红色，对应的白色的(红色的)消息就是拍快照前(后）发送的消息；每个白色进程在合适的时刻拍下自己的快照，这个时刻不应该晚与接收到一个红色消息的瞬间。&lt;/p&gt;
+
+&lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;​《分布式计算 – 原理、算法与系统》，ISBN: 978-7-04-032456-3&lt;/li&gt;
+  &lt;li&gt;https://en.wikipedia.org/wiki/Chandy-Lamport_algorithm&lt;/li&gt;
+  &lt;li&gt;Apache Flink: https://flink.apache.org&lt;/li&gt;
+  &lt;li&gt;Lightweight Asynchronous Snapshots for Distributed Dataflows: https://arxiv.org/abs/1506.08603&lt;/li&gt;
+&lt;/ol&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Facebook Gorilla</title>
+   <link href="https://www.nagekar.com/2017/08/Facebook-Gorilla.html"/>
+   <updated>2017-08-25T00:00:00+08:00</updated>
+   <id>https://www.nagekar.com/2017/08/Facebook Gorilla</id>
+   <content type="html">&lt;h1 id=&quot;facebook-gorilla&quot;&gt;Facebook Gorilla&lt;/h1&gt;
+
+&lt;p&gt;Gorilla是Facebook公司内部的时序数据库产品。Facebook在世纪的使用过程中发现现有的产品不能满足对Facebook超大数据量的处理要求，开发了Gorilla这一样一个产品，通过应用多种压缩方法、将数据放在内存之中，Gorilla获得了73x的延时提升、14x的吞吐量提升&lt;/p&gt;
+
+&lt;h2 id=&quot;介绍背景&quot;&gt;介绍&amp;amp;背景&lt;/h2&gt;
+
+&lt;p&gt;2013年Facebook就开始使用一套基于HBase的时序数据库，但是随着Facebook的发展，这套系统以及不能满足未来的负载，90%的查询已经长达几秒。一个对几千个时间序列的查询要消耗几十秒的时间来执行，而在稀疏的更大数据集上查询通常会超时。HBase被设置为写入优化，现在在其中已经保存了2PB的数据，查询的效率不高，又不太好完全更换系统。所以，Gorilla讲注意力转移到给现有的系统在一个in-memory的cache。这里数据的特点就是新数据一般是热点数据，所以选择奖近段时间内的数据cache，就能很好地提高性能。
+Memcache是Facebook大规模使用的一个缓存系统，但是将memcache应用在这里，追加新数据到已经存在的时间序列中要消耗一个read／write周期，给memcache造成很大的压力，所以需要一种更好的解决方案。注：这里没怎么看懂，原文是：&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;  We also considered a separate Memcache [20] based write-through cache but rejected it as appending new data to an existing time series would require a read/write cycle, causing extremely high traffic to the memcache server. We needed a more efficient solution. 
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;对于Gorilla，主要有以下的要求：
+    1. 2billion的unique的时间序列id，以string表示；
+    2. 每秒700million的data points（timestamp加上value）写入；
+    3. 保存数据26小时；
+    4. 超过40k的QPS；
+    5. 读成功在1ms以下；
+    6. 支持15s的时间粒度；
+    7. 两个用于灾难恢复的不一致的内存副本；
+    8. 单服务器故障时也能保证读取；
+    9. 可以快速扫描所有的内存数据；
+    10. 可以支持每年至少增长2x；&lt;/p&gt;
+
+&lt;p&gt;现有的OpenTSDB、InfluxDB、Whisper都不能满足这些要求；&lt;/p&gt;
+
+&lt;h2 id=&quot;架构&quot;&gt;架构&lt;/h2&gt;
+
+&lt;h3 id=&quot;数据保存方式&quot;&gt;数据保存方式&lt;/h3&gt;
+&lt;p&gt;Gorilla中数据的基本单元时一个Timestamp+value的组合，其中，Timstamp时一个654bit的整数，value是一个double类型的浮点数，一个这样基本单元的stream称为data stream。
+  这个的一连串的数据被压缩保存，称为一个block，block存为一个header加上后面被压缩的数据。&lt;/p&gt;
+
+&lt;h3 id=&quot;时间戳压缩&quot;&gt;时间戳压缩&lt;/h3&gt;
+
+&lt;p&gt;根据Gorilla论文的描述，16bytes的数据被压缩到1.37bytes，压缩了约12倍。其中，对于64bit的时间戳使用的压缩方法是delta-of-delta的方式，基本的原理如下：
+  Gorilla不会保存整个世界戳，因为时间戳大部分的bit位都是相同。举个例子：如果一个时间戳后面时间的差值分别为60,60,59和61，delta-of-delta通过减去前一个时间戳来计算，这样我们得到了0，-1，2。具体算法描述如下：
+    1. Block的header保存了时间戳t-1（t负1）, 它对齐到两个窗口，t0时间戳保存一个14bit的对于t-1的增量。
+    2. 对于序列之后的时间戳：
+     (a) 计算the delta of delta：D = (tn −tn−1)−(tn−1 −tn−2)；
+    （b）如果D为0，则存储单个“0”bit;
+    （c）如果D在[-63,64]之间，则存储’10’后跟值（7位）;
+    （d）如果D在[-255,256]之间，则存储’110’后面跟着值（9位）;
+    （e）如果D在[-2047,2048]之间，则存储’1110’后跟值（12位）;
+    （f）否则使用32位存储’1111’，后跟D。&lt;/p&gt;
+
+&lt;p&gt;在实际的使用中发现96%可以背压缩位单个bit（很显然呀，这么大的QPS，必然很多相邻的时间戳是一样的）。&lt;/p&gt;
+
+&lt;h3 id=&quot;数据压缩&quot;&gt;数据压缩&lt;/h3&gt;
+
+&lt;p&gt;除了数据压缩，对于value也使用了压缩，基于相邻的数据变化不大的特点，主要使用的方法是基于XOR的方法。方法如下描述：&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;第一个值是无压缩存储的；&lt;/li&gt;
+  &lt;li&gt;如果XOR与前一个值为零（相同值），则存储单个“0”bit；&lt;/li&gt;
+  &lt;li&gt;当XOR不为零时，计算XOR中开头和结尾0的数量：
+  （a）(Control bit ‘0’) 如果有意义的位的块落在先前有意义的位的块内，即至少与前一个值一样多的前导0和多个尾随0，就使用该信息作为  块位置，并且只存储有意义的异或值；
+     （b）(Control bit ‘1’) 否则，用5bit前导零数的长度，然后将有意义的异或值的长度存储在接下来的6bit中，最后存储XOR后值的有意义的bit。&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;实际的数据中，大约51％的值被压缩到一个位，因为当前值和以前的值很多是相同的。大约30％的值用控制位’10’压缩，平均压缩大小为26.6位。剩余的19％被压缩为控制位’11’，平均大小为36.9位，这是由于编码前导零位和有意义位的长度需要额外的13位开销。&lt;/p&gt;
+
+&lt;h3 id=&quot;内存中的数据结构&quot;&gt;内存中的数据结构&lt;/h3&gt;
+
+&lt;p&gt;Gorilla实现的主要数据结构是一个Timeseries Map（TSmap）。TSmap由时间序列的C++标准库vector&amp;lt;unique_ptr&lt;TSmap&gt;&amp;gt;，和从时间序列名称到的案例保存map组成。该矢量允许通过所有数据进行有效的分页扫描。
+  使用C++ unqiue_ptr&lt;TSmap&gt;可以在几微秒内复制向量，从而避免影响输入数据流的冗长的关键部分。在删除时间序列时，只标记为‘dead’，但是不会真的删除保存的数据。
+  通过SpnLock的高效实用和分片，以及map有效使用，高效的实现了这个结构。&lt;/TSmap&gt;&lt;/TSmap&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;磁盘上的结构&quot;&gt;磁盘上的结构&lt;/h3&gt;
+
+&lt;p&gt;Gorilla的一个设计目标就是在单机的故障的下能不影响使用，所以，Gorilla将数据保存在有3个副本的GlusterFS中。 将数据保存在HDFS或其他分布式文件系统也很简单。Gorilla还考虑了单个主机数据库，如MySQL和RocksDB，但是最终没有使用，因为Gorilla不需要数据库查询语言。
+   一个Gorilla Host拥有多个分片数据，每个分片维护一个目录。每个目录包含四种类型的文件：key列表，追加日志，完整的块文件和检查点文件。
+   key列表只是时间序列字符串键到整数ID的简单映射。该整数ID是内存中vector的索引。新keys将附加到当前的密钥列表中，并且Gorilla会定期扫描每个分片的所有keys，以重新写入该文件。
+   数据被流式传输到Gorilla，它们被存储在日志文件中。使用4.1节中描述的格式压缩时间戳和值。但是，每个分片只有一个追加日志，因此分片中的值会跨越时间序列交错，这个增加了存储的开销。
+   Gorilla不会提供ACID保证，因此日志文件不是预写日志。在flush之前，数据通常包含一到两秒钟的数据，最多可达64kB，所以崩溃可能导致少量数据的丢失。
+   每两小时，Gorilla将压缩的数据写到磁盘，因为经过了压缩，所以这个比日志文件小得多。这个块文件有两个部分：一组连续64kB的数据块，和一个&amp;lt;time serics ID, data block pointer&amp;gt;的列表。 当一个块文件完成后，Gorilla会更新检查点文件并删除相应的日志。 检查点文件用于标记何时将完整的块文件写入到磁盘。如果在进程崩溃时块文件未成功刷新到磁盘，则当新进程启动时，这个检查点将不存在，因此新进程知道它不能信任该块文件，而应该从日志文件中读取。&lt;/p&gt;
+
+&lt;h3 id=&quot;错误处理&quot;&gt;错误处理&lt;/h3&gt;
+
+&lt;p&gt;// TODO&lt;/p&gt;
+
+&lt;h2 id=&quot;开源实现&quot;&gt;开源实现&lt;/h2&gt;
+
+&lt;p&gt;Facebook是beringei的开源实现，使用C++编写，大量依赖于Facebook的C++基础库，比如folly（folly也是非常高质量的一个C++基础库，非常值得一看）。&lt;/p&gt;
+
+&lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
+&lt;ol&gt;
+  &lt;li&gt;Gorilla Paper: http://www.vldb.org/pvldb/vol8/p1816-teller.pdf&lt;/li&gt;
+  &lt;li&gt;https://github.com/facebookincubator/beringei&lt;/li&gt;
+&lt;/ol&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>A Critique of ANSI SQL Isolation Levels</title>
+   <link href="https://www.nagekar.com/2017/08/A-Critique-of-ANSI-SQL-Isolation-Levels.html"/>
+   <updated>2017-08-19T00:00:00+08:00</updated>
+   <id>https://www.nagekar.com/2017/08/A Critique of ANSI SQL Isolation Levels</id>
+   <content type="html">&lt;h1 id=&quot;a-critique-of-ansi-sql-isolation-levels&quot;&gt;A Critique of ANSI SQL Isolation Levels&lt;/h1&gt;
+
+&lt;p&gt;在ANSI SQL-92 [MS, ANSI]（之后简称SQL-92）根据Phenomena（这个类似专有名词，不翻译了，中文意思是‘现象’）定义了SQL的隔离级别：Dirty Reads, Non-Repeatable Reads, and Phantoms。《A Critique of ANSI SQL Isolation Levels》[1]这篇paper阐述了有些Phenomena是无法用SQL-92中定义的一些隔离级别正确表征的，包括了各个基本上锁的实现。该论文讨论了SQL-92中的Phenomena中的定义模糊的地方。除此之外，还介绍了更好表征隔离级别的Phenomena，比如&lt;em&gt;Snapshot Isolation&lt;/em&gt;。&lt;/p&gt;
+
+&lt;h2 id=&quot;介绍&quot;&gt;介绍&lt;/h2&gt;
+
+&lt;p&gt;不同的隔离级别定义了不同的在并发、吞吐量之间的取舍。较高的级别更容易正确的处理数据，而吞吐量比较低的隔离级别更低，较低的隔离级别更容易获得更高的吞吐量，却可能导致读取无效的数据和状态。
+  SQL-92定义了4个隔离级别：
+    (1) READ UNCOMMITTED, 
+    (2) READ COMMITTED, 
+    (3) REPEATABLE READ, 
+    (4) SERIALIZABLE. 
+它使用了&lt;strong&gt;serializability&lt;/strong&gt;的定义，加上3种禁止的操作子序列来定义这些隔离级别，这些子序列被称为&lt;strong&gt;Phenomena&lt;/strong&gt;，有以下3种：Dirty Read, Non-repeatable Read, and Phantom（一般被翻译为脏读，不可重复读，幻读，不过个人认为不翻译直接理解更好）。规范只是说明phenomena是可能导致异常（anomalous)的动作序列。
+ANSI的隔离级别与lock schedulers的行为相关。一些lock scheduler允许改变lock的范围和持续的时间（一般是为优化了性能），这就导致了不符合严格的两阶段锁定。由[GLPT]引入了以下3种方式定义的Degrees of Consistency（一致性程度）：
+      1. 锁(locking)；
+      2. 数据流图(data flow graph)；
+      3. 异常(anomalies)。
+        这里通过&lt;strong&gt;Phenomena&lt;/strong&gt;(或者叫 anomalies) 来定义隔离级别而不是基于锁。&lt;/p&gt;
+
+&lt;h2 id=&quot;隔离级别的定义&quot;&gt;隔离级别的定义&lt;/h2&gt;
+
+&lt;p&gt;在进入之前先来说明一种表示方法：&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;由读取(read)、写入(write),提交(commit)和中止(abort)组成的历史记录可以用简写符号表示：
+  w1 [x]: 表示事务1怼数据项x的写入，数据项被修改；
+  r2 [x]：表示事务2对x的读取。
+  事务1满足谓词P的读取和写入一组记录分别由r1 [P]和w1 [P]表示。
+  同理，事务1的提交和中止分别被记为c和a相同的方法表示。
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;ansi&quot;&gt;ANSI&lt;/h3&gt;
+
+&lt;p&gt;ANSI中使用了3中Phenomena来定义隔离级别(以Phenomena首字母P + 数字）:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;P0(Dirty Read): 可以读其它事务没有提交的数据；&lt;/li&gt;
+  &lt;li&gt;P1(Non-repeatable or Fuzzy Read): 当前事务重复读取相同的数据行前后的数据不同；&lt;/li&gt;
+  &lt;li&gt;P2(Phantom):当前事务相同条件重复读取数据行前后的数量不同(数量增加)。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;用之前说过的表示方法表示一个操作序列:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;2.1: w1[x] . . . r2[x] . . . (a1 and c2 in either order) 
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;P1可以被表述为不允许出现2.1这种情况。这个序列表明第2个事务(T2)可能读到了第1个事务(T1)中止写入的失误，就可能违法了读已提交。这个的语义是不明确的，不强调T1要中止，只是指出，如果这种情况发生可能会发生不一致。&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;2.2: w1[x]...r2[x]...((c1 or a1) and (c2 or a2) in any order) 
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;上面的这个2.2表示则是不允许有T1修改数据项x，且T2在T1提交或中止之前读取到这些数据，不强调T1中止或T2提交。2.2比2.1更宽松，2.2禁止了4种情况，而2.1只禁止了2种。将2.2 2.1分别表示为P1，A1:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;P1: w1[x]...r2[x]...((c1 or a1) and (c2 or a2) in any order) 
+A1: w1[x]...r2[x]...(a1 and c2 in any order) 
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;类似的，P2和P3也可以有类似的宽松和严格的表示:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;P2: r1[x]...w2[x]...((c1 or a1) and (c2 or a2) in any order) 
+A2: r1[x]...w2[x]...c2...r1[x]...c1
+ P3: r1[P]...w2[y in P]...((c1 or a1) and (c2 or a2) any order) 
+A3: r1[P]...w2[y in P]...c2...r1[P]...c1 
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;注意P3只是禁止范围内的写入。&lt;/p&gt;
+
+&lt;h3 id=&quot;分析ansi-sql隔离级别&quot;&gt;分析ANSI SQL隔离级别&lt;/h3&gt;
+
+&lt;p&gt;将P0定义为脏写，用上面的表示方法表示如下:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;P0: w1[x]...w2[x]...((c1 or a1) and (c2 or a2) in any order)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;考虑一个历史H1，在x和y之间转移$40：&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;H1：r1[x=50]w1[x=10]r2[x=10]r2[y=50]c2 r1[y=50]w1[y=90]c1 
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;H1是不可串形化的，这是一个经典的不一致分析。H1种T2读取到了总额为60的不一致的状态，而H1没有违法A1，A2，A3。但是对于P1，H1是显然违反了的[((c1 or a1) and (c2 or a2) in any order)不符合了]，也就是说，这里宽松的解释是准确的解释。&lt;/p&gt;
+
+&lt;p&gt;类似的，有一下的操作序列：&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;H2: r1[x=50]r2[x=50]w2[x=10]r2[y=50]w2[y=90]c2r1[y=90]c1
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;H2是不可串行的，也是另外一个经典的不一致分析，T2读取到的总余额为140，H2没有违反P1，满足read commited。而且没有任何数据项被读取两次，也没有谓词范围内的数据被更改。 H2的问题是当T1读取y时，x的值已被修改，如果T2再次读取x，就会获得不一样的值，但是T2没有读取，A2也就不适用。用P2替代A2解决了这个问题，当w2[x=10]之后这个序列就不符合P2了。&lt;/p&gt;
+
+&lt;p&gt;最后，有这样一个操作序列H3:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;H3: r1[P] w2[insert y to P] r2[z] w2[z] c2 r1[z] c1
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;这里T2执行条件搜索知道符合条件的记录，然后T2插入了新的数据，然后更新数量z，T1在读出z时数据就产生了不一致。谓词范围没有被访问两次，所以它是被A3所允许，同样，P3则没有这个问题，它不允许这样的操作。&lt;/p&gt;
+
+&lt;p&gt;根据以上的几个例子，发现严格的A1、A2和A3有意想不到的缺点，所以认为ASNI旨在定义P1、P2和P3。&lt;/p&gt;
+
+&lt;h2 id=&quot;其它隔离级别&quot;&gt;其它隔离级别&lt;/h2&gt;
+
+&lt;h3 id=&quot;cursor-stability游标稳定&quot;&gt;Cursor Stability(游标稳定)&lt;/h3&gt;
+&lt;p&gt;Cursor Stability旨在解决丢失更新的问题。丢失更新是当T1读取数据项，然后T2(可能基于之前读到的数据)更新数据项，然后T1(可能基于之前读到的数据)更新数据项并提交时，就发生丢失的更新异常，可以表示为:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;P4: r1[x]...w2[x]...w1[x]...c1
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;对于下面H4的操作序列，即使H4最终T2提交了操作，T2的更新数据也会丢失，&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;H4: r1[x=100] r2[x=100] w2[x=120] c2 w1[x=130] c1 
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;P4肯定不会是P0级别的，它不会产出脏写脏读，仔细对比P2盒P4，可以分析P2是包含了P4的：&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;P4: r1[x]...w2[x]...w1[x]...c1
+P2: r1[x]...w2[x]...((c1 or a1) and (c2 or a2) any order) 
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;所以P4处于P1和P2之间。&lt;/p&gt;
+
+&lt;p&gt;Cursor Stability隔离级别拓展了RC下对SQL游标的锁行为，游标上读取游标(rc)的操作要求在游标当前的数据项下保持长读锁(关于长读锁具体可以参考论文)，知道游标移动or关闭。使用引入P4C:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;P4C: rc1[x]...w2[x]...w1[x]...c1 (Lost Update) 
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;snapshot-isolation快照隔离级别&quot;&gt;Snapshot Isolation(快照隔离级别)&lt;/h3&gt;
+
+&lt;p&gt;在快照隔离下执行的事务始终从事务&lt;strong&gt;开始时起&lt;/strong&gt;的已提交的数据的快照中读取数据。事务开始的时间戳称为Start-Timestamp。当事务运行在快照隔离中时，只要可以维护其开始时间戳对应的快照数据，在就不会阻塞读。事务的写入也将反映在这个快照中，如果事务第二次访问数据，则能再次读到，而这个事务开始时间戳之后的其他事务的更新对于本次事务是不可见的。
+SI隔离级别虽然不在ANSI的隔离级别中，却在实际应用非常广泛。SI是一种MVCC的技术，对于现在常见的数据库，基本都使用了MVCC。对于SI，当T1准备提交时，它将获得一个Commit-Timestamp，该值大于之前的所有时间戳。当T2提交了Commit-Timestamp在T1事务的间隔[Start-Timestamp，Commit-Timestamp]中时，只有在T1, T2数据不重叠情况下，T1事务才成功提交，否则，T1将中止，这叫做First-committer-wins。防止丢失，当T1提交时，其更改对于Start-Timestamp大于T1的Commit-Timestamp的所有事务都可见。
+用之前的表示方法不能很好的表示SI的操作，因为一个数据在同一时间可能存在多个版本(多值历史和单值历史)，这里做如下的表示：&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;  H1.SI: r1[x0=50] w1[x1=10] r2[x0=50] r2[y0=50] c2 
+  		   r1[y0=50] w1[y1=90] c1 
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;所有的快照隔离的历史都可以映射到单值历史，同时保留数据流依赖性，例如，将上面的H1.SI映射到单值历史就是:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;H1.SI.SV: r1[x=50] r1[y=50] r2[x=50] r2[y=50] c2 
+  			  w1[x=10] w1[y=90] c1 
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;Snapshot Isolation 是不可串行化的，因为读写不在一个时刻。
+  有下面一个H5的操作序列:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; H5: r1[x=50] r1[y=50] r2[x=50] r2[y=50] 
+      w1[y=-40] w2[x=-40] c1 c2 
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;这里先来看看约束违反：假设有这样一个约束: 事务在x y写入的操作保持有 x + y &amp;gt; 0的性质，而在SI中，T1和T2时隔离的，所以这个约束在H5中。
+  约束违反是以恶搞通用的重要的并发异常类型。事务必须保留约束以保持一致性：如果数据库在事务启动时保持一致，则事务提交时也必须一致。&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;A5 Data Item Constraint Violation(数据约束违反)&lt;/strong&gt; :&lt;/p&gt;
+
+&lt;p&gt;假设C()是数据库中一个关于 x y的约束，这里提出两种由于违反约束导致的异常:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;1. A5A,读偏。假设T1读取x，然后T2将x y更新并提交。如果现在T1再读取y，它就可能会看到不一致的状态，表示为： ``` A5A: r1[x]...w2[x]...w2[y]...c2...r1[y]...(c1 or a1)  (Read Skew)  ```
+
+2. A5B,写偏。假设T1读取符合约束的x y，然后T2读取x y并写入y提交，然后T1写入x，x y之间的约束就有可能被违反。 ``` A5B: r1[x]...r2[y]...w1[y]...w2[x]...(c1 and c2 occur) (Write Skew)  ```
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;在满足了P2的情况下，A5A和A5B都不会出现，因为A5A和A5B都存在T2写入了一个没有被T1读取的数据，造成了不可重复读。使用A5A A5B隔离级别低于可重复读。
+SI的隔离是高于读以提交的，首先first-committer-wins排除了脏写入，时间戳机制下不会有脏读，因此快照隔离至少是读已提交级别。此外，加上A5A可能在满足读已提交，但却不满足快照隔离与时间戳机制，因此读已提交&amp;lt;快照隔离。
+  SI也不会有A3，T2更新相同谓词下的数据时，T1能始终看到相同的数据，对于可重复读，则有可能遇到。在SI中，A5B时可能的，但是在可重复读中是不可能的。这样就有以下的现象: SI允许A5B禁止A3，可重复读(RR)则禁止A5B允许A3。
+  但是，要注意的是，SI并不排除P3。考虑这样一个约束，表示由谓词确定的一组作业任务小时数不大于8。T1读取此谓词，发现总和只有7小时，就添加1小时持续时间的新任务，同时T2做同样的事情。由于T1 T2正在插入不同的数据项，First-Committer-Wins不排除此情况，这个可能发生在快照隔离中。但在P3不会出现这样的现象。&lt;/p&gt;
+
+&lt;h2 id=&quot;summary-and-conclusions&quot;&gt;Summary and Conclusions&lt;/h2&gt;
+
+&lt;p&gt;总之，原始ANSI SQL隔离级别的定义存在许多的问题。下面是一个总结性的表格:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;+-----------+--------+---------+---------+---------+----------+---------+---------+---------+
+|Isolation  |  P0    |  P1     |  P4c    |  P4     |    P2    |   P3    |   A5A   |    A5B  |
+|level      | 脏写    |  脏读   |游标丢失更新|丢失更新  | 不可重复读| 幻读     | 读偏斜   | 写偏斜   |
++-------------------------------------------------------------------------------------------+
+|  读未提交  |    N   |   P     |    P    |   P     |     P    |   P     |    P    |    P    |
+|           |        |         |         |         |          |         |         |         |
++-------------------------------------------------------------------------------------------+
+| 读已经提交  |   N    |    N    |   P     |  P      |    P     |   P     |   P    |    P    |
+|           |        |         |         |         |          |         |         |         |
++-------------------------------------------------------------------------------------------+
+| 游标稳定   |  N     |    N    |   N     |   S     |    S     |    P    |    P    |    S    |
+|           |        |         |         |         |          |         |         |         |
++-------------------------------------------------------------------------------------------+
+| 可重复读   |   N    |    N    |   N     |   N     |    N     |    P    |   N     |    N    |
+|           |        |         |         |         |          |         |         |         |
++-------------------------------------------------------------------------------------------+
+|  快照隔离  |   N    |   N     |   N     |   N     |    N     |    S    |    N    |   P     |
+|           |        |         |         |         |          |         |         |         |
++-------------------------------------------------------------------------------------------+
+| ANSI序列化 |   N    |   N     |   N     |   N     |   N      |   N     |    N    |   N     |
+|           |        |         |         |         |          |         |         |         |
++-------------------------------------------------------------------------------------------+
+P: Possible
+N: Not Possible
+S: Sometimes Possible 
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;A Critique of ANSI SQL Isolation Levels: http://www.cs.umb.edu/~poneil/iso.pdf&lt;/li&gt;
+  &lt;li&gt;A Critique of ANSI SQL Isolation Levels 论文翻译: https://yq.aliyun.com/articles/77965&lt;/li&gt;
+  &lt;li&gt;A Critique of ANSI SQL Isolation Levels: https://blog.acolyer.org/2016/02/24/a-critique-of-ansi-sql-isolation-levels/&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;​			
+​		
+​&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Hybrid Logical Clock</title>
+   <link href="https://www.nagekar.com/2017/08/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F%E4%B8%AD%E7%9A%84%E6%97%B6%E9%97%B4-hybrid-logical-clock.html"/>
+   <updated>2017-08-16T00:00:00+08:00</updated>
+   <id>https://www.nagekar.com/2017/08/分布式系统中的时间 — hybrid logical clock</id>
+   <content type="html">&lt;h1 id=&quot;分布式系统中的时间--hybrid-logical-clock&quot;&gt;分布式系统中的时间 — hybrid logical clock&lt;/h1&gt;
+&lt;p&gt;发布系统中的时间有很重要的作用，比如Spanner的TrueTime[2]。但是TrueTime实现的难度太大，就算开源社区实现了，也不太好被一般的用户使用。所以CockRoachDB使用了Hybrid Logical Clock(HLC)，HLC是一种Logical Clock的实现，HPC将Logical Clock和物理时钟联系起来，与物理时间之间的误差在一个固定的值之内，这个值由NTP决定。&lt;/p&gt;
+
+&lt;h2 id=&quot;介绍&quot;&gt;介绍&lt;/h2&gt;
+&lt;p&gt;分布式系统中有几个关于时间的概念：
+    1. Logical clock (LC)：逻辑时间是有Lamport提出的，LC独立于物理上的时间存在。
+    2. Physical Time (PT)：
+    3. TrueTime (TT)：TT出现的时间比较近，在Google的Spanner中被使用。目前看来，这个最有B格。
+    4. HybridTime (HT)：&lt;/p&gt;
+
+&lt;h2 id=&quot;背景&quot;&gt;背景&lt;/h2&gt;
+&lt;p&gt;对于由一系列可能随时间变化的节点组成的分布式系统，每个节点可以执行3中操作：1.发送动作，2. 接收动作和3.本地动作。时间戳算法为每个时间分配时间戳。如果使用LC算法来分配时间戳，则给时间e分配的时间记为 lc.e。&lt;/p&gt;
+
+&lt;h2 id=&quot;hlc&quot;&gt;HLC&lt;/h2&gt;
+&lt;p&gt;HLC的设计目标是提供像LC一样的单向因果检测，同时保持时钟的值总是接近物理的时间（这里是NTP的时间）。一个HLC的表述如下：
+  给定一个分布式系统，为每一个事件分配一个时间戳，有：
+    1. e hb f ⇒ l.e &amp;lt; l.f，e事件happen before f，则有l.e &amp;lt; l.f; &lt;br /&gt;
+    2. Space requirement for l.e is O(1) integers, l.e消耗一个整数的空间； &lt;br /&gt;
+    3. l.e is represented with bounded space, l.在一个有界的空间内比表示；  
+    4. l.e is close to pt.e, i.e., |l.e − pt.e| is bounded. l.e接近pt.e ,|l.e - pt.e|是有界的。
+     （pt -&amp;gt; Phiysical Time)。&lt;/p&gt;
+
+&lt;h3 id=&quot;基本的hlc算法&quot;&gt;基本的HLC算法&lt;/h3&gt;
+&lt;p&gt;为了实现以上的4点，这里有一个最简单的实现：&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Initially lc.j := 0 
+
+Send or local event 
+  l.j := max(l.j + 1, pt.j) # 发送是l.j设置为l.j+1 与 物理时间pt.j 的较大值
+  Timestamp with l.j 
+  
+Receive event of message m   l.j := max(l.j + 1, l.m + 1, pt.j)  # 接受到时时间戳设置为 l.j+1, 接受到的时间戳+1与物理时间pt.j中的较大值
+  Timestamp with l.j 
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;table&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;以上的基本算法时满足1，2的，乐死基本的lamport clokc加入了pt的元素。但是这个算法并不能满足4条中的3、4条。&lt;/td&gt;
+      &lt;td&gt;l.e − pt.e&lt;/td&gt;
+      &lt;td&gt;可能会无限的增长。原因在于每一个操作都有可能增大l.e与pt.e的差距。&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;h3 id=&quot;hlc-algorithm&quot;&gt;HLC Algorithm&lt;/h3&gt;
+&lt;p&gt;HLC算法的描述如下：&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Initially l.j := 0; c.j := 0 
+
+Send or local event 
+  l′.j := l.j;   l.j := max(l′.j, pt.j); # 相比于最基础的去处了+1   If (l.j = l′.j) then 
+    c.j := c.j + 1 
+  Else 
+    c.j := 0; 
+  Timestamp with l.j, c.j 
+  
+Receive event of message m   l′.j := l.j;   l.j := max(l′.j, l.m, pt.j); # 相比于最基础的去处了+1   If(l.j=l′.j=l.m) then
+    c.j := max(c.j, c.m) + 1 
+  Else if (l.j =l′.j) then 
+    c.j := c.j + 1 
+  Else if (l.j = l.m) then 
+    c.j := c.m + 1 
+  Else c.j := 0 
+  Timestamp with l.j, c.j ```
+HLC的变化注意有3点：（1）去除了+1的操作，（2）增加了c，（3）c有reset的逻辑。
+  max()的计算逻辑满足了l.j &amp;gt;= pt.j 的，可以理解为l.j保存了节点j已知的系统中的最大的pt值。
+  l.j由于没有了+1的操作，不会出现l.j比pt越来越大的情况。而对于有+1操作的c，c的出现又是为什么呢？
+  c出现的原因时由于没有了+1的操作，有可能导致了l.e = l.f，为了解决这个问题引入了c。这里就使用使用⟨l.e, c.e⟩ &amp;lt; ⟨l.f, c.f ⟩ 来表示先后的关系。同时，为了避免c的无限增长，当我们知道目前有l.e &amp;lt; l.f 时，可以将c reset为0。在算法中，就是本节点的pt时max是，c会被reset为0。
+
+## 实现
+CockroachDB中就是实现了HLC算法[3]。实现HLC的难度不大，代码也比较少，这里指给出关键的两个函数，具体的信息可以参考代码。
+Send，这里和上面的伪代码是相同的逻辑：
+
+​```go
+// c.getPhysicalClockLocked()还会检查时间jump（跳变）
+func (c *Clock) Now() Timestamp {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if physicalClock := c.getPhysicalClockLocked(); c.mu.timestamp.WallTime &amp;gt;= physicalClock {
+		// 当WallTime大于物理时间是，Logical++
+		c.mu.timestamp.Logical++
+	} else {
+		// 否则使用物理时间病Logical置0
+		c.mu.timestamp.WallTime = physicalClock
+		c.mu.timestamp.Logical = 0
+	}
+	return c.mu.timestamp
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Recv的逻辑也是相同的：&lt;/p&gt;
+&lt;div class=&quot;language-go highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;func&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Clock&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Update&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rt&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Timestamp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Timestamp&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;x&quot;&gt;
+	&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mu&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Lock&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;x&quot;&gt;
+	&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;defer&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mu&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Unlock&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;x&quot;&gt;
+	&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;physicalClock&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:=&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;getPhysicalClockLocked&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;x&quot;&gt;
+
+	&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;physicalClock&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mu&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;timestamp&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;WallTime&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;physicalClock&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rt&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;WallTime&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;x&quot;&gt;
+		&lt;/span&gt;&lt;span class=&quot;c&quot;&gt;// 当物理时间最大的，取物理时间，Logical置0,&lt;/span&gt;&lt;span class=&quot;x&quot;&gt;
+		&lt;/span&gt;&lt;span class=&quot;c&quot;&gt;// 对应了上面伪代码的最后一个else&lt;/span&gt;&lt;span class=&quot;x&quot;&gt;
+		&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mu&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;timestamp&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;WallTime&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;physicalClock&lt;/span&gt;&lt;span class=&quot;x&quot;&gt;
+		&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mu&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;timestamp&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Logical&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;m&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;x&quot;&gt;
+		&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;return&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mu&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;timestamp&lt;/span&gt;&lt;span class=&quot;x&quot;&gt;
+	&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;x&quot;&gt;
+	
+	&lt;/span&gt;&lt;span class=&quot;c&quot;&gt;// 两个WallTime不想等则取大的一个，同时Logical++&lt;/span&gt;&lt;span class=&quot;x&quot;&gt;
+	&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rt&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;WallTime&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mu&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;timestamp&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;WallTime&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;x&quot;&gt;
+		&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;offset&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:=&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;time&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Duration&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rt&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;WallTime&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;physicalClock&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;time&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Nanosecond&lt;/span&gt;&lt;span class=&quot;x&quot;&gt;
+		&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;maxOffset&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;m&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;offset&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;maxOffset&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;x&quot;&gt;
+			&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Warningf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;context&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;TODO&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;remote wall time is too far ahead (%s) to be trustworthy - updating anyway&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;offset&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;x&quot;&gt;
+		&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;x&quot;&gt;
+		&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mu&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;timestamp&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;WallTime&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rt&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;WallTime&lt;/span&gt;&lt;span class=&quot;x&quot;&gt;
+		&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mu&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;timestamp&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Logical&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rt&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Logical&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;x&quot;&gt;
+	&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;else&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mu&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;timestamp&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;WallTime&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rt&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;WallTime&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;x&quot;&gt;
+		&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mu&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;timestamp&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Logical&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;x&quot;&gt;
+	&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;else&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;x&quot;&gt;
+		&lt;/span&gt;&lt;span class=&quot;c&quot;&gt;// 两个WallTime想等则Logical取较大的一个，然后Logical++&lt;/span&gt;&lt;span class=&quot;x&quot;&gt;
+		&lt;/span&gt;&lt;span class=&quot;c&quot;&gt;// 对应了上面伪代码的第一个If&lt;/span&gt;&lt;span class=&quot;x&quot;&gt;
+		&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rt&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Logical&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mu&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;timestamp&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Logical&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;x&quot;&gt;
+			&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mu&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;timestamp&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Logical&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rt&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Logical&lt;/span&gt;&lt;span class=&quot;x&quot;&gt;
+		&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;x&quot;&gt;
+		&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mu&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;timestamp&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Logical&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;x&quot;&gt;
+	&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;x&quot;&gt;
+	&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;return&lt;/span&gt;&lt;span class=&quot;x&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mu&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;timestamp&lt;/span&gt;&lt;span class=&quot;x&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;x&quot;&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
+&lt;ol&gt;
+  &lt;li&gt;Logical Physical Clocks and Consistent Snapshots in Globally Distributed Databases：http://www.cse.buffalo.edu/tech-reports/2014-04.pdf&lt;/li&gt;
+  &lt;li&gt;Spanner: http://research.google.com/archive/spanner-osdi2012.pdf&lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;CockroachDB HCL Algorithm: https://github.com/cockroachdb/cockroach/blob/master/pkg/util/hlc/hlc.go&lt;/p&gt;
+
+    &lt;p&gt;​			
+​		
+​&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;​			
+​		
+​&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Distributed — 时间0x01</title>
+   <link href="https://www.nagekar.com/2017/08/Distributed-%E6%97%B6%E9%97%B40x01.html"/>
+   <updated>2017-08-15T00:00:00+08:00</updated>
+   <id>https://www.nagekar.com/2017/08/Distributed — 时间0x01</id>
+   <content type="html">&lt;h1 id=&quot;distributed--时间0x01&quot;&gt;Distributed — 时间0x01&lt;/h1&gt;
+&lt;p&gt;之前说了分布式系统中一些关于时间的基本概念和一些其他的东西，这里我们来讨论分布式系统中物理时间。
+  首先有一下的几点：
+    1. 相对论中，由于存在多个参考系，因此时间测量可能是不准确的。当然，地球上的分布式系统中，相对型的影响是可以忽略的。
+    2. 即使这样，受目前技术能力的限制，我们还是不能准确记录不同点上的事件发生的时间，以此表明事件发生的顺序。&lt;/p&gt;
+
+&lt;p&gt;我们将两个时钟读数之间的瞬间不同被称为始终漂移（clock skew）。时钟漂移以单个时钟读数和完美的参考时钟之间的漂移来度量。此外，参考时钟度量的每个单位时间内，和完美的参考时钟之间的漂移量称为漂移率。目前，原子钟时漂移率最小的时钟（Spanner中就使用了原子钟）。	
+原子时钟的输出被用作实际时间的标准，称为国际原子时间，而秒、年等我们使用的时间单位来源于天文时间，与原子时间并不一致，	通用协调时间（UTC）是国际计时标准，它基于原子时间的，但是偶尔需要增加闰秒或极偶尔的情况下要删除闰秒（这个闰秒导致了很多的软件故障）[1]。&lt;/p&gt;
+
+&lt;h2 id=&quot;同步物理时钟&quot;&gt;同步物理时钟&lt;/h2&gt;
+&lt;p&gt;为了知道分布式系统P的进程中事件发生的具体时间，有必要用权威的外部时间源同步进程的时钟Ci – 外部同步（external synchronization）。
+	如果时钟Ci与其他时钟同步到一个已知的精度，那么我们就能通过本地时钟度量在不同计算机上发生的两个事件的间隔  – 内部同步（internal synchronization）。
+	这里要定义一下时钟的正确性。正如我们所知，完全准确的时钟时几乎不可能的，所以：	 时钟正确性（correctness）通常定义为，如果一个硬件时钟H的漂移率在一个已知的范围ρ&amp;gt;0内，那么该时钟是正确的。
+	  1. 这表明度量实际时间t和t’的时间间隔的误差是有界的&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;                     (1- ρ)(t’-t) ≤ H(t’)-H(t) ≤ (1+ ρ)(t’-t)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;  2. 该条件禁止了硬件时钟值的跳跃，有时，软件也时钟也要求遵循该条件。但是用一个较弱的单调性条件就足够了。
+  3. 单调性是指一个时钟C前进的条件 ```
+             t’&amp;gt;t ==&amp;gt; C(t’) &amp;gt; C(t) ```
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;现在来看看时钟同步中的一些情况:
+   一个进程在消息m中将本地时钟的时间发送给另一个进程:
+      最简单的做法就是接收进程可以将它的时钟设成t+T(trans)，但是T(trans)是不确定的。
+   在&lt;em&gt;同步的&lt;/em&gt;系统中：&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;设消息传输时间的不确定性为u，那么有u=(max-min)；&lt;/li&gt;
+  &lt;li&gt;如果接收放将时钟设置为t+min，那么时钟偏移至多为u；&lt;/li&gt;
+  &lt;li&gt;如果接收放将时钟设置为t+max，那么时钟偏移至多为u；&lt;/li&gt;
+  &lt;li&gt;如果设置为t+(max+min)/2，那么是时钟偏移至多为u/2；&lt;/li&gt;
+  &lt;li&gt;同步系统要同步N个时钟，可获得的时钟偏移最优范围是u(1-1/N)。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;然而在异步的系统中，消息传输的事件延迟是没有上界的，只有：T(trans) = min + x, x &amp;gt;= 0;&lt;/p&gt;
+
+&lt;h2 id=&quot;cristian方法&quot;&gt;Cristian方法&lt;/h2&gt;
+
+&lt;p&gt;Cristian Algorithm使用一个时间服务器，它连接到一个接收UTC信号的设备上，用于实现外部同步在接收到请求后，服务器S根据它的时钟提供时间。
+  Cristian Algorithm:
+    1. 一个进程P发送一个请求信号给时间服务器S；
+    2. S收到P的请求包之后，在包上面加上当前S的时间，然后回复P；
+    3. P收到回复后，将P的当前时间设为T + RTT/2。
+       此外 Cristian Algorithm通过给S发送几个请求，Tround最小值给出最精确的估计。
+         Cristian Algorithm基于RTT的，要求RTT的准确性。此外，Cristian Algorithm存在单点的问题。&lt;/p&gt;
+
+&lt;h2 id=&quot;berkeley-algorithm&quot;&gt;Berkeley Algorithm&lt;/h2&gt;
+
+&lt;p&gt;Berkeley Algorithm与Cristian Algorithm不同。Cristian Algorithm是用在一个客户端向一个服务器请求时间。而Berkeley Algorithm是几个客户端之间同步时钟。
+  算法的主要步骤:
+	1. 选择一台协调者计算机作为master；
+	2. Master定期轮询其他要同步时钟(slave)的计算机；
+	3. Slave将它们的时钟值返回给主机；
+	4. Master通过观察往返时间来估计它们的本地时钟时间，并计算所获得值的平均值，所以协议的准确性依赖于主从机之间的名义上最大往返时间；
+	5. 主机发送每个从属机的时钟所需的调整量。&lt;/p&gt;
+
+&lt;p&gt;这里要注意的是Slave受到了调整量后，如果需要把时钟往回调，则一般是通过让时钟变慢一点，而不是真的回调，因为在很多的程序中，都以时间只会往前走而不会后退为基本假设，后退时钟可能导致一些程序的Bug。&lt;/p&gt;
+
+&lt;h2 id=&quot;ntp&quot;&gt;NTP&lt;/h2&gt;
+
+&lt;p&gt;上面说的两种Cristian方法和Berkeley算法主要应用于企业内部网，而网络时间协议（Network Time Protocol，NTP）定义了时间服务的体系结构和在互联网上发布时间信息的协议。
+  NTP服务由互联网上的服务器网提供，主服务器（primary server）直接连接到像无线电时钟这样的接收UTC源，二级服务器（secondary server）与主服务器同步。
+  NTP有3中模式，所以模式都以UDP传输：
+	1. 组播模式，用于高速LAN，一个或多个服务器定期将时间组播到由LAN连接的其他结点，并设置它们的时间。需要基于延迟很小这一假设。
+	2. 过程调用模式（procedure-call mode），类似与Cristian算法，服务器从其他计算机接收请求，并用时间戳应答
+	3. 对称模式（symmetric mode），用于在LAN中提供时间信息的服务器和同步子网的较高层，一对服务器交换有时序信息的消息。时序数据作为服务器之间的关联的一部分被保留，时序数据可用于提高时间同步的准确性&lt;/p&gt;
+
+&lt;p&gt;过程调用模式和对称模式中，进程交换消息对，每个消息有最近消息的时间戳: 发送和接收前一个NTP消息的本地时间，发送当前消息的本地时间。NTP消息的接收者记录它接收消息的本地时间。&lt;/p&gt;
+
+&lt;p&gt;对于两个服务器之间发送的每对消息，由NTP计算偏移 o(i) 和延迟 d(i)
+	 * 偏移o(i)是对两个时钟之间实际偏移的一个估计
+	 * 延迟d(i)是两个消息整个的传输时间&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Server A
++-------------------T(i-2)----------------T(i)---+
+
+
++-----------T(i-3)-------------T(i-1)------------+
+Server B
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;如果B上的时钟相对于A的真正偏移是o，而m和m’实际的传输时间分别为t和t’，那么我们可以得到：&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;          T(i-2) = T(i-3) + t + o
+          T(i) = T(i-1) + t’- o
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;可以推出：&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;	     d(i) = t + t’ = T(i-2) –T(i-3) + T(i) – T(i-1)
+		  o = o(i) + (t’-t)/2，其中 o(i) = (T(i-2) – T(i-3) + T(i-1) – T(i)) / 2
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;利用t和t’≥0的事实，有 o(i) - d(i)/2 ≤ o ≤ o(i) + d(i)/2。o(i)是偏移的估计，d(i)是该估计的精确性度量&lt;/p&gt;
+
+&lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;​COMP130123 Distributed Systems [Fall 2015]: http://jkx.fudan.edu.cn/~qzhang/COMP130123.html&lt;/li&gt;
+&lt;/ol&gt;
+</content>
  </entry>
  
  

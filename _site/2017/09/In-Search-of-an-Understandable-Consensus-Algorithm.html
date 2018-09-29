@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <link rel="stylesheet" href="/assets/css/normalize.css"/>
+  <link rel="stylesheet" href="/assets/css/bulma.css"/>
+  <link rel="stylesheet" href="/assets/css/custom.css"/>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <!-- <link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto" rel="stylesheet"> -->
+
+  <!-- Icons -->
+  <link rel="shortcut icon" href="/assets/images/favicon.ico">
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+
+  <title>
+    
+      In Search of an Understandable Consensus Algorithm &middot; Columba M71's Blog
+    
+  </title>
+
+</head>
+
+
+<body>
+
+<section class="hero is-dark">
+  <div class="hero-body">
+    <div class="container">
+        <h1 class="title">
+          <span class="typewrite" data-period="2000" data-type='[ "hello", "namaste", "assalam o alaikum",
+          "sat srī akāl", "khammaghani", "hola", "bonjour", "nomoskaar", "guten tag", "kumusta", "salut", "nômoshkar"]'>
+            <span class="wrap"></span>
+          </span>
+        </h1>
+      <h4 class="subtitle" id="quote">
+      </h4>
+    </div>
+  </div>
+</section>
+
+<div class="main-container">
+  <div class="tile is-ancestor is-vertical">
+
+
+    <nav class="nav has-shadow">
+
+      <div class="nav-left">
+
+        <a href="/" class="nav-item">
+          <span class="icon">
+            <i class="fa fa-home" aria-hidden="true" title="Homepage"></i>
+          </span>
+        </a>
+
+        <a href="https://github.com/hnu2013wwj" class="nav-item">
+          <span class="icon">
+            <i class="fa fa-github" aria-hidden="true" title="Github"></i>
+          </span>
+        </a>
+
+        <div class="nav-item" id="searchFieldNav">
+          <div class="field has-addons">
+            <p class="control">
+              <input class="input is-small" type="text" placeholder="Find an article" id="search-text">
+            </p>
+            <p class="control">
+              <a class="button is-dark is-small" onclick="searchHandler();">
+                Search
+              </a>
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="nav-right nav-menu" id='nav-menu'>
+        <a href="/archive" class="nav-item">Archive</a>
+        <a href="/tags" class="nav-item">Tags</a>
+      </div>
+
+      <span class="nav-toggle" id="nav-toggle">
+          <span></span>
+          <span></span>
+          <span></span>
+    </nav>
+
+    <div class="tile is-parent">
+      <div class="tile is-8 is-child main">
+
+        <div class="box">
+    <h1 class="post-title">In Search of an Understandable Consensus Algorithm</h1>
+    <hr/>
+    <div class="content"><span class="post-text"><h1 id="in-search-of-an-understandable-consensus-algorithm">In Search of an Understandable Consensus Algorithm</h1>
+<p>Raft算法[2]是一致性新晋的热门选手。Raft在一些方面和Viewstamped Replication[4]相似。Raft也有一它自己的特点[1,3]:
+    1. 强领导者: Raft中领导者的地位更高，日志条目指由leader发送给其它部分。这个方式更加简单且易于理解；
+    2. 领导选举: Raft在领导选举中使用了一随机的计数器，这在解决领导选举的冲突时会更加有效；
+    3. 成为变更: Raft在成员变更时使用了一种新的joint consensus方法，这使得及时在成员变更时Raft也能工作。</p>
+
+<p>Raft存在以下概念: 
+    1. Leader: 通常情况下，系统中只有一个leader。
+    2. Follower: 通常情况下，出leader之外的都是follower。
+    3. Candidate: 领导人选举时的一种身份状态。
+    4. Term: 一个成员担任领导人的这段时间，算法中会用一个递增的数字(任期号)表示。</p>
+
+<p>Raft主要分为3个部分: 
+    1. 领导选举；
+    2. 日志复制；
+    3. 安全性。</p>
+
+<h2 id="领导选举">领导选举</h2>
+
+<p>到Follower发现自己和Leader之间的心跳出现问题时，它就会启动一次新的选举。Foller首先要递增它当前的任期号，然后转变自己为Candidate状态，然后并行地向其它成员发送投票请求，知道以下情况发生然后停止:
+    1. 它赢得了选举;
+    2. 其它成员成为Leader；
+    3. 一段时间过后没有选举出领导人。</p>
+
+<p>当一个Candidate获得半数以上的选票时，它就赢得了选举。每个领导者只会对一个任期号的第一个投票请求投票。在赢得选举之中，就会向其它成员发送消息来确定自己的地位。在等待投票的时候，它就可能收到其它成员的投票的请求，如果这个请求中的任期号比自己当前的任期号，那么它就会投这一票并回到Follower的状态，否则，拒绝请求。
+这里可能发生的一种情况时几个候选人争夺Leader位置导致无法选举出Leader，Raft使用的解决方案时选举超时的时间从一个时间区间内随机选择(比如150ms ～ 300ms)，</p>
+
+<h2 id="日志复制">日志复制</h2>
+
+<p>对于Leader处理的每一条记录，它都会把这条记录追加到自己的日志里面，然后向所有的Follower发送消息，要求他们复制这条记录，当确认这条记录被一半以上的称为保存之后，Leader向客户端返回成功，对于没有及时回复Leader的Follower，Leader会一致重试指到所有的Follower都保存了所有的日志。
+  日志在被复制到多数的成员中之后，Leader就会提交这个日志，同时这日志之前的所有的日志也会被提交。日志在每个成员都是顺序保存的。Raft维护日志有以下的特点:
+    1. 如果不同的日志中的两个条目有相同的索引和任期号，那么它们就保存了相同的内容；
+    2. 如果不同的日志中的两个条目有相同的索引和任期号，那么它们之前的所有条目也相同。</p>
+
+<h3 id="对领导选举的限制">对领导选举的限制</h3>
+
+<p>不同于其它的一致性算法(包括Viewstamped Replication)一个成员可以被选举为Leader，及时它没有保存所有的已经提交的日志条目。这些算法就需要额外的机制来让新的Leader获取到这个日志。而Raft不同，它可以保证所有的之前的任期号内的已经提交的日志都已经保存在新的Leader之中。
+  Raft使用的方式是一个成员只能在已经包含了所有的已经提交的日志条目的情况下才能赢得选举。一个成员要想赢得选举，它必须获得半数以上的选票，这些选票中一定会有一个成员保存了所有的已经提交的条目，这样就可以达到阻止没有包含所有的已经提交的日志的成员被选举为Leader。
+  Raft通过比较两份日志中最后一条日志条目的索引值和任期号来定义谁比较新，如果最后的条目的任期号不同，那么任期号大的比较新，如果任期号相同，那么索引更大的比较新。在Raft中，Leader处理日志的一些不一致时直接通过强制要求Follower复制自己的日志来解决的，有冲突的日志会被覆盖(只会是那些没有提交的日志)。</p>
+
+<h2 id="安全性">安全性</h2>
+
+<p>关于Raft的安全性的证明，论文[1]中有详细的描述，这里就不说了。</p>
+
+<h2 id="成员变更">成员变更</h2>
+
+<p>为了保证在成员(配置)变更的时候算法还是安全的，要求这个过程中不能存在一个时间点有两位Leader。但是直接从旧的配置切换到新的配置都不能做出保证，因为不能保证所有成员在同时配置被更新。
+  为了解决这个问题，在Raft中使用的方式是集群先切换到一个过渡的配置，然后在切换到新的配置。这个过度配置称之为<em>共同一致</em>，一旦共同一致被提交，那么系统就可以切换到新的配置之上。这里的共同一致时新老配置的结合:
+    1. 日志会被复制给所有新老配置的所有成员；
+    2. 新老配置中的成员都可以作为Leader；
+    3. 达成一致需要分别在新老配置上获得多数支持。</p>
+
+<p>此外，即使在成员变更的时候，集群依然可以工作。
+对于新加入的成员，它可能没有保存任何的日志条目，这种情况下追赶上来可能需要一段比较长的时间，Raft使用了一个额外的阶段，在这个阶段之中，新的成员会以没有投票权的身份参与进来，知道这个成员追赶上来。
+还存在另外一个问题，移除不在新配置中的成员可能扰乱集群。这些成员将不会再接收到心跳，所以当选举超时，他们就会进行新的选举过程。它们会发送拥有新的任期号的投票请求，这样会导致当前的Leader回退成Follower状态。新的Leader最终会被选出来，但是被移除的服务器将会再次超时，然后这个过程会再次重复，导致整体可用性大幅降低。为了解决这个问题，当服务器确认当前Leader存在时，服务器会忽略投票请求，还有当服务器在当前最小选举超时时间内收到一个投票请求，它不会更新当前的任期号或者投出选票。这不会影响正常的选举，但这有利于避免被移除的服务器扰乱，如果Leader能够发送心跳给集群，那么它就不会失去Leader的身份。</p>
+
+<h2 id="日志压缩">日志压缩</h2>
+
+<p>这部分旧不赘言了，可以参考论文[1]。</p>
+
+<h2 id="参考">参考</h2>
+<ol>
+  <li>In Search of an Understandable Consensus Algorithm (Extended Version): https://raft.github.io/raft.pdf</li>
+  <li>Raft: https://en.wikipedia.org/wiki/Raft</li>
+  <li>Raft论文中文翻译: https://github.com/maemual/raft-zh_cn</li>
+  <li>Viewstamped Replication Revisited: http://www.pmg.csail.mit.edu/papers/vr-revisited.pdf</li>
+</ol>
+</span></div>
+</div>
+
+
+      </div>
+
+      <div class="tile is-4 is-child">
+        <div class="tile is-parent is-vertical sidebar">
+
+          <div class="tile is-child widget">
+
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Recent Posts
+                </p>
+              </header>
+              <div class="card-content">
+                <div class="content nice-text">
+                  <ul>
+                  
+                  <li><a href="/2018/09/Homa-A-Receiver-Driven-Low-Latency-Transport-Protocol-Using-Network-Priorities.html">
+                    A Receiver-Driven Low-Latency Transport Protocol
+                  </a></li>
+                  
+                  <li><a href="/2018/09/Re-architecting-datacenter-networks-and-stacks-for-low-latency-and-high-performance.html">
+                    NDP transport protocol
+                  </a></li>
+                  
+                  <li><a href="/2018/09/ISA-Wars-Understanding-the-Relevance-of-ISA-being-RISC-or-CISC-to-Performance,-Power,-and-Energy-on-Modern-Architecture.html">
+                    ISA Wars
+                  </a></li>
+                  
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tile is-child widget">
+
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Sponsored
+                </p>
+              </header>
+              <div class="card-content">
+                <div class="content nice-text">
+                  <img src="/assets/images/Dust_Bunny.jpg"/>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="tile is-child widget">
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Recommended Websites
+                </p>
+              </header>
+              <!-- <div class="card-content">
+                <div class="content nice-text">
+                  <ul>
+                    <li>
+                      <a href="https://xkcd.com">xkcd</a>
+                    </li>
+                    <li>
+                      <a href="http://commitstrip.com">Commit Strip</a>
+                    </li>
+                    <li>
+                      <a href="http://www.smbc-comics.com">SMBC Comics</a>
+                    </li>
+                    <li>
+                      <a href="https://blog.codinghorror.com">Coding Horror</a>
+                    </li>
+                    <li>
+                      <a href="http://waitbutwhy.com">Wait Buy Why</a>
+                    </li>
+                    <li>
+                      <a href="https://simplysoch.wordpress.com/">Simply Soch</a>
+                    </li>
+                  </ul>
+                </div> -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <p>
+        Some rights reserved.
+      </p>
+      <p>
+        Made with <i class="fa fa-heart"></i> and <a href="https://github.com/jgthms/bulma">Bulma</a>, <a href="https://jekyllrb.com/">Jekyll</a>. Hosted on <a href="https://github.com/">Github</a>
+      </p>
+      <p>
+        <a class="icon" href="https://github.com/abhn">
+          <i class="fa fa-github" title="Github"></i>
+        </a>
+        <a class="icon" href="https://in.linkedin.com/in/AbhishekNagekar">
+          <i class="fa fa-linkedin" title="Linkedin"></i>
+        </a>
+        <a class="icon" href="mailto:abhishek@nagekar.com">
+          <i class="fa fa-envelope" title="Email"></i>
+        </a>
+      </p>
+    </div>
+  </div>
+</footer>
+
+<!-- js -->
+<script src="/assets/js/custom.js"></script>
+<script src="/assets/js/typewriter.js"></script>
+</body>
+</html>

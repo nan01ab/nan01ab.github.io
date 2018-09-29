@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <link rel="stylesheet" href="/assets/css/normalize.css"/>
+  <link rel="stylesheet" href="/assets/css/bulma.css"/>
+  <link rel="stylesheet" href="/assets/css/custom.css"/>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <!-- <link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto" rel="stylesheet"> -->
+
+  <!-- Icons -->
+  <link rel="shortcut icon" href="/assets/images/favicon.ico">
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+
+  <title>
+    
+      Distributed — 分布式互斥 &middot; Columba M71's Blog
+    
+  </title>
+
+</head>
+
+
+<body>
+
+<section class="hero is-dark">
+  <div class="hero-body">
+    <div class="container">
+        <h1 class="title">
+          <span class="typewrite" data-period="2000" data-type='[ "hello", "namaste", "assalam o alaikum",
+          "sat srī akāl", "khammaghani", "hola", "bonjour", "nomoskaar", "guten tag", "kumusta", "salut", "nômoshkar"]'>
+            <span class="wrap"></span>
+          </span>
+        </h1>
+      <h4 class="subtitle" id="quote">
+      </h4>
+    </div>
+  </div>
+</section>
+
+<div class="main-container">
+  <div class="tile is-ancestor is-vertical">
+
+
+    <nav class="nav has-shadow">
+
+      <div class="nav-left">
+
+        <a href="/" class="nav-item">
+          <span class="icon">
+            <i class="fa fa-home" aria-hidden="true" title="Homepage"></i>
+          </span>
+        </a>
+
+        <a href="https://github.com/hnu2013wwj" class="nav-item">
+          <span class="icon">
+            <i class="fa fa-github" aria-hidden="true" title="Github"></i>
+          </span>
+        </a>
+
+        <div class="nav-item" id="searchFieldNav">
+          <div class="field has-addons">
+            <p class="control">
+              <input class="input is-small" type="text" placeholder="Find an article" id="search-text">
+            </p>
+            <p class="control">
+              <a class="button is-dark is-small" onclick="searchHandler();">
+                Search
+              </a>
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="nav-right nav-menu" id='nav-menu'>
+        <a href="/archive" class="nav-item">Archive</a>
+        <a href="/tags" class="nav-item">Tags</a>
+      </div>
+
+      <span class="nav-toggle" id="nav-toggle">
+          <span></span>
+          <span></span>
+          <span></span>
+    </nav>
+
+    <div class="tile is-parent">
+      <div class="tile is-8 is-child main">
+
+        <div class="box">
+    <h1 class="post-title">Distributed — 分布式互斥</h1>
+    <hr/>
+    <div class="content"><span class="post-text"><h1 id="distributed--分布式互斥">Distributed — 分布式互斥</h1>
+
+<p>分布式系统中，Concurrency是很重要的一个部分。任务在不同的进程中执行时，不可避免的会遇到访问相同的资源，这种情况下，就需要保证并发访问情况下的准确性的解决方案。
+  通常情况下，分布式互斥两种基本的策略[1]：
+    1. 基于令牌的算法(token-based)；
+    2. 基于许可的算法(permission-based)。
+        在基于令牌的算法中，所有的进程共享一个token，只有拥有token的进程才可以进入临界区，当临界区执行完之后，token被释放。token的唯一性保证了互斥，死锁也可以简单的被避免，不过一个问题时处理token丢失比较麻烦。
+           对于基于许可的算法，一个进程要到达所有进程的一个子集的允许后才能进入临界入区。</p>
+
+<p>一个互斥的算法应该满足下面几个基本的要求[2]：
+    1. 安全性：如何情况下只能有一个进程能够进入临界区；
+    2. 活性：不存在死锁和饥饿，每个进程会在有限的时间了得到临界区的机会；
+    3. 公平性：每个进程得到执行临界区的机会时公平的(一般是指执行临界区的顺序是按照它们请求执行临界区的逻辑时间的先后顺序)。</p>
+
+<p>除了基本的要求之外，对于一个分布式互斥的算法性能也是很重要的:
+    1. 进去临界区需要发送消息的数量；
+    2. 同步延时，从一个节点离开临界区到下一个节点进入需要的时间；
+    3. 响应时间，一个请求消息发出到请求的临界区执行结束的时间；
+    4. 系统吞吐量，系统执行临界区请求的速度，等于同步延时+平均临界区执行时间的倒数；</p>
+
+<h2 id="中央服务器算法">中央服务器算法</h2>
+
+<p>基于中央服务器的算法是一个简单有效的方法。最基本的思路是使用一个进程作为协调人。如果一个进程要执行临界区，它得向协调人请求，协调人在没有在其它的进程使用临界区的情况下就会授予改进程使用临界区的权限，否则将会拒绝请求，在进程执行完临界区之后，将会发送信息告知协调人释放临界区的锁。
+  这个算法的基本思路很简单，也很实用，现在实际使用的很多相关的系统也是使用了这个模型，比如Google Chubby[3]、Zookper[4]。但是要具体实现还要解决很多的问题，比如进程在临界区内Crash，协调人如何保证可靠性等等，具体可以参考[3，4]。</p>
+
+<h2 id="令牌环的算法">令牌环的算法</h2>
+
+<p>基于令牌的算法以及令牌环的思路在网络中的一些协议也很常见。在这个算法中，所有的进程被组织位一个逻辑上的环。
+  环上的进程被丛0开始依次编号，初始化时，token个授予编号为0的进程，token在环中由k进程传递到k+1进程(最后一个传回0号进程)。如果一个进程需要执行临界区，需要得到token被传递给它时，将token保留到它执行完临界区，如果进程不对token感兴趣，只需要简单地将token传递给下一个进程即可。
+  因为任何时间，最多有一个进程拥有token，使用互斥时包保证的。改算法也不会导致死锁。该算法也存在不少的问题，第一个就时token丢失的问题，token在传递的过程中可能被丢失，一个在一个持有token的进程在执行临界区时Crash也会造成token丢失。另外一个问题时环中的进程Crash会阻碍token的传递。</p>
+
+<h2 id="基与组播和逻辑时钟的算法">基与组播和逻辑时钟的算法</h2>
+
+<h3 id="lamport算法">Lamport算法</h3>
+<p>Lamport发明的这种分布式互斥的算法时一种时间同步机制[2]，它要求通信时FIFO的。该算法具体表现为</p>
+<ol>
+  <li>当一个节点S(i)想进入临界区时，它广播REQUEST(ts(i),i)的消息给其它的所有节点，并将改请求放置到request queue(i)队列；</li>
+  <li>当其它的节点S(j)说到这个消息时，它将S(i)的请求放置到request-queue(j)的队列，并恢复一个带时间戳的REPLY消息。
+ 当下面两个条件满足时，S(i)进入临界区:
+   01: S(i)从其它的所有站点收到一个时间戳大于（ts(i),i)的消息；
+   02: 节点S(i)的请求位于request-queue(i)的队首。</li>
+  <li>当S(i)执行完临界区后，从自己的请求队列删除自己的请求，并广播一个带时间戳的释放消息给其它节点。</li>
+  <li>其它节点收到后释放消息，从自己的request-queue删除S(i)的请求。</li>
+</ol>
+
+<h3 id="ricard-agrawala-算法">Ricard-Agrawala 算法</h3>
+<p>这个算法可以看作是上个算法的一个改良版本[1]，也是通过发送向其它节点REQUEST消息来请求进入临界区的许可，通过回复REPLY来表示通过请求。
+  当节点S(j)收到S(i)的REQUEST的消息时，如何当前没有在请求执行临界区 or 在执行临界区，或者虽然S(j)在请求执行临界区，但是时间戳比S(i)的这次请求的要大，就回复S(i)REPLY消息，否则，延迟发送REPLY消息。
+  S(i)在收到所有节点的REPLY消息时，进入临界区。执行完毕后，S(i)发送所有延迟的REPLY消息。</p>
+
+<p>相比于上面的Lamport算法，改算法使用了延时发送的方法。这个方法减少了需要发送消息的数量，提高了性能。</p>
+
+<h2 id="总结">总结</h2>
+
+<p>这里简单的介绍了集中分布式互斥的算法，除此之外，更多的分布式互斥的算法在书[1,2]有更详细的描述。此外，这些算法和实际总工程中使用的分布式互斥的方法还是有很大的区别的。对于在实际工程中使用的分布式互斥的方法，[3,4]是非常好的参考。</p>
+
+<h2 id="参考">参考</h2>
+
+<ol>
+  <li>《Distributed Systems: Principles and Paradigms》第二版，ISBN: 0-13-239227-5。</li>
+  <li>《分布式计算 – 原理、算法与系统》，ISBN: 978-7-04-032456-3</li>
+  <li>The Chubby lock service for loosely-coupled distributed systems: http://research.google.com/archive/chubby-osdi06.pdf</li>
+  <li>Zookeeper: Wait-free coordination for Internet-scale systems: https://www.usenix.org/events/usenix10/tech/full_papers/Hunt.pdf</li>
+</ol>
+</span></div>
+</div>
+
+
+      </div>
+
+      <div class="tile is-4 is-child">
+        <div class="tile is-parent is-vertical sidebar">
+
+          <div class="tile is-child widget">
+
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Recent Posts
+                </p>
+              </header>
+              <div class="card-content">
+                <div class="content nice-text">
+                  <ul>
+                  
+                  <li><a href="/2018/09/Homa-A-Receiver-Driven-Low-Latency-Transport-Protocol-Using-Network-Priorities.html">
+                    A Receiver-Driven Low-Latency Transport Protocol
+                  </a></li>
+                  
+                  <li><a href="/2018/09/Re-architecting-datacenter-networks-and-stacks-for-low-latency-and-high-performance.html">
+                    NDP transport protocol
+                  </a></li>
+                  
+                  <li><a href="/2018/09/ISA-Wars-Understanding-the-Relevance-of-ISA-being-RISC-or-CISC-to-Performance,-Power,-and-Energy-on-Modern-Architecture.html">
+                    ISA Wars
+                  </a></li>
+                  
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tile is-child widget">
+
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Sponsored
+                </p>
+              </header>
+              <div class="card-content">
+                <div class="content nice-text">
+                  <img src="/assets/images/Dust_Bunny.jpg"/>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="tile is-child widget">
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Recommended Websites
+                </p>
+              </header>
+              <!-- <div class="card-content">
+                <div class="content nice-text">
+                  <ul>
+                    <li>
+                      <a href="https://xkcd.com">xkcd</a>
+                    </li>
+                    <li>
+                      <a href="http://commitstrip.com">Commit Strip</a>
+                    </li>
+                    <li>
+                      <a href="http://www.smbc-comics.com">SMBC Comics</a>
+                    </li>
+                    <li>
+                      <a href="https://blog.codinghorror.com">Coding Horror</a>
+                    </li>
+                    <li>
+                      <a href="http://waitbutwhy.com">Wait Buy Why</a>
+                    </li>
+                    <li>
+                      <a href="https://simplysoch.wordpress.com/">Simply Soch</a>
+                    </li>
+                  </ul>
+                </div> -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <p>
+        Some rights reserved.
+      </p>
+      <p>
+        Made with <i class="fa fa-heart"></i> and <a href="https://github.com/jgthms/bulma">Bulma</a>, <a href="https://jekyllrb.com/">Jekyll</a>. Hosted on <a href="https://github.com/">Github</a>
+      </p>
+      <p>
+        <a class="icon" href="https://github.com/abhn">
+          <i class="fa fa-github" title="Github"></i>
+        </a>
+        <a class="icon" href="https://in.linkedin.com/in/AbhishekNagekar">
+          <i class="fa fa-linkedin" title="Linkedin"></i>
+        </a>
+        <a class="icon" href="mailto:abhishek@nagekar.com">
+          <i class="fa fa-envelope" title="Email"></i>
+        </a>
+      </p>
+    </div>
+  </div>
+</footer>
+
+<!-- js -->
+<script src="/assets/js/custom.js"></script>
+<script src="/assets/js/typewriter.js"></script>
+</body>
+</html>
