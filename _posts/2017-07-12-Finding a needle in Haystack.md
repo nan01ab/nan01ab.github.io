@@ -1,14 +1,13 @@
 ---
 layout: page
-title: Finding a needle in Haystack
+title: Finding a Needle in Haystack
 tags: [Storage, Distributed]
 excerpt_separator: <!--more-->
 typora-root-url: ../
 ---
 
 
-
-# Finding a needle in Haystack: Facebook’s photo storage
+# Finding a Needle in Haystack: Facebook’s photo storage
 
 Haystack是对象存储的经典设计，它是Facebook的照片应用而专门优化定制的对象存储系统。Facebook在峰值时需提供每秒查询超过1 million图片的能力。
 
@@ -35,7 +34,7 @@ Haystack是对象存储的经典设计，它是Facebook的照片应用而专门�
 
 ### 基本操作
 
-  访问一个图片：当用户使用Directory为每个图片来构建的一个URL来访问一个图片。这个URL包含几段信息，每一段内容对应了到从浏览器访问CDN(或者Cache)直至最终在一台Store机器上检索到图片的过程。一个典型的URL如下：
+访问一个图片：当用户使用Directory为每个图片来构建的一个URL来访问一个图片。这个URL包含几段信息，每一段内容对应了到从浏览器访问CDN(或者Cache)直至最终在一台Store机器上检索到图片的过程。一个典型的URL如下：
  ```
 http://<CDN>/<Cache>/<Machine id>/<Logical volume, Photo>
  ```
@@ -101,7 +100,7 @@ Cache可理解为一个分布式Hash Table，使用图片ID作为key来定位缓
 
 ### 容错
 
-  图片文件都好保存多份。
+  图片文件都好保存多(3)份。
 
 
 

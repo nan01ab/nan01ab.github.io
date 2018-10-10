@@ -11,7 +11,7 @@ typora-root-url: ../
 # A Quorum-Based Commit Protocol
   在distributed computing中，quorum是指分布式执行时必须获得的最小的票数[2]，常被用于分布式的commit protocol和replica control。这里我们来看看论文[1]描述的一种quorum-based commit protocol。
 
-
+>
 
 ## 介绍
 

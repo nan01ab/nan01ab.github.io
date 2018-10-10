@@ -105,6 +105,8 @@ Memcache是Facebook大规模使用的一个缓存系统，但是将memcache应�
 
   Facebook是beringei的开源实现，使用C++编写，大量依赖于Facebook的C++基础库，比如folly（folly也是非常高质量的一个C++基础库，非常值得一看）。
 
+
+
 ## 参考
 1. Gorilla Paper: http://www.vldb.org/pvldb/vol8/p1816-teller.pdf
 2. https://github.com/facebookincubator/beringei

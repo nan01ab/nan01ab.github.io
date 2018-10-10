@@ -95,7 +95,9 @@ step 3: A写y，此时新的y在A的write set里面，对其它不可见；
 step 4: A进入检验步骤，根据算法2，提交时间戳读数据项最大的wts，写数据项的最大rts+1。x在timestamp 2 and 3是合法的, 可以通过校验，然后提交(timestamp=3)；
 ```
 
- 
+.
+
+>
 
 ### 0x02 正确性证明
 
@@ -114,18 +116,18 @@ LEMMA 3. A read operation from a committed transaction returns the value of the 
 
 ```
 
+.
 
+>
 
 ### 0x03 优化和评估
 
- 不讲了，看论文吧。
-
-
+ 参考论文[1]。
 
 
 
 ## 参考
 
-1. TicToc: Time Traveling Optimistic Concurrency Control， SIGMOD 2016；
+1. TicToc: Time Traveling Optimistic Concurrency Control, SIGMOD 2016；
 2. H. T. Kung and J. T. Robinson. On optimistic methods for concurrency control. ACM Trans. Database Syst., 6(2):213–226, June 1981. 
 3. CMU Advanced Database 2018课程课件。
