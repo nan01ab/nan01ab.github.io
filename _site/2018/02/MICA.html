@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <link rel="stylesheet" href="/assets/css/normalize.css"/>
+  <link rel="stylesheet" href="/assets/css/bulma.css"/>
+  <link rel="stylesheet" href="/assets/css/custom.css"/>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <!-- <link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto" rel="stylesheet"> -->
+
+  <!-- Icons -->
+  <link rel="shortcut icon" href="/assets/images/favicon.ico">
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+
+  <title>
+    
+      MICA &middot; Columba M71's Blog
+    
+  </title>
+
+</head>
+
+
+<body>
+
+<section class="hero is-dark">
+  <div class="hero-body">
+    <div class="container">
+        <h1 class="title">
+          <span class="typewrite" data-period="2000" data-type='[ "Columba M71"]'>
+            <span class="wrap"></span>
+          </span>
+        </h1>
+      <h4 class="subtitle" id="quote">
+      </h4>
+    </div>
+  </div>
+</section>
+
+<div class="main-container">
+  <div class="tile is-ancestor is-vertical">
+
+
+    <nav class="nav has-shadow">
+
+      <div class="nav-left">
+
+        <a href="/" class="nav-item">
+          <span class="icon">
+            <i class="fa fa-home" aria-hidden="true" title="Homepage"></i>
+          </span>
+        </a>
+
+        <a href="https://github.com/hnu2013wwj" class="nav-item">
+          <span class="icon">
+            <i class="fa fa-github" aria-hidden="true" title="Github"></i>
+          </span>
+        </a>
+
+        <div class="nav-item" id="searchFieldNav">
+          <div class="field has-addons">
+            <p class="control">
+              <input class="input is-small" type="text" placeholder="Find an article" id="search-text">
+            </p>
+            <p class="control">
+              <a class="button is-dark is-small" onclick="searchHandler();">
+                Search
+              </a>
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="nav-right nav-menu" id='nav-menu'>
+        <a href="/archive" class="nav-item">Archive</a>
+        <a href="/tags" class="nav-item">Tags</a>
+      </div>
+
+      <span class="nav-toggle" id="nav-toggle">
+          <span></span>
+          <span></span>
+          <span></span>
+    </nav>
+
+    <div class="tile is-parent">
+      <div class="tile is-8 is-child main">
+
+        <div class="box">
+    <h1 class="post-title">MICA</h1>
+    <hr/>
+    <div class="content"><span class="post-text"><h2 id="mica-a-holistic-approach-to-fast-in-memory-key-value-storage">MICA: A Holistic Approach to Fast In-Memory Key-Value Storage</h2>
+
+<p>这篇paper是关于KVS里面一篇非常好的文章。个人觉得里面很多东西都设计的很赞。此外，作者还有一篇指导如何设计一个QPS 为Billion基本的论文[2]，也很值得一看(不过好像里面做的并没有实际到达1billion，倒是SOSP 2017 上的一篇文章到达了[3]，之后加上这篇论文的blog)</p>
+
+<h3 id="0x00-引言">0x00 引言</h3>
+
+<p>MICA一个目的就是旨在解决之前类似系统只为read-mostly场景设计，希望能适应各种各样的场景，并提供很好的性能：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Under write-intensive workloads with a skewed key popularity, a single MICA node serves 70.4 million small key-value items per second (Mops), which is 10.8x faster than the next fastest system. For skewed, read-intensive workloads, MICA’s 65.6 Mops is at least 4x faster than other systems even after modifying them to use our kernel bypass. MICA achieves 75.5–76.9 Mops under workloads with a uniform key popularity. 
+</code></pre></div></div>
+
+<h3 id="0x01-采用的技术和目标">0x01 采用的技术和目标</h3>
+
+<p>MICA主要使用了一下的一些技术来达到设计目标:</p>
+
+<ol>
+  <li>
+    <p>Fast and scalable parallel data access，同时使用数据分区和开发cores之间的并行性来提高数据范围的性能。MICA使用了2中模式:</p>
+
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Its EREW mode (Exclusive Read Exclusive Write) minimizes costly inter-core communication, and its CREW mode (Concurrent Read Exclusive Write) allows multiple cores to serve popular data.
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>Network stack for efficient request processing，MICA使用bypass kernel的网络栈来提高性能。</p>
+  </li>
+  <li>
+    <p>New data structures for key-value storage，使用新的内存分配方法和indexing，分别为存储和缓存优化。</p>
+  </li>
+</ol>
+
+<p>.</p>
+
+<p>MICA的具体目标和一些类似的系统没有多大的区别:</p>
+
+<ol>
+  <li>High single-node throughput;</li>
+  <li>Low end-to-end latency ;</li>
+  <li>Consistent performance across workloads;</li>
+  <li>Handle small, variable-length key-value items;</li>
+  <li>Key-value storage interface and semantics;</li>
+  <li>Commodity hardware;</li>
+</ol>
+
+<p>简而言之就是高吞吐，低延时，稳定的性能表现，兼容性良好的借口，无需特殊硬件。</p>
+
+<p>.</p>
+
+<h3 id="0x02-mica-design">0x02 MICA Design</h3>
+
+<h4 id="parallel-data-access">Parallel Data Access</h4>
+
+<p>MICA使用了基于Keyhash的数据分区方式。这样分区可能造成的问题就是在数据范围严重倾斜的情况下可能导致的系统inblance。一个缓解这个情况的原因是热点数据被频繁访问，这样的话这些数据在cache中的可能性就比较高。此外MICA还使用了一些别的解决办法，之后会提到。</p>
+
+<p><img src="/assets/img/mica-arch.png" alt="mica-arch" /></p>
+
+<p>主要的情况下，MICA只会有一个线程访问本线程的partition（Exclusive Read Exclusive Write），这样可以去除core间通信的成本，避免巨大的同步开销。而在数据访问严重倾斜的情况下，可以使用Concurrent Read Exclusive Write的访问方式。MICA会总是避免concurrent write。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>CREW allows any core to read partitions, but only a single core can write. This combines the benefit of concurrent read and exclusive write; the former allows all cores to process read requests, while the latter still reduces expensive cache line transfer. CREW handles reads efficiently under highly skewed load, at the cost of managing read-write conflicts.
+</code></pre></div></div>
+
+<h4 id="network-stack">Network Stack</h4>
+
+<p>Network I/O 是现在KVS中最昂贵的操作，在一些KVS中，TCP的处理消耗刘大约70%的时间。由于内存的key-value大多的时候的key value对象都比较小，这里MICA使用了UDP而不是TCP来提高性能。此外，MICA使用了DPDK加快网络传输处理。利用DPDK的Burst packet I/O来平摊packet的处理成本，使用Zero-copy processing 避免不必要的内存分配和加快数据处理。</p>
+
+<h5 id="client-assisted-hardware-request-direction">Client-Assisted Hardware Request Direction</h5>
+
+<p>现在的NIC支持 RSS和FDir 来讲packets分配到不同的core上，但是这个不能根据packet的内容来决定分配到哪一个core。所以MICA使用了一种client和server协作的方法，client缓存了server的一些信息，如operation mode，core的数量，NUMA，网卡和分区等的信息。利用这些信息计算出分区or core index，将其作为UDP数据包的目的端口。server使用FDir机制使用destination port，这个port被映射到一个RX queue，这样包就被传输到了正确的分区。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>The client then embeds the request direction information in the packet header: If the request uses exclusive data access (read/write on EREW and write on CREW), the client calculates the partition index from the keyhash of the request. If the request can be handled by any core (a CREW read), it picks a server core index in a round-robin way (across requests, but in the same NUMA domain (Section 4.2.1)). Finally, the client encodes the partition or core index as the UDP destination port.
+</code></pre></div></div>
+
+<p>.</p>
+
+<h4 id="data-structure">Data Structure</h4>
+
+<h5 id="circular-log">Circular Log</h5>
+
+<p><img src="/assets/img/mica-circular-log.png" alt="mica-circular-log" /></p>
+
+<p>MICA使用的内存分配方式不同与Log-Structure 和malloc 的方式。新添加的数据项被直接添加到log的后面，这点与Log-Structure是相同的，更新的时候，只要新的数据大小不超过原来的大小，就是就地更新，这点上与Log-Structure不同。Circular Log的大小是固定的，使用log满的时候就会驱除最老的数据项来获取内存空间。</p>
+
+<p>此外，MICA还使用了hugepages 和 NUMA-aware的分配方法。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Without explicit range checking, accessing an entry near the end of the log (e.g., at 234 − 8 in the example below) could cause an invalid read or segmentation fault by reading off the end of the range. To avoid such errors without range checking, MICA manually maps the virtual memory addresses right after the end of the log to the same physical page as the first page of the log, making the entire log appear locally contiguous: Our MICA prototype implements this scheme in userspace by mapping a pool of hugepages to virtual addresses using the mmap() system call.
+</code></pre></div></div>
+
+<p>.</p>
+
+<h5 id="lossy-concurrent-hash-index">Lossy Concurrent Hash Index</h5>
+
+<p>MICA 的index的设计和MemC3的设计有很多相似的地方，这里就只看看它不同的地方了：</p>
+
+<ol>
+  <li>
+    <p>为了加快insert操作的速度，一个key-value结构插入到一个满了的bucket的时候，与MemC3不相同的是它不使用类似cuckoo hash的方式，而是直接根据数据项的年龄来进行回收操作。</p>
+  </li>
+  <li>
+    <p>当一个数据项从log中删除的时候，它的index项并没有删除，这样可能造成数据访问的问题。MICA解决这个问题的方式是:</p>
+
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>To address this problem, MICA uses large pointers for head/tail and item offsets. As depicted in Figure 7, MICA’s index stores log offsets that are wider than needed to address the full size of the log (e.g., 48-bit offsets vs 34 bits for a 16 GiB log). MICA detects a dangling pointer before using it by checking if the difference between the log tail and the item offset is larger than the actual log size.5 If the tail wraps around the 48-bit size, however, a dangling pointer may appear valid again, so MICA scans the index incrementally to remove stale pointers.
+</code></pre></div>    </div>
+  </li>
+</ol>
+
+<p><img src="/assets/img/mica-pointer.png" alt="mica-pointer" /></p>
+
+<h4 id="其它">其它</h4>
+
+<p>MICA具体使用的优化方法很多，这里只说了其中几个，想详细研究的话看看[1],[2].</p>
+
+<p>.</p>
+
+<h3 id="0x03-评估">0x03 评估</h3>
+
+<p>只看性能比较部分，吊打其它系统的表现(MICA-c MICA-s性能几乎一样):</p>
+
+<p><img src="/assets/img/mica-performance.png" alt="mica-performance" /></p>
+
+<h2 id="参考">参考</h2>
+
+<ol>
+  <li>MICA: A Holistic Approach to Fast In-Memory Key-Value Storage, NSDI‘14.</li>
+  <li>Full-Stack Architecting to Achieve a Billion-Requests-Per-Second Throughput on a Single Key-Value Store Server Platform, TOCS 2016.</li>
+  <li>KV-Direct: High-Performance In-Memory Key-Value Store with Programmable NIC, SOSP 2017.</li>
+</ol>
+</span></div>
+</div>
+
+
+      </div>
+
+      <div class="tile is-4 is-child">
+        <div class="tile is-parent is-vertical sidebar">
+
+          <div class="tile is-child widget">
+
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Recent Posts
+                </p>
+              </header>
+              <div class="card-content">
+                <div class="content nice-text">
+                  <ul>
+                  
+                  <li><a href="/2018/10/LegoOS.html">
+                    LegoOS -- A Disseminated, Distributed OS for Hardware Resource Disaggregation
+                  </a></li>
+                  
+                  <li><a href="/2018/10/Level-Hashing.html">
+                    Write-Optimized and High-Performance Hashing Index Scheme for Persistent Memory
+                  </a></li>
+                  
+                  <li><a href="/2018/10/Classical-Papers.html">
+                    计算机科学经典论文
+                  </a></li>
+                  
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tile is-child widget">
+
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Sponsored
+                </p>
+              </header>
+              <div class="card-content">
+                <div class="content nice-text">
+                  <img src="/assets/images/Dust_Bunny.jpg"/>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="tile is-child widget">
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Recommended Websites
+                </p>
+              </header>
+              <!-- <div class="card-content">
+                <div class="content nice-text">
+                  <ul>
+                    <li>
+                      <a href="https://xkcd.com">xkcd</a>
+                    </li>
+                    <li>
+                      <a href="http://commitstrip.com">Commit Strip</a>
+                    </li>
+                    <li>
+                      <a href="http://www.smbc-comics.com">SMBC Comics</a>
+                    </li>
+                    <li>
+                      <a href="https://blog.codinghorror.com">Coding Horror</a>
+                    </li>
+                    <li>
+                      <a href="http://waitbutwhy.com">Wait Buy Why</a>
+                    </li>
+                    <li>
+                      <a href="https://simplysoch.wordpress.com/">Simply Soch</a>
+                    </li>
+                  </ul>
+                </div> -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <p>
+        Some rights reserved.
+      </p>
+      <p>
+        Made with <i class="fa fa-heart"></i> and <a href="https://github.com/jgthms/bulma">Bulma</a>, <a href="https://jekyllrb.com/">Jekyll</a>. Hosted on <a href="https://github.com/">Github</a>
+      </p>
+      <p>
+        <a class="icon" href="">
+          <i class="fa fa-github" title="Github"></i>
+        </a>
+        <a class="icon" href="">
+          <i class="fa fa-linkedin" title="Linkedin"></i>
+        </a>
+        <a class="icon" href="">
+          <i class="fa fa-envelope" title="Email"></i>
+        </a>
+      </p>
+    </div>
+  </div>
+</footer>
+
+<!-- js -->
+<script src="/assets/js/custom.js"></script>
+<script src="/assets/js/typewriter.js"></script>
+</body>
+</html>

@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <link rel="stylesheet" href="/assets/css/normalize.css"/>
+  <link rel="stylesheet" href="/assets/css/bulma.css"/>
+  <link rel="stylesheet" href="/assets/css/custom.css"/>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <!-- <link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto" rel="stylesheet"> -->
+
+  <!-- Icons -->
+  <link rel="shortcut icon" href="/assets/images/favicon.ico">
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+
+  <title>
+    
+      Well, Hello There! &middot; Columba M71's Blog
+    
+  </title>
+
+</head>
+
+
+<body>
+
+<section class="hero is-dark">
+  <div class="hero-body">
+    <div class="container">
+        <h1 class="title">
+          <span class="typewrite" data-period="2000" data-type='[ "Columba M71"]'>
+            <span class="wrap"></span>
+          </span>
+        </h1>
+      <h4 class="subtitle" id="quote">
+      </h4>
+    </div>
+  </div>
+</section>
+
+<div class="main-container">
+  <div class="tile is-ancestor is-vertical">
+
+
+    <nav class="nav has-shadow">
+
+      <div class="nav-left">
+
+        <a href="/" class="nav-item">
+          <span class="icon">
+            <i class="fa fa-home" aria-hidden="true" title="Homepage"></i>
+          </span>
+        </a>
+
+        <a href="https://github.com/hnu2013wwj" class="nav-item">
+          <span class="icon">
+            <i class="fa fa-github" aria-hidden="true" title="Github"></i>
+          </span>
+        </a>
+
+        <div class="nav-item" id="searchFieldNav">
+          <div class="field has-addons">
+            <p class="control">
+              <input class="input is-small" type="text" placeholder="Find an article" id="search-text">
+            </p>
+            <p class="control">
+              <a class="button is-dark is-small" onclick="searchHandler();">
+                Search
+              </a>
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="nav-right nav-menu" id='nav-menu'>
+        <a href="/archive" class="nav-item">Archive</a>
+        <a href="/tags" class="nav-item">Tags</a>
+      </div>
+
+      <span class="nav-toggle" id="nav-toggle">
+          <span></span>
+          <span></span>
+          <span></span>
+    </nav>
+
+    <div class="tile is-parent">
+      <div class="tile is-8 is-child main">
+
+        <div class="box">
+    <h1 class="post-title">Well, Hello There!</h1>
+    <hr/>
+    <div class="content"><span class="post-text"><ul class="posts">
+    
+    <li class="post">
+        <small>10 Oct 2018</small>
+        <small><a style="color:grey" href="/2018/10/LegoOS.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2018/10/LegoOS.html">LegoOS -- A Disseminated, Distributed OS for Hardware Resource Disaggregation</a>
+        <p class="nice-text">LegoOS: A Disseminated, Distributed OS for Hardware Resource Disaggregation 0x00 引言 这篇文章是OSDI 2018的best paper之一。这篇paper针对目前这样一个情况，提出了一种新的OS架构：目前硬件资源在数据中心这样的地方很多时候分布在不同的机器之后，而传统的一个系统由固定的几个硬件组成，主要的如内存，处理器，硬盘等。不同的应用的特性不同，对资源的使用也不同，就可能出现在一台机器上的一些资源已经很紧张了，另外的一些资源却没有怎么使用。 针对这种情况，这里提出了一种叫做splitkernel 的架构，在splitkernel的模式下，设计并实现了一个LegoOS的操作系统，这个系统的主要特点就是资源分布在不同的地方，每一个地方运行不同的系统组件，各个组件之间由高速网络连接(这里使用的就是RDMA)，这些组件的组合就形成了一个新的系统。Lego这个名字取的很生动形象。 Following the splitkernel model, we built LegoOS, the first OS designed for hardware resource disaggregation. LegoOS is a distributed OS that appears to applications as a set of virtual servers (called vNodes). A vNode... <a href="/2018/10/LegoOS.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>08 Oct 2018</small>
+        <small><a style="color:grey" href="/2018/10/Level-Hashing.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2018/10/Level-Hashing.html">Write-Optimized and High-Performance Hashing Index Scheme for Persistent Memory</a>
+        <p class="nice-text">Write-Optimized and High-Performance Hashing Index Scheme for Persistent Memory 0x00 引言 这篇OSDI 2018会议(就是今天开的, 2018-10-08)上的一篇关于Persistent Memory上hash index设计的文章[1]，是Path Hashing[2]的后续，也是华科在OSDI上发表的第一篇文章？？？这篇论文讨论了Path Hashing没有解决的问题，其中一个就是resize如何处理。 To cost-efficiently resize this hash table, level hashing leverages an in- place resizing scheme that only needs to rehash 1/3 of buckets instead of the entire table, thus significantly reducing the number... <a href="/2018/10/Level-Hashing.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>01 Oct 2018</small>
+        <small><a style="color:grey" href="/2018/10/Classical-Papers.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2018/10/Classical-Papers.html">计算机科学经典论文</a>
+        <p class="nice-text">计算机科学经典论文 引言 2018-10-01，国庆节，祝祖国69岁生日快乐。 计算机科学发展上的经典之作(不是所有方向)。 逐渐更新，这里是目录… 还能跟踪一下最新的发展就更加好了。这里大概率会是上个世纪的文章。 Architecture Yeh, T.-Y.; Patt, Y. N. (1991). “Two-Level Adaptive Training Branch Prediction”. Proceedings of the 24th annual international symposium on Microarchitecture. Albuquerque, New Mexico, Puerto Rico: ACM. pp. 51–61. 两级自适应分支预测器. OS The UNIX Time-Sharing System,The Bell System Technical Journal 57 no. 6, part 2... <a href="/2018/10/Classical-Papers.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>25 Sep 2018</small>
+        <small><a style="color:grey" href="/2018/09/Optimizing-the-Block-IO-Subsystem-for-Fast-Storage-Devices.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2018/09/Optimizing-the-Block-IO-Subsystem-for-Fast-Storage-Devices.html">Optimizing the Block IO Subsystem for Fast Storage Devices</a>
+        <p class="nice-text">Optimizing the Block I/O Subsystem for Fast Storage Devices 0x00 引言 这篇Paper讨论的是如何优化Linux的Block I/O Subsystem以使用新的高速的硬件，这里面主要提出了6条改进方案，这些措施有些之间是相互不兼容的，也就是说不能同时使用。此外，这里讨论的是如何对内核做更改来优化，而不是在现在的内核上调整参数设置来优化性能: In this article, we explore six optimizations for the block I/O subsystem: polling I/O completion, eliminating context switches from the I/O path, merging discontiguous requests, reconfiguring an I/O scheduler for an SSD, resolving the read-ahead dilema,... <a href="/2018/09/Optimizing-the-Block-IO-Subsystem-for-Fast-Storage-Devices.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>22 Sep 2018</small>
+        <small><a style="color:grey" href="/2018/09/PolarFS.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2018/09/PolarFS.html">PolarFS</a>
+        <p class="nice-text">PolarFS: An Ultra-low Latency and Failure Resilient Distributed File System for Shared Storage Cloud Database 0x00 引言 PolarFS是阿里巴巴为它推出的PolarDB设计的文件系统，作为控制面和数据面分离中的一部分。PolarFS在使用新技术时还是挺激进的，在一个商业产品上面一下子就搞这么多东西，将 network stack, IO stack都做到了user-space，使用3D XPoint ，RDMA, NVMe SSD, and SPDK 等新的技术。 0x01 基本架构 PolarFS主要分为2层，Storage Layer负责管理storage nodes的磁盘资源， 为每个数据库实例提供数据卷(volume)。File system layer 支持在这些volume上实现文件管理，同时还负责访问文件元数据时的互斥和同步。Polar的组件分为一下几个部分: libpfs，一个实现在用户空间的类似POSIX的文件系统接口； Polar-Switch，运行在计算结点上，将IO请求发送给ChunkServer； ChunkServers，允许在storage结点上，处理IO请求； PolarCtrl，PolarCtrl 时控制面，有一组master组成，同时在每一个storage结点上部署了一个agent； 0x02 组件 File System Layer 这些接口以一个libpfs 库提供给使用者。... <a href="/2018/09/PolarFS.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>20 Sep 2018</small>
+        <small><a style="color:grey" href="/2018/09/Homa-Transport-Protocol.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2018/09/Homa-Transport-Protocol.html">A Receiver-Driven Low-Latency Transport Protocol</a>
+        <p class="nice-text">Homa – A Receiver-Driven Low-Latency Transport Protocol Using Network Priorities 0x00 引言 最近几年为数据中心设计的新的传输协议不少，这篇是SIGCOMM上最新的一篇(截止写这篇论文时)，总而言之，这篇论文做到了: In simulations, Homa’s latency is roughly equal to pFabric and significantly better than pHost, PIAS, and NDP for almost all message sizes and workloads. Homa can also sustain higher network loads than pFabric, pHost, or PIAS. -----... <a href="/2018/09/Homa-Transport-Protocol.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>17 Sep 2018</small>
+        <small><a style="color:grey" href="/2018/09/DCTCP,-D3-and-D2TCP.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2018/09/DCTCP,-D3-and-D2TCP.html">Datacenter TCP, Deadline Driven Delivery and Deadline-aware Datacenter TCP</a>
+        <p class="nice-text">Datacenter TCP, Deadline Driven Delivery and Deadline-aware Datacenter TCP 0x00 引言 这篇总结包含了3篇Paper的内容，一篇是SIGCOMM 2010上的DCTCP，一篇是SIGCOMM 2011上的Deadline Driven Delivery，还有一篇是SIGCOMM 2012上面的D2TCP。前者将的是如何利用Explicit Congestion Notification (ECN)解决数据中心网络中TCP的一些问题，第二个是如何加入deadline的优化，后者是前2者的优化。 这里只是简单地介绍。 0x01 ECN ECN就是显示的拥塞通知。对于IPv4，它使用了DiffServ字段最右边的两个bits来标示(在一些早一点的书上，可以发现说这里是预留给以后的功能的，目前没有使用，当然现在是已经使用了)，在IPv6上Traffic Class字段的最后两个bits。 ​ 这里只给出了IPv4的header，图片来源于维基百科。 00 – 不支持ECN； 10 – 支持ECN； 01 – 支持ECN，和上面相同； 11 –遇到了阻塞； ECN还有更多的细节，可参考相关资料。 . 0x02 问题 incast 问题，在Partition/Aggregate模式中比较常见，服务器同时回复请求端导致某个地方的包突然大量增加，从而导致丢包； 排队问题，长时间的流和短时间的流同时使用一个交换机端口时，导致排队，也导致短时间的数据被drop，及时没有被drop页导致了延时的增加； buffer的问题，不同的流使用不同的交换机短空，长时间的流占用了共享的buffer。 0x03 DCTCP DCTCP利用了ECN。在交换机上，当一个端口的包超过一定的阈值之后，给包加上ECN标志。包的接受这在接受到这些包之后，将这些信息回复给发送者。发送者根据收到的包里面的ECN的情况来调整发送行为。这样就可以在发生拥塞之前就调整行为。总结一下就是3个部分: Simple Marking... <a href="/2018/09/DCTCP,-D3-and-D2TCP.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>15 Sep 2018</small>
+        <small><a style="color:grey" href="/2018/09/Linux-Multi-Queue-Block-Layer.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2018/09/Linux-Multi-Queue-Block-Layer.html">Linux Multi-Queue Block Layer</a>
+        <p class="nice-text">Linux Block IO: Introducing Multi-queue SSD Access on Multi-core Systems 0x00 引言 这篇Paper讲的是Linux Multi-Queue Block Layer。Linux Multi-Queue Block Layer主要是为了解决现在的Linux Block Layer不能很好地使用新的高速的存储硬件(比如4k读写能得到100W的超高速的NVMe的SSD)。Multi-Queue Block Layer在Linux 3.x的后期合并到了Linux内核主线，在Linux 4.x变化比较大。 硬件性能的快速变化，这里还只是2012年的数据，实际上现在的SSD的性能比这些数据高出很多。 0x02 目前的问题 Linux目前的Block Layer都是为HHD优化设计的。 IO操作在Block Layer中会经过复杂的操作才会被执行，在高速的存储硬件目前暴露出了以下的缺点： Request Queue Locking，现在的请求队列只的操作中，会频繁地使用锁，而这里的很多锁都是全局的，也就是说所有经过这里的请求都有可能形成竞争。在HHD这样性能比较低的硬件上，带来的竞争不明显。但是在SSD上，这里的竞争、同步操作显著了性能。 Hardware Interrupts，IOPS达到了几十万甚至更加高的时候，很多的时间就会被消耗在中断处理上了。 Remote Memory Accesses，目前的设计会导致CPU核心访问的会是Remote Memory，这个造成了不小的性能损失，特别是在NUMA架构的机器上。对缓存也不友好。 0x03 基本设计 顾名思义，Mutil-Queue就是由对个队列，不过不是简单的拆分而言，还要考虑到block layer上层和block layer下层各自的特性。这里使用两级队列的结构，上层的软件队列和下层的硬队列，两个队列实现不同的功能，对应不同的优化策略。 Software Staging Queues 多个Software... <a href="/2018/09/Linux-Multi-Queue-Block-Layer.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>13 Sep 2018</small>
+        <small><a style="color:grey" href="/2018/09/BFQ-IO-Scheduler-of-Linux.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2018/09/BFQ-IO-Scheduler-of-Linux.html">BFQ IO Scheduler of Linux</a>
+        <p class="nice-text">BFQ I/O Scheduler of Linux 0x00 引言 Linux目前使用的IO Scheduler有CFQ，NOOP和Deadline。在最近几年，Linux的Block Layer做了很多的有哈，最大的一个改变就是添加了multi-queue block layer。相适应的，IO Scheduler也出现了新的变化，在4.12版本中新加入了Budget Fair Queueing (BFQ) Storage-I/O Scheduler和Kyber multiqueue I/O scheduler。前者有不少的资料，这里先记录一下BFQ。Kyber multi-queue I/O scheduler没有文档资料，不过这个应该是一个比较简单的，代码只有约1000行，先研究研究再说。 BFQ包含了很多细节的优化，这里以后慢慢完善。 0x01 BFQ基本思路 BFQ保持每一个进程一个IO请求队列，不同于CFQ用RR的方式轮询这些队列的方法，BFQ给这些队列一个I/O budget，这个I/O budget代表了下次能写入到磁盘的扇区(这里是HHD上面的说法)的数量。这个I/O budget的计算时一个很复杂的过程，这里只会简单的说明，不会很具体的讨论。这个I/O budget主要和进程的行为有关。 一个基本的过程如下： 挑选一下一个服务的进程，这里使用内部的B-WF2Q+，一个内部的fair-queueing调度器； 请求分发，等待调用相关函数，处理请求，这时候的处理逻辑是： 一个内部的C-LOOK调度器选择这个应用的一个请求，从它的请求队列中那处理，然后存储设备处理请求。这个C-LOOK既能适应HHD也能适应SSD。 应用的budget会逐渐递减； 如何这个应用的请求处理完成，or 没有了budget之后，执行下面的第3步； 这个应用会被退出服务，赋予一个新的budget，这里会有算法计算新的这个budget； . 在BGQ中，每个进程都会赋予一个固定的权重，从总体上来说，这个进程使用的磁盘的吞吐量只会和这个权重相关，和上面的budget其实没有关系。也就是说，这个磁盘的带宽会被竞争使用这个磁盘的进程共同分配。 这个看上去反直觉，因为上面提到了budget，这个数值大的能帮助进程获取更加多的资源。但是这里如果是budget更加大，B-WF2Q+会将其的服务推迟得更晚，更小的budget能更及时地得到服务。进程的这个budget的计算时和这个进程的权重时没有关系了，上面提到了，这个budget更多由进程的行为决定的。 如果对CFS的进程调度器也熟悉的话，这里的很多思想也是类似。BFQ、CFQ和CFS的一个目标都是公平。此外，区分进程的特点，比如区分交互进程和非交互进程以提供更加好的服务。 Budget assignment 最为一个常识，要想获得最高的磁盘性能，访问最好都是顺序的，很显然这里如果是顺序访问磁盘的进程，最好就能赋予一个更加大的budget。BFQ会通过一系列的方法来计算磁盘的性能特点和一个进程访问的特点。通过 feedback-loop算法，BFQ尝试去计算下一次的budget，让这个budget尽可能的接近进程的需求，当然这里值的计算要考虑到目前的系统状况和磁盘的特点。 BGQ会给一个进程最大的使用时间，这样可以避免随机访问的进程长时间的占有磁盘而降低了吞吐量(这里可以猜想，这里是因为随机访问的应用实际写入的数据比较小，磁盘随机访问的性能远低于顺序访问的性能，而导致budget消耗速度比较慢，从而导致了一直占有磁盘)。 To... <a href="/2018/09/BFQ-IO-Scheduler-of-Linux.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>11 Sep 2018</small>
+        <small><a style="color:grey" href="/2018/09/New-Syscalls-of-Linux-4.x.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2018/09/New-Syscalls-of-Linux-4.x.html">New Syscalls of Linux 4.x</a>
+        <p class="nice-text">New Syscalls of Linux 4.x 引言 Linux 4.19 就要发布了，按照套路，4.19应该是Linux 4.x的最后一个版本。Linux 4.0发布在2015年4月(那时候还是大二的小懵懂)。这几年中Linux改变了那些东西呢。这篇是总结了一下新增的syscalls的，其实syscall与新特性大部分时候都没啥关系，这里只是为了好玩。 Syscalls copy_file_range ssize_t copy_file_range(int fd_in, loff_t *off_in, int fd_out, loff_t *off_out, size_t len, unsigned int flags); Linux 4.5中添加的，主要是为了减少不必要的数据拷贝。比如从一个文件的数据拷贝到另外一个文件是，可以不经过user space。 mlock2 int mlock(const void *addr, size_t len); int mlock2(const void *addr, size_t len, int flags); int munlock(const void *addr, size_t... <a href="/2018/09/New-Syscalls-of-Linux-4.x.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>09 Sep 2018</small>
+        <small><a style="color:grey" href="/2018/09/Linux-BtrFS.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2018/09/Linux-BtrFS.html">Linux BtrFS</a>
+        <p class="nice-text">BTRFS: The Linux B-Tree Filesystem 0x00 引言 BtrFS号称是Linux的下一代文件系统，不过感觉现在进展不怎么样，目前性能也渣。虽然有一大堆的新功能和高级特性，不过bug一大堆。从2007年开始开发到现在都11年了，还是这个鬼样子，有种要扶不上墙的感觉。这篇Paper就介绍了BtrFS的基本技术: 0x01 BtrFS特点 诸多的新功能: (1) CRCs maintained for all metadata and data; (2) efficient writeable snapshots, clones as first class citizens; (3) multidevice support; (4) online resize and defragmentation; (5) compression; (6) efficient storage for small files; (7) SSD optimizations and TRIM support.... <a href="/2018/09/Linux-BtrFS.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>06 Sep 2018</small>
+        <small><a style="color:grey" href="/2018/09/F2FS.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2018/09/F2FS.html">F2FS</a>
+        <p class="nice-text">F2FS: A New File System for Flash Storage 0x00 引言 SSD有种它自己的特点。Linux的Ext FS，XFS FS等主要还是为HHD设计，优化的出发点也是HHD的工作方式。而SSD的工作方式和HHD有着本质的不同. F2FS是Linux上的一个为SSD设计的FS，另外F2FS是一个Log Structured的FS(所以先看一下[2,3])，现在在很多的智能手机上已经使用了(苹果也号称它的新的APFS是为SSD优化设计的，不过找不到具体技术细节的东西)。 The detrimental effects of random writes could be reduced by the log-structured file system (LFS) approach and/or the copy-on-write strategy. For exam- ple, one might anticipate file systems like BTRFS and NILFS2 would perform well... <a href="/2018/09/F2FS.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>05 Sep 2018</small>
+        <small><a style="color:grey" href="/2018/09/Flash-based-SSDs.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2018/09/Flash-based-SSDs.html">Flash-based SSDs</a>
+        <p class="nice-text">Flash-based SSDs 0x00 引言 SSD在个人电脑是逐渐要普及了。在一个很多公司，数据库的机器也是被特殊对待，一般会配备性能杠杠的SSD。这篇主要参考了[1]，这本书是可以免费获取的。 0x01 基本结构和操作 SSD中分为2级的结构，blocks常见的大小是128KB 256KB，另外一个是Page，最常见的大小是4KB。SSD中更加基本的结构是transistor ，一个transistor 可以存储1 2 3 4bits(目前最多一般只有4个)的信息。一个transistor 里面bit越多，性能越差，寿命越短(相对而言，在同样的技术条件下)。 基本操作 Flash的基本操作有3个: Read(page): 读取一个page的数据，这个是SSD比HHD的优点之一，随机读的性能远高于HHD； Erase (a block): 很不幸的是，这个是Flash-based SSD的最大最麻烦的一个问题，也极大地影响了SSD和其控制器的设计。在一个page被program之前，SSD必须擦除page所在的整个块。这个是由于SSD存储的原理决定的。 Program (a page): 将数据写入到一个已经擦除的page中。 0x02 FTL 很不幸的是，SSD的寿命也不如HHD，主要的原因是block能被擦出的次数有限: The typical lifetime of a block is currently not well known. Manufac- turers rate MLC-based blocks as having a... <a href="/2018/09/Flash-based-SSDs.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>04 Sep 2018</small>
+        <small><a style="color:grey" href="/2018/09/Log-structured-File-Systems.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2018/09/Log-structured-File-Systems.html">Log-Structured File System</a>
+        <p class="nice-text">Log-Structured File System 0x00 引言 Log是Computer Science中一个非常重要的思想，与存储相关的地方都非常常见。Log-Structured File System(这里是LFS)是不同与常见的Unix FFS的一类文件系统，这篇论文发表于1992年(还是比我年龄要大呀)，比发表于1984年的Unix FFS晚了8年时间。计算机系统随着时间也发生了很多的变化，新的方法也会随之诞生。 同前面的Unix FFS的paper一样，Log-Structured File System的论文也大概在大三的时候就看过了，因为某些原因，又重新回顾了一遍。 Log-Structured 是从文件系统，内存分配起到NVM空间管理，到Log-Structured 的数据结构，SSD的内部等等等，一大堆。可以来一个集合。 0x01 动机 动机基于以下的观察: System memories are growing; There is a large gap between random I/O performance and se- quential I/O performance; Existing file systems perform poorly on many common workloads; File systems... <a href="/2018/09/Log-structured-File-Systems.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>03 Sep 2018</small>
+        <small><a style="color:grey" href="/2018/09/A-Fast-File-System-for-Unix.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2018/09/A-Fast-File-System-for-Unix.html">A Fast File System for Unix</a>
+        <p class="nice-text">A Fast File System for Unix 0x00 引言 Unix FFS是针对HHD的经典文件系统设计，文章发表于1984了，距今已有34年了(比我年龄大上好多)。这篇论文在大三的时候就看过了。FFS的论文里面的思想影响到了现在很多文件系统的设计。 0x01 原有解决方案存在的问题 ​ 经典的Unix文件系统布局: Super Block +------+---------+---------------------------+ | | | | | | | Data | | | inodes | | +------+---------+---------------------------+ 原有系统的问题就是糟糕的性能表现，大概只能发挥出磁盘2%的带宽，低到可怕。性能低的一个最主要的原因就是远文件系统的设计是把此篇当作是一个随机访问的内存，只不过这个不支持byte-addressable而已，只能按块来访问。系统运行一段时间后碎片导致了文件块发布在此篇的各个地方，操作文件造成了大量的seek操作，严重降低了性能。 所以FFS的核心就是[2]: How can we organize file system data structures so as to improve per- formance? What types... <a href="/2018/09/A-Fast-File-System-for-Unix.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>02 Sep 2018</small>
+        <small><a style="color:grey" href="/2018/09/The-Multi-Level-Feedback-Queue.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2018/09/The-Multi-Level-Feedback-Queue.html">The Multi-Level Feedback Queue</a>
+        <p class="nice-text">The Multi-Level Feedback Queue 0x00 引言 MLFQ应该OS课程都会将到的一个Scheduling算法吧。《Operating Systems: Three Easy Pieces》中这一章将的真的是非常赞了(强势安利)。就来复习一下几年前学过的内容。 The Multi-level Feedback Queue (MLFQ) scheduler was first described by Corbato et al. in 1962 in a system known as the Compatible Time-Sharing System (CTSS), and this work, along with later work on Multics, led the ACM to award... <a href="/2018/09/The-Multi-Level-Feedback-Queue.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>01 Sep 2018</small>
+        <small><a style="color:grey" href="/2018/09/ISA-Wars.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2018/09/ISA-Wars.html">ISA Wars</a>
+        <p class="nice-text">ISA Wars: Understanding the Relevance of ISA being RISC or CISC to Performance, Power, and Energy on Modern Architectures(指令集战争：理解现代RISC或CISC处理器架构与性能、能耗和能效的相关性) 0x00 引言 RISC和CISC的比较来源已久，早期的比较大多都集中在性能方面。一般情况下，会认为CISC处理器的性能更加好，而能耗和能效更加低，RISC反之，当然这种说法不一定准确。而现在，CPU架构发展已经相对成熟，单核性能每年增长的幅度很小，CPU多核化，智能手机等移动设备的CPU越来越受关注。那么在CPU发展变化之后，RISC和CISC的指令集类型对处理器的各个关键指标又有什么样的影响呢？这里我们来看一看TPCS 2015上的一篇文章[1]。这篇paper主要做的就是: We present an exhaustive and rigorous analysis using workloads that span smart-phone, desktop, and server applications. In our study, we are primarily interested in whether and, if... <a href="/2018/09/ISA-Wars.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>25 Aug 2018</small>
+        <small><a style="color:grey" href="/2018/08/Path-Hashing.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2018/08/Path-Hashing.html">A Write-Friendly and Cache-Optimized Hashing Scheme for NVM Systems</a>
+        <p class="nice-text">A Write-Friendly and Cache-Optimized Hashing Scheme for Non-Volatile Memory Systems 0x00 引言 非易失性内存(NVM)是现在的一个研究热点。对于现在存在的一些hash table的算法都不能很好的适应NVM的环境，其主要原因就是NVM写的成本相对来说比较高，而常规的设计会造成很多额外的写操作。这篇paper的主要目的就是减少额外的写操作，同时为cache优化。 0x01 基本思路 这篇paper使用的方法叫做Path hashing ，方法理解起来很简单，文章中的一段话加上一幅图即可： Storage cells in the path hashing are logically organized as an inverted complete binary tree. The last level of the inverted binary tree, i.e., all leaf nodes, is addressable by the... <a href="/2018/08/Path-Hashing.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>18 Aug 2018</small>
+        <small><a style="color:grey" href="/2018/08/Fine-grained-TCP-Retransmissions-for-Datacenter.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2018/08/Fine-grained-TCP-Retransmissions-for-Datacenter.html">Fine-grained TCP Retransmissions</a>
+        <p class="nice-text">Safe and Effective Fine-grained TCP Retransmissions for Datacenter Communication 引言 TCP中对于超时重传的时间处理上，为了避免虚假的超时重传，设置来一个最小的超时时间。在Linux上，这个是时间一般是200ms。在广域网上，这个最低的值设置是有意义的。但是在延时很低的数据中心内部，设个时间限制就可能导致一些问题，特别是incast的情况(就是多台机器与一台机器同时通信)。 这篇Paper就讨论了减小这个RTO带来的影响，发现可以通过将这个RTO的最小值设置的很小也能保证安全和效率，同时解决存在的问题。 问题分析 现在常见的RTO计算方式是: RTO = SRTT + (4 × RTTVAR) 考虑到指数退让，这里就是: timeout = RTO × 2 ^ backoff . 模拟中这个RTO的最小值对性能的影响，可以看出来RTO的最小值对性能有着明显的影响(模拟情况): ​ Paper中的在实际情况中的测试，也显示出减小RTOmin对性能的影响。 Despite these differences, the real world results show the need to reduce the RTO to at least... <a href="/2018/08/Fine-grained-TCP-Retransmissions-for-Datacenter.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>01 Aug 2018</small>
+        <small><a style="color:grey" href="/2018/08/Read-Log-Update.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2018/08/Read-Log-Update.html">Read-Log-Update</a>
+        <p class="nice-text">Read-Log-Update – A Lightweight Synchronization Mechanism for Concurrent Programming 0x00 引言 RLU可以看作是RCU的升级版本。RCU在Linux Kernel 中已经得到广泛的应用了。但是其也存在一些缺点，最大的一个缺点就是很难用，其次就是只适应有很少的write操作的情形，最后就是等待读者完成操作的延时问题(具体看看RCU有关的东西？)。RLU则可以解决RCU存在的一些问题: RLU provides support for multiple object updates in a single operation by combining the quiescence mechanism of RCU with a global clock and per thread object-level logs. . 0x01 基本思路 通过使用综合了结合global clock的RCU的quiescence机制和 thread直接独立的object logs，RLU一个操作支持多个对象更新。RLU有以下的基本思路，这一部分先假设写都是顺序进行的: 所有操作在开始都要读取global clock(g-clock)到自己线程局部的l-lock中，使用这个lock来对共享的对象解引用；... <a href="/2018/08/Read-Log-Update.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>15 Jul 2018</small>
+        <small><a style="color:grey" href="/2018/07/Contention-Aware-Lock-Scheduling-for-Transactional-Databases.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2018/07/Contention-Aware-Lock-Scheduling-for-Transactional-Databases.html">Contention-Aware Lock Scheduling</a>
+        <p class="nice-text">Contention-Aware Lock Scheduling for Transactional Databases 0x00 引言 这是我目前读过的最喜欢的一篇论文之一。首先，论文写的非常通俗易懂，即使你之前对Lock Schedule没有什么了解，通过这篇论文也能很清楚的知道Contention-Aware Lock Scheduling的原理。另外，这个算法不仅仅是一个理论上的，只存在于实验室中，这个算法已经被MySQL 8.0采用了。简直赞的不行，如此快速的在真正的实际的被广泛使用软件中得到应用，也侧面印证了这个研究very excellent。 文章一步一步的说明思路，从简单的想法开始，最终得出来 Largest-Dependency-Set-First 和batched Largest-Dependency- Set-First 两种算法，很喜欢这样的写作套路，对于这篇paper中大量的数学化描述，只需要理解其中的关键部分就可以了。类似的套路的文章(举两个例子)有《Paxos Made Simple》，还有《The Operating System: Three Easy Pieces》这本书中的不少章节，都讲的很不错，强烈推荐。 0x01 背景与动机 简而言之就是： Our goal is to find a lock scheduling algorithm under which the expected transaction latency is minimized. 很不幸的是，这个问题是个NP问题，找到最优的解是不现实的。所以这里只能使用近似的方法。 Paper中给出了一些概念，这里就不仔细去说这些概念了. 这里只说一下Dependency... <a href="/2018/07/Contention-Aware-Lock-Scheduling-for-Transactional-Databases.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>28 Jun 2018</small>
+        <small><a style="color:grey" href="/2018/06/Bw-Tree.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2018/06/Bw-Tree.html">Building a Bw-Tree Takes More Than Just Buzz Words</a>
+        <p class="nice-text">Building a Bw-Tree Takes More Than Just Buzz Words 0x00 引言 Bw-Tree是Microsoft Research发明的一种lock-free(在数据库中应该叫做latch-free)的数据结构，被用在Microsoft的内存数据库产品中，在CMU的学术型数据库peloton中也采用了这种数据结构。这篇paper就是CMU对其在peloton中实现中，对Bwtree的一些更加详细的讨论。从paper中得出的结论来说，Bwtree是有复杂而且在不少方面表现却比一些更加简单的、非lock-free的数据结构要差。 关于 Bwtree的论文之前有两篇， 不过这篇是讲的最清晰的。 0x01 基本结构 先来看一张图： Bwtree的4个核心内容： Base Nodes and Delta Chains 以目前的硬件，由于没有支持多CAS的(有软件的实现，之后在看看, ^_^)。所以直接修改B+tree的节点来实现lock free是不太行的通的。所以Bwtree使用了 Delta Chains的方法， Delta Chains实际上就是一个对节点修改的操作的链表。实现lock-free的链表相对来说简单多了。当这个 Delta Chains长度达到一定程度的时候，就利用这个 Delta Chains和原来的base node构造新的node，替换原来的node。这样通过一系列的操作转换，巧妙的将其转换为了lock free的结构。 Mapping Table 在原来的论文中，Mapping Table 的存在不仅仅是为了将更新node变为lock free的，还有为这个结构同时支持memory和SSD之类的多级存储的功能。在这篇文章中只在意在内存中(因为peloton是一个内存数据库). The Bw-Tree’s centralized Mapping Table avoids... <a href="/2018/06/Bw-Tree.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>05 Jun 2018</small>
+        <small><a style="color:grey" href="/2018/06/TicToc-Time-Traveling-Optimistic-Concurrency-Control.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2018/06/TicToc-Time-Traveling-Optimistic-Concurrency-Control.html">Time Traveling Optimistic Concurrency Control</a>
+        <p class="nice-text">TicToc: Time Traveling Optimistic Concurrency Control 0x00 引言 这篇文章是关于内存数据库的Optimistic Concurrency Control优化的一篇paper(对OCC没有了解的可以先看看论文[2])。Timestamp ordering (T/O) concurrency control 是数据库并发控制一种非常重要的方法，一般而言，系统会以事务为粒度分配timestamp，而这种方式存在一个缺点： A common way to implement the allocator is through an atomic add instruction that increments a global counter for each new transaction. This approach, however, is only able to generate less than 5 million... <a href="/2018/06/TicToc-Time-Traveling-Optimistic-Concurrency-Control.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>03 May 2018</small>
+        <small><a style="color:grey" href="/2018/05/NetChain-Scale-Free-Sub-RTT-Coordination.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2018/05/NetChain-Scale-Free-Sub-RTT-Coordination.html">NetChain -- Scale-Free Sub-RTT Coordination</a>
+        <p class="nice-text">NetChain: Scale-Free Sub-RTT Coordination 0x00 引言 这篇文章将的是利用可编程交换机做的一个Coordination Service(类似Chubby Zookeeper)，是NetPaxos 和NetCache的后续，想法都是将一些东西使用可编程的交换机来实现。 We present NetChain, a new approach that leverages the power and flexibility of new-generation programmable switches to provide scale-free sub-RTT coordination. In contrast to server-based solutions, NetChain is an in-network solution that stores data and processes queries entirely within the... <a href="/2018/05/NetChain-Scale-Free-Sub-RTT-Coordination.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>23 Apr 2018</small>
+        <small><a style="color:grey" href="/2018/04/Reducing-the-Storage-Overhead-of-Main-Memory-OLTP-Databases.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2018/04/Reducing-the-Storage-Overhead-of-Main-Memory-OLTP-Databases.html">Reducing the Storage Overhead of Main-Memory OLTP Databases</a>
+        <p class="nice-text">Reducing the Storage Overhead of Main-Memory OLTP Databases with Hybrid Indexes 0x00 引言 ​ 这篇文章的idea也是very excellent，paper的主要目的是减少内存数据库中内存的使用。通过讲结构分为两个部分，一个部分负责读取写入，另外一个只负责读取，通过对后一个的优化减少了大量的内存使用： The dual-stage architecture maintains a small dynamic “hot” store to absorb writes and a more compact, but read-only store to hold the bulk of index entries. Merge between the stages is triggered peri- odically... <a href="/2018/04/Reducing-the-Storage-Overhead-of-Main-Memory-OLTP-Databases.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>22 Apr 2018</small>
+        <small><a style="color:grey" href="/2018/04/The-ART-of-Practical-Synchronization.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2018/04/The-ART-of-Practical-Synchronization.html">The ART of Practical Synchronization</a>
+        <p class="nice-text">The ART of Practical Synchronization 0x00 引言 这篇文章是关于Adaptive Radix Tree上同步机制的一篇文章，ART是Hyper数据库中主要的索引数据结构。这里介绍了两个同步机制: Optimistic Lock Coupling , and Read-Optimized Write EXclusion (ROWEX) We synchronize the Adaptive Radix Tree (ART) using two such protocols, Optimistic Lock Coupling and Read-Optimized Write EXclusion (ROWEX). Both perform and scale very well while being much easier to implement... <a href="/2018/04/The-ART-of-Practical-Synchronization.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>12 Apr 2018</small>
+        <small><a style="color:grey" href="/2018/04/TinyLFU-A-Highly-Efficient-Cache-Admission-Policy.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2018/04/TinyLFU-A-Highly-Efficient-Cache-Admission-Policy.html">TinyLFU</a>
+        <p class="nice-text">TinyLFU: A Highly Efficient Cache Admission Policy 0x00 引言 在工作的时候使用了caffeine这个java 本地缓存库，这个库的设计非常赞，代码也非常棒(虽然目前为止只是粗略的看了一下，如果要推荐java的开源项目看看代码，这个绝对值得推荐)。这里只关注它里面的Cache Admission Policy – TinyLFU。 0x01 基本思路 先来一张图： ​ 虽然论文长达31页，但是我们这里只关注其中的两个部分: Let us emphasize that we face two main challenges. The first is to maintain a freshness mechanism in order to keep the history recent and remove old events. The second... <a href="/2018/04/TinyLFU-A-Highly-Efficient-Cache-Admission-Policy.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>02 Apr 2018</small>
+        <small><a style="color:grey" href="/2018/04/Anna.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2018/04/Anna.html">Anna -- A KVS for any scale</a>
+        <p class="nice-text">Anna: A KVS for any scale
+
+参考
+
+
+  Anna: A KVS for any scale, ICDE’18
+
+
+ <a href="/2018/04/Anna.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>28 Mar 2018</small>
+        <small><a style="color:grey" href="/2018/03/Full-Stack-Architecting-to-Achieve-a-Billion-RPS.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2018/03/Full-Stack-Architecting-to-Achieve-a-Billion-RPS.html">Full-Stack Architecting to Achieve a Billion</a>
+        <p class="nice-text">Full-Stack Architecting to Achieve a Billion-Requests-Per-Second Throughput on a Single Key-Value Store Server Platform 参考 Sheng Li, Hyeontaek Lim, Victor W. Lee, Jung Ho Ahn, Anuj Kalia, Michael Kaminsky, David G. Andersen, Seongil O, Sukhan Lee, and Pradeep Dubey. 2016. Full-stack architecting to achieve a billion-requests-per- second-throughput on a single... <a href="/2018/03/Full-Stack-Architecting-to-Achieve-a-Billion-RPS.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>25 Mar 2018</small>
+        <small><a style="color:grey" href="/2018/03/ScaleFS.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2018/03/ScaleFS.html">Scaling a file system to many cores using an operation log</a>
+        <p class="nice-text">Scaling a file system to many cores using an operation log
+
+参考
+
+
+  Scaling a file system to many cores using an operation log, SOSP 2017.
+
+ <a href="/2018/03/ScaleFS.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>20 Mar 2018</small>
+        <small><a style="color:grey" href="/2018/03/OpLog.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2018/03/OpLog.html">OpLog -- a library for scaling update-heavy data structures</a>
+        <p class="nice-text">OpLog: a library for scaling update-heavy data structures
+
+参考
+
+
+  OpLog: a library for scaling update-heavy data structures, Silas Boyd-Wickizer, M. Frans Kaashoek, Robert Morris, and Nickolai Zeldovich
+
+
+ <a href="/2018/03/OpLog.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>10 Mar 2018</small>
+        <small><a style="color:grey" href="/2018/03/The-Scalable-Commutativity-Rule.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2018/03/The-Scalable-Commutativity-Rule.html">The Scalable Commutativity Rule</a>
+        <p class="nice-text">The Scalable Commutativity Rule: Designing Scalable Software for Multicore Processors 0x00 引言 CPU的单核性能增长现在已经慢到不行，核心数量的增长还是很快的。如何改变软件让其适应越来越多的核心的CPU，这是个问题，233。 API的设计(the design of the software interface )对系统可可拓展性有着很大的影响，一个例子就是open这个系统调用。POSIX标准规定返回的文件描述符必须是空闲的里面最小的，实际上对于这个API来说，文件描述符只要能保证是唯一的就行了，完全没必要有这样的要求。就是当初这样一个设定，导致了可拓展性的问题。在MegaPipe等之类的设计中都抛弃了这一个设定。 This forces the kernel to coordinate file descriptor allocation across all threads, even when many threads are opening files in parallel. This choice simplified the kernel interface during the early... <a href="/2018/03/The-Scalable-Commutativity-Rule.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>01 Mar 2018</small>
+        <small><a style="color:grey" href="/2018/03/KV-Direct.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2018/03/KV-Direct.html">KV-Direct</a>
+        <p class="nice-text">KV-Direct: High-Performance In-Memory Key-Value Store with Programmable NIC 引言 KV-Direct[1]是SOSP 2017上的一篇关于利用可编程网卡和FPGA实现Key-Value Store的Paper。号称可在单机上实现1.22 billion的 KV操作。 A single NIC KV-Direct is able to achieve up to 180 M KV operations per second (Ops), equivalent to the throughput of 36 CPU cores. Compared with state-of-art CPU KVS implementations, KV-Direct reduces tail latency to... <a href="/2018/03/KV-Direct.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>25 Feb 2018</small>
+        <small><a style="color:grey" href="/2018/02/ZygOS.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2018/02/ZygOS.html">ZygOS -- Achieving Low Tail Latency for Microsecond-scale Networked Tasks</a>
+        <p class="nice-text">ZygOS: Achieving Low Tail Latency for Microsecond-scale Networked Tasks
+
+0x00 引言
+
+0x02 基本思路
+
+参考
+
+
+  George Prekas, Marios Kogias, and Edouard Bugnion. 2017. ZygOS: Achieving Low Tail Latency for Microsecond-scale Networked Tasks. In Proceedings of SOSP ’17. ACM, New York, NY, USA, 17 pages. https://doi.org/10.1145/3132747.3132780.
+
+ <a href="/2018/02/ZygOS.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>20 Feb 2018</small>
+        <small><a style="color:grey" href="/2018/02/The-IX-Operating-System.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2018/02/The-IX-Operating-System.html">The IX Operating System</a>
+        <p class="nice-text">The IX Operating System: Combining Low Latency, High Throughput, and Efficiency in a Protected Dataplane 引言 IX和Arrakis都是OSDI 2014上关于利用硬件虚拟化来提供系统IO性能的论文。IX和Arrakis在很多地方是相似的，比如Data Plane和Control Plane分离，比如使用虚拟化和硬件交互，比如都是用用户空间的网络栈等等。此外，IX实现基于之前的Dune Framework，一个利用虚拟化安全保留硬件功能的框架。IX的设计基于以下几个原则: Separation and protection of control and data plane， Run to completion with adaptive batching， Native, zero-copy API with explicit flow control， Flow-consistent, synchronization-free processing， TCP-friendly flow group migration， Dynamic... <a href="/2018/02/The-IX-Operating-System.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>16 Feb 2018</small>
+        <small><a style="color:grey" href="/2018/02/Arrakis.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2018/02/Arrakis.html">Arrakis -- The Operating System Is the Control Plane</a>
+        <p class="nice-text">Arrakis: The Operating System Is the Control Plane 买不到票的人回不了家。 引言 这篇文章是OSDI 2014上面关于利用虚拟化优化网络和存储IO的文章，主要现在的新硬件上的系统优化。很值得一看。 We demonstrate that operating system protection is not contradictory with high performance. For our prototype implementation, a client request to the Redis persistent NoSQL store has 2× better read latency, 5× better write la- tency, and 9× better... <a href="/2018/02/Arrakis.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>08 Feb 2018</small>
+        <small><a style="color:grey" href="/2018/02/MICA.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2018/02/MICA.html">MICA</a>
+        <p class="nice-text">MICA: A Holistic Approach to Fast In-Memory Key-Value Storage 这篇paper是关于KVS里面一篇非常好的文章。个人觉得里面很多东西都设计的很赞。此外，作者还有一篇指导如何设计一个QPS 为Billion基本的论文[2]，也很值得一看(不过好像里面做的并没有实际到达1billion，倒是SOSP 2017 上的一篇文章到达了[3]，之后加上这篇论文的blog) 0x00 引言 MICA一个目的就是旨在解决之前类似系统只为read-mostly场景设计，希望能适应各种各样的场景，并提供很好的性能： Under write-intensive workloads with a skewed key popularity, a single MICA node serves 70.4 million small key-value items per second (Mops), which is 10.8x faster than the next fastest system. For skewed, read-intensive workloads,... <a href="/2018/02/MICA.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>04 Feb 2018</small>
+        <small><a style="color:grey" href="/2018/02/Algorithmic-Improvements-for-Fast-Concurrent-Cuckoo-Hashing.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2018/02/Algorithmic-Improvements-for-Fast-Concurrent-Cuckoo-Hashing.html">Algorithmic Improvements for Fast Concurrent Cuckoo Hashing</a>
+        <p class="nice-text">Algorithmic Improvements for Fast Concurrent Cuckoo Hashing 0x00 引言 这篇paper是MemC3[2]的进一步的工作，发表的时间晚了一年(2014，想想当时年轻的我，心塞塞的)。这里继续讨论了对hash table的一些优化，主要是对MemC3中的hash table的设计，特别是并发方面。此外，还利用了HTM做的一些优化。 0x01 Improve Concurrency 先来看一看结果，性能数据还是灰常赞的(可怜的TBB，经常被比较，总是被打败). 并发方面的优化基于一下基本principle: P1: Avoid unnecessary or unintentional access to common data. 这个基本不用说了，最基本的套路. P2: Minimize the size and execution time of critical sections. 同上. P3: Optimize the concurrency control mechanism. 这里的名堂就多了去了。这里还讨论了使用HTM的优化。 . 0x02 Algorithmic Optimizations Lock... <a href="/2018/02/Algorithmic-Improvements-for-Fast-Concurrent-Cuckoo-Hashing.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>02 Feb 2018</small>
+        <small><a style="color:grey" href="/2018/02/MemC3.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2018/02/MemC3.html">MemC3</a>
+        <p class="nice-text">MemC3: Compact and Concurrent MemCache with Dumber Caching and Smarter Hashing 0x00 引言 ​ 这篇paper是关于优化memcached内部实现的。主要包含了几个方面，这里只关注optimistic cuckoo hashing 。 As a case study, we focus on Memcached [19], a popular in-memory caching layer, and show how our toolbox of techniques can improve Memcached’s perfor- mance by 3× and reduce its memory... <a href="/2018/02/MemC3.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>30 Jan 2018</small>
+        <small><a style="color:grey" href="/2018/01/netmap.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2018/01/netmap.html">netmap -- a novel framework for fast packet I/O</a>
+        <p class="nice-text">netmap: a novel framework for fast packet I/O
+
+参考
+
+
+  netmap: a novel framework for fast packet I/O,
+
+ <a href="/2018/01/netmap.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>26 Jan 2018</small>
+        <small><a style="color:grey" href="/2018/01/mTCP.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2018/01/mTCP.html">mTCP -- A Highly Scalable User-level TCP Stack</a>
+        <p class="nice-text">mTCP: A Highly Scalable User-level TCP Stack for Multicore Systems 引言 mTCP是在用户态实现的TCP网络协议栈，目的是解决目前的内核网络栈存在的可拓展性的问题。具体的一些问题在前面的几篇文章中已经提到了。 Lack of connection locality，Affinity-Accept[3]和MegaPipe[2]也尝试解决这个问题； Shared file descriptor space，VFS带来的overhead； Inefficient per-packet processing，低效的包处理； System call overhead，系统调用的开销。 mTCP通过综合多中技术:1. 将昂贵的syscall转化为为一个简单的引用操作，2. 高效的流事件聚合，3. IO操作批量化处理等最终实现了性能的大幅提升: Our evaluations on an 8-core machine showed that mTCP improves the performance of small message transactions by a factor of... <a href="/2018/01/mTCP.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>24 Jan 2018</small>
+        <small><a style="color:grey" href="/2018/01/Fastsocket.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2018/01/Fastsocket.html">Scalable Kernel TCP Design and Implementation for Short-Lived Connections</a>
+        <p class="nice-text">Scalable Kernel TCP Design and Implementation for Short-Lived Connections 引言 这篇Fastsocket的文章是最近的关于Linux网络栈优化的第3篇，出自清华大学和新浪。所以要解决的问题和前面的2个差不多，还是要解决Linux内核网络栈存在的一些可拓展性的问题。和前面的两篇的最大的一个区别就是这篇文章里面讲的Fastsocket被实际使用了。 基本思路 将导致竞争的全局结构分区处理； 正确处理包以实现主动连接和被动连接的connection locality； 解决socket和VFS耦合导致的性能问题，同时保证兼容性。 基本的架构图如下: Local Listen Table 和前面2篇文章的思路一样，这里的做法也是讲listen table之类的共享结构分区处理: 一个进程创建一个listen socket，这个socket对应的 Listen Table是 global listen table。然后这个进程fork出子进程，子进程继承了这个socket，准备好接受新的连接。 在fastsocket中，使用local listen() 来告诉内核我想处理的是我绑定的CPU core上面处理的连接。 We refer to the copied listen socket as the local listen socket and the original listen socket... <a href="/2018/01/Fastsocket.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>21 Jan 2018</small>
+        <small><a style="color:grey" href="/2018/01/MegaPipe.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2018/01/MegaPipe.html">MegaPipe</a>
+        <p class="nice-text">MegaPipe: A New Programming Interface for Scalable Network I/O 引言 网卡性能的提高，自然对kernel的网络栈的性能也提出了更加高的要求。网络栈的一些缺点在这些高性能的网卡中也会体现地更加明显。 目前系统存在的一些问题: Contention on Accept Queue（accept队列上的竞争): accept queue只有一个，操作加锁，这样就导致了CPU核心之间的竞争。影响了kernel添加连接和application接受一个新的连接。此外，这样的设计也是缓存不友好的； Lack of Connection Affinity（缺乏连接亲和性): 在Linux中，已经存在了RSS、RPS等机制将接受的数据包分发到每个CPU核心上。一个CPU核心上接受的新连接的数据包可能是另外一个CPU核心接受的。 File Descriptors ：POSIX中一个很差劲的设计，但是可能没想到对以后的系统会有这么大影响。每次分配的fd必须是最小的，这个在实际中是没有这个需要的，标准中确加了进去。(the cost of allocating a single FD is roughly 16% greater when there are 1,000 existing sockets as compared to when there are no existing... <a href="/2018/01/MegaPipe.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>18 Jan 2018</small>
+        <small><a style="color:grey" href="/2018/01/Improving-Network-Connection-Locality.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2018/01/Improving-Network-Connection-Locality.html">Improving Network Connection Locality on Multicore Systems</a>
+        <p class="nice-text">Improving Network Connection Locality on Multicore Systems 引言 这个是最近三篇关于Linux 内核网络栈优化文章中的第1篇，后面的两篇会之后加上[2,3]。这篇文章解决Linux中Connection Locality的问题的。提出了一个叫做MegaPipe办法。 问题: 这以幅图就基本说明了目前存在的问题。多个核心共享一些结构导致了冲突的问题。 基本思路 基本思路就是将这些共享的结构弄成非共享的。Affinity-Accept 将这些结构变成了每一个核心一份。 第一个要解决的问题就是包路由的问题，这里需要将来自一个连接的包有交给同一个核心。这里通过网卡的功能解决。 The NIC hardware typically hashes each packet’s flow identifier five-tuple (the protocol number, source and destination IP addresses, and source and destination port numbers) and uses the resulting hash value to look up... <a href="/2018/01/Improving-Network-Connection-Locality.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>07 Jan 2018</small>
+        <small><a style="color:grey" href="/2018/01/Dune-Framework.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2018/01/Dune-Framework.html">Dune Framework</a>
+        <p class="nice-text">Dune: Safe User-level Access to Privileged CPU Features 引言 做为一个计算机系统的常识，为了保护系统，我们知道，用户进程的权限是很有限的。这样的设计带来一些好处的同时，也屏蔽了一些好处。如java虚拟机，有时候需要控制线程，要经常性地进行GC，这个时候如果能让JVM访问一些kernel feature，就能得到很多好处。 Dune的一个基本思想是利用虚拟化，将一些之前只能是kernel feautre的功能暴露给应用，同时保证系统的安全性。一个Dune进程做为一个普通的Linux进程，不够使用VMCALL来进行系统调用。 之前有个的一个类似的系统是Exokernel，不过那个更像是一种类型的kernel，而这个是一个内核上的功能。 基本架构 Dune可以看作是一个虚拟化的一个模块，有内核部分和应用库组成： Dune的基本架构如上图所示，在内核中，添加了一个Dune Module，一个Dune Process，运行在VMX non-root的ring0权限下，再在此之上运行平常的代码。应用不必要一开始在Dune中运行，可以在运行。通过对 /dev/dune/ 进行操作进入Dune状态。不过一旦进入，就不能退出。 Dune不同于VMM的一些地方： Dune不支持运行一个完整的OS； 与一般的VMMs不同，Dune使用hypercall调用的是一般的linux syscall； 一般的VMM是虚拟完整的硬件，而Dune之暴露硬件的一部分features； Dune不需要save和restore所有的state； Dune中的内存布局可以是稀疏的，不必想VMMs一样每一个VM都有一个分隔的地址空间。 Memory Management &amp; Exposing Access to Hardware &amp; Preserving OS Interfaces 内存管理Dune的最大的要处理的一个问题，由于Dune想要暴露出来page table，于此同时又要保存一般的内存空间的功能。在上面的图中有一定的体现。 For processes using Dune, a user controlled page... <a href="/2018/01/Dune-Framework.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>18 Dec 2017</small>
+        <small><a style="color:grey" href="/2017/12/Multi-Kernel.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2017/12/Multi-Kernel.html">The Multikernel -- A new OS architecture for scalable multicore systems</a>
+        <p class="nice-text">The Multikernel: A new OS architecture for scalable multicore systems 引言 这篇Paper针对的是现在的系统越来越多样，CPU的核心数量越来越多。一种内核为多样的环境和多样的任务都优化得很好是不可能的。为了适应未来的挑战，Paper提出了一种叫做multikernel的新的OS架构，这种内核架构最大的一个特点就是将机器看着是一个由cores组成的一个网络，core之间没有底层的共享结构，将传统的OS的功能转移到通过消息通信的分布式系统之中。促使设计multikernel这样一种kernel 架构的动机: 系统变得越来越多样化； core也在变的多样化； 现在系统的内部连接存在很多问题； 消息通信的代价要小于共享内存； 缓存一执行不能解决所有的问题(不是万能药)； 消息通信在变得更加简单； . 文中认为现在系统中存在的问题与现在的内核存在很多由共享锁保护的数据结构有很大的关系，这里multikernel则引入分布式系统中的概念，将操作系统的功能分解为分布式的功能单元来重新思考。这里的设计遵循了以下的原则: 显式的core间通信；相比于传统的隐式的core间通信，这种方式使得OS可以保持良好的隔离性，以及有利于管理各种各样的核心。此外，这使得在任意的核的拓扑关系间调度任务变得更加有效(虽然我也不知道为什么，反正他就是这么说的)，没有缓存一致性，没有共享内存。 保持硬件中立性；multikernel的一个设计思想就是尽可能的将OS架构和硬件分离开，这主要来消息传递的原理和硬件接口两个方面，这有利于适应新的研究而不用做出很多的修改，也有利于将方法和具体的实现分离开来。 复制状态而不是共享状态；系统中总是存在许多的状态，常见的使用共享数据结构，然后使用锁保护的方式使得系统变得更加复杂而去难以拓展。复制状态也是现在的系统提高性能常用的一种办法，常见的就是per-core的结构。复制也对在运行时改变cores很有用，比如CPU的热拔插。 The contributions of this work are as follows: • Weintroducethemultikernelmodelandthedesignprinciples of explicit communication, hardware-neutral structure, and state replication. • We present a multikernel, Barrelfish, which explores... <a href="/2017/12/Multi-Kernel.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>20 Nov 2017</small>
+        <small><a style="color:grey" href="/2017/11/Masstree.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2017/11/Masstree.html">Masstree</a>
+        <p class="nice-text">Cache Craftiness for Fast Multicore Key-Value Storage 引言 Masstree是一种结合了trie和b+tree的一种新型的数据结构，为内存数据库设计，被用在了silo这个内存数据库之中。之后又被其它一些相关的系统使用。 这篇paper中除了讨论Masstree的结构外，还讨论了一些关于其并发操作的内容。这里如果不是必要的话，会忽略这部分的内容，因为在SOSP‘13 silo的论文中有更加详细的讨论。这里只关注数据结构本身。 基本结构 Masstree可以看作是一棵trie，每个节点是一棵b+tree树。这样就是一种树套树的数据结构: 每一层Masstree的key长度是8bytes。至少包含了一个border节点和 0个or多个的interior 节点，前者和b+tree中的leaf节点相似，但不仅仅可以包含key values，还可以包含对下一层的指针。Key的保持有以下的规则 (1) Keys shorter than 8h + 8 bytes are stored at layer ≤ h. (2) Any keys stored in the same layer-h tree have the same 8h-byte prefix. (3) When two keys share... <a href="/2017/11/Masstree.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>11 Nov 2017</small>
+        <small><a style="color:grey" href="/2017/11/The-Tail-at-Scale.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2017/11/The-Tail-at-Scale.html">The Tail at Scale</a>
+        <p class="nice-text">The Tail at Scale 引言 这个大名鼎鼎的 JEFFREY DEAN发表的一片关于tail-tolerance的一篇文章。一般都知道接口的一个重要的衡量指标就是TOP 90, TOP 99之类的。常见的互联网的服务比如网页加载速度、相关接口的反应时间等等是直接影响到用户体验的。Amazon和Google都要相关的数据表明加载时间长多少ms，用户就会损失多少。这个可以在网上找到相关的文章。 Tail-Tolerance 在较复杂的系统中，长尾延时总是会存在。造成这个的原因非常多，常见的有网络抖动，GC，系统调度等。文章中有总结如下: Shared resources. 公用资源产生的相互影响； Daemons. Global resource sharing. 比如交换机，共享的文件系统； Maintenance activities. Queueing. Power limits. Garbage collection. 这里不仅仅包括类似JVM的GC，还有SSD这类hardware的内部行为； Energy management. key insights： even rare performance hiccups affect a significant fraction of all requests in large-scale distributed systems. eliminating all... <a href="/2017/11/The-Tail-at-Scale.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>05 Nov 2017</small>
+        <small><a style="color:grey" href="/2017/11/Write-Behind-Logging.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2017/11/Write-Behind-Logging.html">Write-Behind Logging</a>
+        <p class="nice-text">Write-Behind Logging 引言 继续讲WAL进化的文章。这次的Paper讲的是NVM上面的WAL应该如何设计。利用NVM掉电不丢数据的特点，这篇Paper描述了Write-Behind Logging。Write-Behind Logging，顾名思义就是在操作之后在写Log。 Using this logging method, the DBMS can flush the changes to the database before recording them in the log. By ordering writes to NVM correctly, the DBMS can guarantee that all transactions are durable and atomic. This allows the DBMS to write less data... <a href="/2017/11/Write-Behind-Logging.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>03 Nov 2017</small>
+        <small><a style="color:grey" href="/2017/11/From-ARIES-to-MARS.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2017/11/From-ARIES-to-MARS.html">From ARIES to MARS</a>
+        <p class="nice-text">From ARIES to MARS: Transaction Support for Next-Generation Solid State Drives 引言 WAL是数据库等系统的设计中一个很核心的一个部分。之前的WAL机制如ARIES都是为HHD设计的。对于现在越来越快的SSD和出现的非易失性内存，如何优化原来的WAL设计，更好的利用新的硬件，这篇Paper就是讨论了这个问题。 This paper presents a novel WAL scheme, called Modified ARIES Redesigned for SSDs (MARS), optimized for NVM-based storage. The design of MARS reflects an examination of ARIES, a popular WAL-based recovery algorithm for databases, in the context... <a href="/2017/11/From-ARIES-to-MARS.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>01 Nov 2017</small>
+        <small><a style="color:grey" href="/2017/11/ARIES.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2017/11/ARIES.html">ARIES -- A Transaction Recovery Method</a>
+        <p class="nice-text">ARIES: A Transaction Recovery Method Supporting Fine-Franularity Locking and Partial Rollbacks Using Write-Ahead Logging 引言 ARIES这篇文章应该是WAL里面最有名的一篇了，发表在1992年，现在很多数据库WAL的设计上都有它的影子。后续的对它的改进和各种的变体也很多。另外，这篇论文长达69页，orz。这里的总结也会讲的比较详细，长度可能是其它的几倍，此外，除了这篇文章里面的内容，还会结合现在的数据库的实例来对比看看。 ARIES有以下的几个特点: 操作之前先在Log中持久化相关的数据，这些log都是只追加的，从来不会修改； ‘No-Force’ policy，由于有了Log，也就不需要立即就将更新之后的page持久化； ‘Steal’ policy，没有提交的事务更新的pages也能写入到磁盘上面(这个是为了支持”很大”的事务)，因为有undo log，这也是可以恢复的； 使用LSN (Log Sequence Numbers)来保证标记log，page是基本的管理单位； 相关的数据接口 正常处理流程 重启处理流程 CheckPoint Media恢复 Nested Top Actions Recovery Paradigms MySQL的WAL PostgreSQL的WAL RocksDB的WAL 参考 ARIES: A Transaction Recovery Method Supporting Fine-Franularity Locking and... <a href="/2017/11/ARIES.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>25 Oct 2017</small>
+        <small><a style="color:grey" href="/2017/10/Storage&Recovery-Methods-for-NVM-DB.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2017/10/Storage&Recovery-Methods-for-NVM-DB.html">Storage & Recovery Methods for NVM DB</a>
+        <p class="nice-text">Let’s Talk About Storage &amp; Recovery Methods for Non-Volatile Memory Database Systems 引言 这篇Paper主要讨论了数据库的不同类型的存储和恢复方式在NVM上的表现。NVM有着不同于DRAM和SSD的性能特点，自然不同的方式在NVM也有着不同的性能体现。Paper主要讨论了常见的就地更新，Copy-on-Write和 Log-structured Updates在NVM为基础的数据库上的各种的表现。 分类 基本分类： In-Place Updates Engine(InP) InP是数据库中常见的存储策略，更新数据时就直接在原来的数据上进行。 Storage 在InP engine 中，存储空间被分为一些固定长度的blocks，和一些变长的blocks。这两个不同用于存储不同的数据。每一个block由一组slot组成，tuple被保存在这些slot里面，超过8byte的字段被保存在变长的slot里面，原tuple对应的字段的位置就保存地址信息。 When a transaction inserts a tuple into a table, the engine first checks the table’s pool for an available slot. If the pool is... <a href="/2017/10/Storage&Recovery-Methods-for-NVM-DB.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>18 Oct 2017</small>
+        <small><a style="color:grey" href="/2017/10/An-Empirical-Evaluation-of-In-Memory-MVCC.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2017/10/An-Empirical-Evaluation-of-In-Memory-MVCC.html">An Empirical Evaluation of In-Memory MVCC</a>
+        <p class="nice-text">An Empirical Evaluation of In-Memory Multi-Version Concurrency Control 引言 In-Memory的数据库也最近的一个研究的热点，此外，MVCC相对于其它存在的Concurrency Control方法，相对来说是最均衡的，新设计的In-Memory绝大部分采用的是MVCC的方法(OCC的缺点太明显了，write一多就abort)。基于MVCC的DBMS允许一个只读事务在读取一个较老版本的同时另外一个事务更新相同的一个对象，能获取更加好的并发程度。此外，如果DBMS没有移除对象的就版本，这个系统就可以支持读取过去一个时间点的快照。 虽然有诸多的DBMS使用了MVCC，但是它们之间的MVCC的方式很多不同的地方。这篇论文主要分析不同MVCC在这些方面方面上的一个特点: 1. 并发控制协议； 2. 版本存储； 3. 垃圾回收； 4. 索引管理。 (更新)强烈推荐的一片论文。 MVCC Overview 表1给出了常见数据4个方面的对比: 忽略其一些具体实现的差异，一个基于MVCC的DBMS一般有相同的一些用于事务和数据元组的元数据: Transactions: DBMS会赋予一个事务一个递增的时间戳作为事务id，用于表示这个事务。并发控制协议使用这个标识符标识一个事务可以访问的元组。 Tuples: 一个物理上的版本的数据包含了4个元数据字段(具体的可能有些区别)，如下图所示: +--------+-----------+---------+---------+------+-------------------------------+ | | | | | | | | txn-id | begain-ts | end-ts | pointer | ... | cloumns... |... <a href="/2017/10/An-Empirical-Evaluation-of-In-Memory-MVCC.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>12 Oct 2017</small>
+        <small><a style="color:grey" href="/2017/10/Consistency-Tradeoffs-in-Modern-Distributed-Database.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2017/10/Consistency-Tradeoffs-in-Modern-Distributed-Database.html">Consistency Tradeoffs in Modern Distributed Database System Design</a>
+        <p class="nice-text">Consistency Tradeoffs in Modern Distributed Database System Design CAP理论深刻地影响了分布式数据库的设计，另外一个方面，一致性和延迟之间的权衡也对现在的数据库产生了直接的影响。未来融合这个两者，一个新的理论PACELC[2]被提出。 DDBSs正在正在变得越来越”大”, 2个主要的原因促使了这种变化，第1个是现在的应用需要越来越多的数据和越来越高的事务处理能力，第2个是因为增长的跨国企业的需要在全球范围内开展业务，需要将数据中心建立在靠近客户的地方。在过去10年开发的DDBSs都具有高可用性或(和)全球范围内范围的能力，比如SimpleDB/DynamoDB，Cassandra，Voldmort，HBase/BigTable,MongoDB，VoltDB/H-Store以及Megastore等。 DDBSs是一个复杂的系统，开发这样一个系统是非常困难的。DDBS的设计是一门权衡的艺术，其中CAP理论是很重要的一个部分。虽然CAP很重要，但是论文[1]认为CAP被滥用了，仅仅只考虑C A P之间的权衡是不够的。实际上，CAP讨论的是故障复发生之后的一些限制。正常情况下，更为常见的权衡是一致性和延时之间的权衡，它也深刻地影响了DDBS的设计。PACELC被提出统一这些权衡，PACELC的含义为: P then AC else LC，意为在网络分区发生的时候系统需要在可用性和一致性之间做出权衡，而没有网络分区的情况下，系统需要在一致性和延时之间做出权衡。 CAP是关于故障的 由于CAP理论中三个最多只能取其二，只有以下几种类型的系统是可能的: CA，没有网络分区；CP，不能保证高可用；AP，不能保证一致性。现在很多的DDBS(默认情况下)都不保证C，比如SimpleDB/Dynamo, Cassandra等。 早起的DDBS的研究的关注点在一致性，很自然的认为CAP是影响数据库架构的主要因素。DDBS是必须要能容忍出现网络分区的，这样的话，DDBS这能在A和C之间做出选择。对于可靠性有高要求的应用就只能舍弃C。 看上去这里是没有问题的。但是实际上还是有一些瑕疵，这个观点不仅仅是一致性和可用性之间的权衡，而且还包括了网络分区和网络分区的存在这个件事情。也就是，这里只是简单地认为网络分区的存在得让我们在一致性和可用性之间做出选择。但是网络分区可能性是多种原因决定的: 系统在WAN上运行？或者知识一个局部的集群？使用了什么样的硬件？等等。通常网络分区是很少见的，发生的频率低于系统中的其它类型的故障。在没有网络分区的情况下，CAP允许系统完整的实现ACID的前提下也实现高可用性。CAP理论不是这些在正常的情况下减弱一致性的理由(比如SimpleDB/Dynamo, Cassandra等)。 一致性和延时之间的权衡 理解现代一些DDBS的设计要先了解它们面向的使用场景，现在的很多DDBS(比如SimpleDB/Dynamo, Cassandra等)面向的使用场景是在线活动，对交互的延时比较敏感，延时多上100ms可能就导致用户的流失。 不幸的事，在一致性、可用性和延时之间存在基本的权衡，即使没有网络分区，这种权衡也会存在，这种权衡与CAP无关。及时如此，这张权衡也是这些系统设计的关键因素。 高可用性机遇就意味着复制数据。为了实现尽可能高的可用性，DDBS就得在WLN复制数据，防治一个数据中心因为某些原因被整个损坏(比如地震、飓风)等。 当出现数据复制时，就会有一致性和延时之间的权衡。只有3种方法来实现数据复制: 1. 系统同时发送更新给所有副本；2. 发送给特殊的master节点；3. 随机发送给一个节点。无论哪一种方法，都存在一致性和延时之间的权衡。 同时发送给所有副本 如果更新不经过预处理合作其它的协议，因为每个副本得到的更新的顺序可能是不同的，这样就会导致明显的缺失一致性。而如果经过预处理合作通过其它协议来保证副本应用更新的顺序，这样的话，这些操作就是延时的来源。如果使用的是使用某种协议的方法，那么协议本身就是一种延时的来源。 在使用预处理方法的情况下，主要有两个延时的来源，第一个是附加的预处理会增加延时，第二，预处理器由几台机器或者一台机器组成，多台机器的情况下又需要某种协议来保证更新的顺序，一台机器的情况下任何位置的更新都得像这个单一的节点请求更新。 数据更新发送到一个商定的位置 这个商定的位置可以称为master。Master节点所有的请求然后更新数据。由于只由master来处理请求，所以更新执行的顺序是可以保证的。Master执行玩操作后，会复制到其它的节点。 这个复制有3种不同的选项: 1. 同步复制: Master节点会一直等待知道所有的副本都已经复制完成。这样一致性是有保障的，但是延时不可避免地会增大。 2. 异步复制: 系统会认为在复制完成之前就认为更新已经完成。通常会保证更新的数据以及被持久化保存，但不保证更新已经同步到所有的节点，这种情况下，一致性和延时的权衡取决于系统如何读取: i.... <a href="/2017/10/Consistency-Tradeoffs-in-Modern-Distributed-Database.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>09 Oct 2017</small>
+        <small><a style="color:grey" href="/2017/10/Adaptive-Radix-Tree.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2017/10/Adaptive-Radix-Tree.html">Adaptive Radix Tree</a>
+        <p class="nice-text">The Adaptive Radix Tree: ARTful Indexing for Main-Memory Databases 引言 ​ Adaptive Radix Tree是最近出现的为Main-Memory Database设计的的支持范围数据结构里面个人认为最优美的一种了，不如Masstree，Bwtree那么复杂，另外，相比于传统的一些结构如T-tree，也更好的适应了现代的多核处理器。这篇时关于Adaptive Radix Tree(ART)的基本结构的，另外有一篇时关于ART的Concurrency Control的，之后会加上。 ​ ART的主要思路时使用不同大小的Node，来减少内存使用。同时加上一些额外的如高度上的优化。 基本结构 前面提到，ART的内部Node有不同的大小。一般而言，离root比较远的Node里面保护的数据项时比较小的。一般的Radix Tree使用完整的Node的话，会浪费很多的内存，而ART就解决了这个问题： ART可以做到 With 32 bit keys, for example, a radix tree using s = 1 has 32 levels, while a span of 8 results in only 4 levels.... <a href="/2017/10/Adaptive-Radix-Tree.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>14 Sep 2017</small>
+        <small><a style="color:grey" href="/2017/09/PacificA-Replication-in-Log-Based-Distributed-Storage-Systems.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2017/09/PacificA-Replication-in-Log-Based-Distributed-Storage-Systems.html">PacificA -- Replication in Log-Based Distributed Storage Systems</a>
+        <p class="nice-text">PacificA: Replication in Log-Based Distributed Storage Systems PacificA是微软推出的一个通用的复制框架。论文[1]中强调PacificA是一个简单、实用和强一致性的。也许是基于Paxos的方法被太多的吐槽了关于复杂，难以理解难以实现，Raft、PacificA等算法都特别强调自己简单易于理解也相对容易实现。 选择一个合适的复制算法就算选择一个正确的架构设计，简单和模块化是设计的几个要点。PacificA的设计有以下的特点: 1. PacificA将配置管理和数据复制分离，由基于Paxos的模块来负责管理配置，主副本(primary/backup)策略来复制数据； 2. 去中心化的错误检测和触发配置，监控流量遵循数据复制的策略； 3. PacificA是一个通用的抽象的模型，易于验证，可以有不同的策略实现。 系统有以下的假设: 系统运行在一个分布式的环境之中，一些server组成集群，这些server随时可能失败，这里假设的情况是失败之后就停止运行(fail-stop failures)，信息在传输的过程中可能被延时任意长的时间达到，也可能丢失，可能会发生网络分区。时钟也是不可靠的。PacificA可以在一个n+1个副本的系统中最多容忍n个副本故障。 主副本数据复制 系统将客户端的请求分为两种: queries请求只请求数据而不会更新数据，而updates请求会更新数据。所有的请求都会发送个primary，primary会处理全部的请求，而只会在updates请求的时候才会让副本参与进来。这样的主副本的策略好处就是简单易于实现。 如果更新操作的结果是确定的，且所有的服务器都以系统的顺序处理了相同的请求集合，那么就可以实现强一致性。为了实现这个目标，primary(主副本)会赋予每一个请求一个唯一的单调递增的序号给所有的updates请求，每个次副本都的安装这个序号表示的顺序进行处理。这里可以表示为每个副本都维持了一个包含了它收到的所有请求的prepared list和一个对于这个list的一个commited point。这个list会根据序号排序，commited point之前的prepred list部分就是commited list。 正常情况情况下的查询和更新协议 正常情况下，primary对于接受到的queries的请求，直接就查询commited list之中的结果如何回复客户端即可。 对于updates请求，primary会先给这个请求赋予下一个的编号(编号可以初始化为0)，然后将这个请求带上编号和当前配置版本号(prepare message)发送给所有的次副本。 在收到prepare message后，次副本会将这个请求插入prepared list(注意要按照编号的顺序)，在次副本确认这个请求被安置妥当之后，就发送给primary一个ack以告知自己已经将这个请求安置妥当。当primary在收到了所有的次副本的ack之后，primary就会提交这个请求(The request is committed when the primary receives acknowledgments from all replicas)。然后，primary会移动它的committed point，然后向所有的次副本发送消息通知它们已经处理完毕，在收到了primary确认成功的消息之后，次副本也就可以移动它的committed point的了。 在这种处理方式之中，会有以下的结论： Commit... <a href="/2017/09/PacificA-Replication-in-Log-Based-Distributed-Storage-Systems.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>12 Sep 2017</small>
+        <small><a style="color:grey" href="/2017/09/A-Quorum-Based-Commit-Protocol.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2017/09/A-Quorum-Based-Commit-Protocol.html">A Quorum-Based Commit Protocol</a>
+        <p class="nice-text">A Quorum-Based Commit Protocol 在distributed computing中，quorum是指分布式执行时必须获得的最小的票数[2]，常被用于分布式的commit protocol和replica control。这里我们来看看论文[1]描述的一种quorum-based commit protocol。 介绍 这个Quorum-Based Commit Protocol(下文简称protocol or 协议)使用quorum的方式来解决错误发生之后的冲突。当有一个错误发生之后，一个事务只能在被一个quorum commit的情况下commit，这个quorum称为commit quorum，表示为V(C)，同理，一个事务abort只有在一个quorum abort的情况下abort，这个quorum称为abort quorum，表示为V(A)。 这个protocol有以下的一些的特点： 1. 这是一个集中式(centralized)的协议(也就是说存在中心节点)； 2. 当所有的错误(failure)被解决之后，协议最终会终止； 3. 这是一个阻塞的协议，只有当错误被修复之后才能继续运行。 此外，协议可以从多种的失败中快速恢复，但是主要关注的错误的网络分区，主要是以下两种类型: 节点失败和消息丢失，这个两类情况都可以被视为是网络分区错误。 协议 在介绍这个协议之前，先来看一看经典的2PC协议[3]，2PC可以用下图简单地表示: +---------+ | | | q | | | ++---------+ | | +----------+ | | +----------+ | | | +-&gt;... <a href="/2017/09/A-Quorum-Based-Commit-Protocol.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>11 Sep 2017</small>
+        <small><a style="color:grey" href="/2017/09/In-Search-of-an-Understandable-Consensus-Algorithm.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2017/09/In-Search-of-an-Understandable-Consensus-Algorithm.html">In Search of an Understandable Consensus Algorithm</a>
+        <p class="nice-text">In Search of an Understandable Consensus Algorithm Raft算法[2]是一致性新晋的热门选手。Raft在一些方面和Viewstamped Replication[4]相似。Raft也有一它自己的特点[1,3]: 1. 强领导者: Raft中领导者的地位更高，日志条目指由leader发送给其它部分。这个方式更加简单且易于理解； 2. 领导选举: Raft在领导选举中使用了一随机的计数器，这在解决领导选举的冲突时会更加有效； 3. 成为变更: Raft在成员变更时使用了一种新的joint consensus方法，这使得及时在成员变更时Raft也能工作。 Raft存在以下概念: 1. Leader: 通常情况下，系统中只有一个leader。 2. Follower: 通常情况下，出leader之外的都是follower。 3. Candidate: 领导人选举时的一种身份状态。 4. Term: 一个成员担任领导人的这段时间，算法中会用一个递增的数字(任期号)表示。 Raft主要分为3个部分: 1. 领导选举； 2. 日志复制； 3. 安全性。 领导选举 到Follower发现自己和Leader之间的心跳出现问题时，它就会启动一次新的选举。Foller首先要递增它当前的任期号，然后转变自己为Candidate状态，然后并行地向其它成员发送投票请求，知道以下情况发生然后停止: 1. 它赢得了选举; 2. 其它成员成为Leader； 3. 一段时间过后没有选举出领导人。 当一个Candidate获得半数以上的选票时，它就赢得了选举。每个领导者只会对一个任期号的第一个投票请求投票。在赢得选举之中，就会向其它成员发送消息来确定自己的地位。在等待投票的时候，它就可能收到其它成员的投票的请求，如果这个请求中的任期号比自己当前的任期号，那么它就会投这一票并回到Follower的状态，否则，拒绝请求。 这里可能发生的一种情况时几个候选人争夺Leader位置导致无法选举出Leader，Raft使用的解决方案时选举超时的时间从一个时间区间内随机选择(比如150ms ～... <a href="/2017/09/In-Search-of-an-Understandable-Consensus-Algorithm.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>10 Sep 2017</small>
+        <small><a style="color:grey" href="/2017/09/Paxos-Made-Simple.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2017/09/Paxos-Made-Simple.html">Paxos Made Simple</a>
+        <p class="nice-text">Paxos Made Simple Paxos是分布式系统中的一个非常重要的算法，用于解决容错的分布式系统中对一个值达成一致的算法。论文[1]以一种很好的理解的方式描述了这个算法(这里讨论的是基础的paxos算法，不是其它的变种)。 算法假设有以下的一些条件: 1. 进程(or 角色)一任意的速度执行，每个都可能出错、停止运行，也可能错误之后恢复过来。所有进程可能在选定这个值值后都失败重启，它们可能在重启之后不能确定之前被选定的值，除非其中的一些进程保存下了这些信息。 2. 信息在传输的过程中可能被延时任意长的时间达到，也可能丢失、重复，但是信息的被人不会被修改。 总的来说，这篇paper讲的还是很清晰的。 提出问题 考虑在一个可能发生一些错误的一个分布式系统中，多个进程针可以提出自己的value，最终这个进程将会对这个值达成一致。当然在没有值没有被提出的时候，也就没有值会最终选定。当只有一个值被提出的时候，算法也要保证最终被选定的值就是这个唯一提出的值，多个不同的值被提出来之后，最终只会有一个值被选定。如果一个值一旦被选定，这些进程能知道这个值。 总结如下，为了保证safety的要求，算法要求: 1. 只有一个值被提出之后才能被选定； 2. 只有一个值最终被选定； 3. 一个进程认为被选定的值必须是真的最终被选定的值。 在这个算法之中，有以下的概念: Proposal: 这里可以理解为代表了一个值； Proposer: 提出Proposal； Acceptor: 决定是否接受Proposal； Learner: 接受被选定的值。 选定一个值 由于算法要求只有一个进程提出一个值的情况下这个值也会被选定，所以算法必须满足以下的要求: P1: 一个Proposer必须接受它收到的第一个Proposal 这又导致另外一个问题，由于系统中可能存在多个的Acceptor，这种做法可能导致不同的Acceptor接受了不同的值，所以这里最初一个规定: 规定: 一个Proposal只有在一半以上的Acceptor接受的情况下才能被选定 为了实现这个规定，就要求可以选定不同的Proposal(因为不这样的话就可能无法到达半数以上的Acceptor接受)。在这里，为了区分这些Proposal，我们赋予每个Proposal递增的一个编号。为了保证选定了不同的Proposal也能得到最终准确的结果，这里要求被选定的不同的Proposal的值是相等的。所以有如下的要求: P2: 如果一个Proposal被选定了，每个被选定的有更高的编号的Proposal的值必须与此相同 为了选定一个Proposal，必须要求有一个Acceptor接受，也就是说: P2a: 如果一个Proposal被选定了，那么每一个被Acceptor接受的Proposal必须与此相同 这个算法中，通信是不可靠的，进程也可能失败后又重启，也就可能存在下面这种情况: 一个Acceptor c之前没有收到过之前的Proposal，又有一个”新”(可能从失败之后恢复了过来)的Proposer向其发送了一个有更高编号的带有不同值的Proposal，由于要求P1，c必须接受这个Proposal，这就会导致维持P1和P2a直接的矛盾。为了解决这个问题，提出了以下的要求: P2b: 如果一个Proposal被选定了，那么之后的Proposer提出的编号更高的Proposal的值也必须与此相同。 从P2b可以推导出P2a，P2a有可以推导出P2(具体证明略，可以参考[1])。 那么如果保证P2b呢，这里采用的方法就是P2c: P2c:... <a href="/2017/09/Paxos-Made-Simple.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>06 Sep 2017</small>
+        <small><a style="color:grey" href="/2017/09/Distributed-Election.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2017/09/Distributed-Election.html">Distributed -- Election</a>
+        <p class="nice-text">Distributed – Election 很多的分布式算法中需要一个协调人来做一些特殊的决策，如何在一些进程中选举出这个协调人就是分布式选举算法的内容。 几个选举算法 在这个算法中，都假定每个进程都被一个数字唯一的表示，一个进程也知道其它所有进程的标识符。 The Bully Algorithm Bully算法是一个出现的比较早比较简单的算法，先通过这个算法来讨论一下分布式选举中需要解决的问题。 Bully算法假设一下条件: 同步系统； 进程可能随时fail； 进程的fail之后停止运行，通过重启恢复运行； 有failure检查，用于发现failed的进程； 信息传递时可靠的； 每个进程知道所有的其它进程的id和地址。 在Bully算法之中，有以下类别的消息[1]: Election Message: 用于宣布一次选举； Answer (Alive) Message: 回复Election Message； Coordinator (Victory) Message: 被选举为Coordinator的进程向其它进程宣布它被选举为Coordinator。 这个算法的基本的过程如下: 如果进程p拥有最大的id（process id)，p向其它所有进程发送Coordinator Message说明它赢得了选举，否则，p向其它的id比自己高的进程广播一个Election Message； 如果p在发送了Election Message之后没有收到Answer Message，p向其它所有进程发送Coordinator Message说明它赢得了选举。 如果p收到了一个Answer Message且来自一个id更大的进程，则不发送消息，等待别的进程发送来的Coordinator Message，如果一段时间之后没有收到Coordinator Message，则重复选举过程。 如果p收到了一个Answer Message且来自一个id更大的进程，则回复一个Answer Message。然后p启动一个选举过程，向其它的id更大的进程发送Election Message。 如果p收到了一个Coordinator Message，则将发送这个消息的进程当作Coordinator。 随着算法的运行，id较小的进程会逐渐放弃选举为Coordinator，最终，id最大的进程会赢得选举。... <a href="/2017/09/Distributed-Election.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>03 Sep 2017</small>
+        <small><a style="color:grey" href="/2017/09/Distributed-%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%92%E6%96%A5.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2017/09/Distributed-%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%92%E6%96%A5.html">Distributed — 分布式互斥</a>
+        <p class="nice-text">Distributed — 分布式互斥 分布式系统中，Concurrency是很重要的一个部分。任务在不同的进程中执行时，不可避免的会遇到访问相同的资源，这种情况下，就需要保证并发访问情况下的准确性的解决方案。 通常情况下，分布式互斥两种基本的策略[1]： 1. 基于令牌的算法(token-based)； 2. 基于许可的算法(permission-based)。 在基于令牌的算法中，所有的进程共享一个token，只有拥有token的进程才可以进入临界区，当临界区执行完之后，token被释放。token的唯一性保证了互斥，死锁也可以简单的被避免，不过一个问题时处理token丢失比较麻烦。 对于基于许可的算法，一个进程要到达所有进程的一个子集的允许后才能进入临界入区。 一个互斥的算法应该满足下面几个基本的要求[2]： 1. 安全性：如何情况下只能有一个进程能够进入临界区； 2. 活性：不存在死锁和饥饿，每个进程会在有限的时间了得到临界区的机会； 3. 公平性：每个进程得到执行临界区的机会时公平的(一般是指执行临界区的顺序是按照它们请求执行临界区的逻辑时间的先后顺序)。 除了基本的要求之外，对于一个分布式互斥的算法性能也是很重要的: 1. 进去临界区需要发送消息的数量； 2. 同步延时，从一个节点离开临界区到下一个节点进入需要的时间； 3. 响应时间，一个请求消息发出到请求的临界区执行结束的时间； 4. 系统吞吐量，系统执行临界区请求的速度，等于同步延时+平均临界区执行时间的倒数； 中央服务器算法 基于中央服务器的算法是一个简单有效的方法。最基本的思路是使用一个进程作为协调人。如果一个进程要执行临界区，它得向协调人请求，协调人在没有在其它的进程使用临界区的情况下就会授予改进程使用临界区的权限，否则将会拒绝请求，在进程执行完临界区之后，将会发送信息告知协调人释放临界区的锁。 这个算法的基本思路很简单，也很实用，现在实际使用的很多相关的系统也是使用了这个模型，比如Google Chubby[3]、Zookper[4]。但是要具体实现还要解决很多的问题，比如进程在临界区内Crash，协调人如何保证可靠性等等，具体可以参考[3，4]。 令牌环的算法 基于令牌的算法以及令牌环的思路在网络中的一些协议也很常见。在这个算法中，所有的进程被组织位一个逻辑上的环。 环上的进程被丛0开始依次编号，初始化时，token个授予编号为0的进程，token在环中由k进程传递到k+1进程(最后一个传回0号进程)。如果一个进程需要执行临界区，需要得到token被传递给它时，将token保留到它执行完临界区，如果进程不对token感兴趣，只需要简单地将token传递给下一个进程即可。 因为任何时间，最多有一个进程拥有token，使用互斥时包保证的。改算法也不会导致死锁。该算法也存在不少的问题，第一个就时token丢失的问题，token在传递的过程中可能被丢失，一个在一个持有token的进程在执行临界区时Crash也会造成token丢失。另外一个问题时环中的进程Crash会阻碍token的传递。 基与组播和逻辑时钟的算法 Lamport算法 Lamport发明的这种分布式互斥的算法时一种时间同步机制[2]，它要求通信时FIFO的。该算法具体表现为 当一个节点S(i)想进入临界区时，它广播REQUEST(ts(i),i)的消息给其它的所有节点，并将改请求放置到request queue(i)队列； 当其它的节点S(j)说到这个消息时，它将S(i)的请求放置到request-queue(j)的队列，并恢复一个带时间戳的REPLY消息。 当下面两个条件满足时，S(i)进入临界区: 01: S(i)从其它的所有站点收到一个时间戳大于（ts(i),i)的消息； 02: 节点S(i)的请求位于request-queue(i)的队首。 当S(i)执行完临界区后，从自己的请求队列删除自己的请求，并广播一个带时间戳的释放消息给其它节点。 其它节点收到后释放消息，从自己的request-queue删除S(i)的请求。 Ricard-Agrawala 算法... <a href="/2017/09/Distributed-%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%92%E6%96%A5.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>01 Sep 2017</small>
+        <small><a style="color:grey" href="/2017/09/Distributed-%E5%85%A8%E5%B1%80%E7%8A%B6%E6%80%81%E4%B8%8E%E5%BF%AB%E7%85%A7.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2017/09/Distributed-%E5%85%A8%E5%B1%80%E7%8A%B6%E6%80%81%E4%B8%8E%E5%BF%AB%E7%85%A7.html">Distributed — 全局状态与快照</a>
+        <p class="nice-text">Distributed — 全局状态与快照 在没有共享存储器和全局时钟的分布式系统之中有效的纪录系统的全局状态很重要但也不是一件简单的事情。系统全局状态在死锁检测，故障恢复等方面都有很重要的作用。 分布式系统的全局状态是进程和通道本地状态的集合，使用符号GS表示[1]。 分布式系统中的一致性快照需要处理一下的两个问题: 1. 如何判别纪录在快照中的消息和没有在快照中的消息，要求: 0x01. 在纪录快照之前的一个进程发送的消息一定都会被记录在全局快照之中； 0x02. 在纪录快照之后的一个进程发送的消息一定都不会被记录在全局快照之中。 2. 如何确定快照的瞬间。 这里只讲了一些很基础的东西。 FIFO通道: Chandy - Lamport 算法 Chandy - Lamport 算法算法假设通信的通道是FIFO的和可靠的，它使用了一个称为标记的控制信息。算法主要由两个部分组成: 标记发送规则和标记接收规则。消息一个进程在记录完它自己的快照之后，向其它所有的进程发送一个标记，这个被称为标记发送规则。因为通信通道是FIFO的，使用标记将在快照之前的消息标示出来，这样可以满足上面的第1点。 一个进程在接受到来自一个通道C标记之后，如果它还没有记录自身的状态，则记录接受到标记的通道C的状态为空，并执行上面描述的的标记发送规则。如果已经接受到C的标记，则记录C的状态记录为在该通道上记录了本地状态之后且在接受标记之前的消息的集合。 算法的过程如下[1，2]: 1. 进程p的标记发送规则: 0x01 进程p记录本地状态； 0x02 对其它进程发送标记。 2. 进程p的标记接收规则: 进程p在通道C接收到标记后，如何p没有记录自身的状态，则记录C的状态为空并执行标记发送规则， 否则，记录C的状态为消息集。 算法在进程p接收到来自所有输入通道的标记之后终止。 Variants 以Chandy - Lamport算法为基础，再次之上有多种算法的变种。 Spezialetti - Kearns 算法主要在快照收集的并发启动和被记录快照的有效发送。 在一些系统之中，会定期的收集系统的全局快照，Venkatesan快照增量算法优化了这种情况，Venkatesan快照增量算法将上一次获取的快照和记录最后一次快照以来的增量快照结合在一起，形成目前的系统快照。 应用 Flink中的创建快照的算法[4]主要收到了Chandy -... <a href="/2017/09/Distributed-%E5%85%A8%E5%B1%80%E7%8A%B6%E6%80%81%E4%B8%8E%E5%BF%AB%E7%85%A7.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>25 Aug 2017</small>
+        <small><a style="color:grey" href="/2017/08/Facebook-Gorilla.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2017/08/Facebook-Gorilla.html">Facebook Gorilla</a>
+        <p class="nice-text">Facebook Gorilla Gorilla是Facebook公司内部的时序数据库产品。Facebook在世纪的使用过程中发现现有的产品不能满足对Facebook超大数据量的处理要求，开发了Gorilla这一样一个产品，通过应用多种压缩方法、将数据放在内存之中，Gorilla获得了73x的延时提升、14x的吞吐量提升 介绍&amp;背景 2013年Facebook就开始使用一套基于HBase的时序数据库，但是随着Facebook的发展，这套系统以及不能满足未来的负载，90%的查询已经长达几秒。一个对几千个时间序列的查询要消耗几十秒的时间来执行，而在稀疏的更大数据集上查询通常会超时。HBase被设置为写入优化，现在在其中已经保存了2PB的数据，查询的效率不高，又不太好完全更换系统。所以，Gorilla讲注意力转移到给现有的系统在一个in-memory的cache。这里数据的特点就是新数据一般是热点数据，所以选择奖近段时间内的数据cache，就能很好地提高性能。 Memcache是Facebook大规模使用的一个缓存系统，但是将memcache应用在这里，追加新数据到已经存在的时间序列中要消耗一个read／write周期，给memcache造成很大的压力，所以需要一种更好的解决方案。注：这里没怎么看懂，原文是： We also considered a separate Memcache [20] based write-through cache but rejected it as appending new data to an existing time series would require a read/write cycle, causing extremely high traffic to the memcache server. We needed a more efficient solution. 对于Gorilla，主要有以下的要求： 1. 2billion的unique的时间序列id，以string表示；... <a href="/2017/08/Facebook-Gorilla.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>19 Aug 2017</small>
+        <small><a style="color:grey" href="/2017/08/A-Critique-of-ANSI-SQL-Isolation-Levels.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2017/08/A-Critique-of-ANSI-SQL-Isolation-Levels.html">A Critique of ANSI SQL Isolation Levels</a>
+        <p class="nice-text">A Critique of ANSI SQL Isolation Levels 在ANSI SQL-92 [MS, ANSI]（之后简称SQL-92）根据Phenomena（这个类似专有名词，不翻译了，中文意思是‘现象’）定义了SQL的隔离级别：Dirty Reads, Non-Repeatable Reads, and Phantoms。《A Critique of ANSI SQL Isolation Levels》[1]这篇paper阐述了有些Phenomena是无法用SQL-92中定义的一些隔离级别正确表征的，包括了各个基本上锁的实现。该论文讨论了SQL-92中的Phenomena中的定义模糊的地方。除此之外，还介绍了更好表征隔离级别的Phenomena，比如Snapshot Isolation。 介绍 不同的隔离级别定义了不同的在并发、吞吐量之间的取舍。较高的级别更容易正确的处理数据，而吞吐量比较低的隔离级别更低，较低的隔离级别更容易获得更高的吞吐量，却可能导致读取无效的数据和状态。 SQL-92定义了4个隔离级别： (1) READ UNCOMMITTED, (2) READ COMMITTED, (3) REPEATABLE READ, (4) SERIALIZABLE. 它使用了serializability的定义，加上3种禁止的操作子序列来定义这些隔离级别，这些子序列被称为Phenomena，有以下3种：Dirty Read, Non-repeatable Read, and Phantom（一般被翻译为脏读，不可重复读，幻读，不过个人认为不翻译直接理解更好）。规范只是说明phenomena是可能导致异常（anomalous)的动作序列。 ANSI的隔离级别与lock schedulers的行为相关。一些lock scheduler允许改变lock的范围和持续的时间（一般是为优化了性能），这就导致了不符合严格的两阶段锁定。由[GLPT]引入了以下3种方式定义的Degrees of Consistency（一致性程度）： 1. 锁(locking)；... <a href="/2017/08/A-Critique-of-ANSI-SQL-Isolation-Levels.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>18 Aug 2017</small>
+        <small><a style="color:grey" href="/2017/08/Faster-Hash.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2017/08/Faster-Hash.html">Faster Hash</a>
+        <p class="nice-text">Faster Hash Hash算法是被使用的最为广泛的算法之一（这里说的是计算对象（or 结构 etc.）hash值的非加密型的算法，即计算Java hashCode、C# HashCode or C++ std::hash的算法），由于被广泛使用，因此优化这个hash也能获取到比较好的效益。 博客文章[7]是写的很好的一篇对一些简单的hash值计算方法总结（大概是byvoid高中的时候写的，不愧是大佬，我高中的时候还只会用IE上网，23333）。评估一个hash的算法主要通过几个方面来衡量：hash尽可能分散，对象微小的差异都能够导致hash很大的差别（雪崩效应）；速度尽可能快；不容易被攻击。近些年也出现了一些比常见的hash计算方法更好的方法，一些更加适应现在的CPU的一些特点，比如缓存、指令并行、乱序执行、SIMD以及专门的一些特殊指令（关于指令[8]是一个比较好的参考）以拥有更高的速度，一些则能计算出更佳理想的hash值，或者二者兼得。这里主要讨论速度的优化。 一些优化基本知识 熟悉CPU特别是现代CPU的一些实现的原理能指导我们写出更快的程序，相关的知识一般计算机专业的同学在本科阶段都已经学过了。现代CPU的一些特点中，多核是很重要的一方面，但是计算一个对象的hash一般不会使用多线程的方式，利用不上多核，优化的重点在与提高指令并行性，充分发挥CPU流水线，利用好CPU缓存等，还有一些则利用SIMD指令一次性执行多份数据的计算，抑或是可以使用CPU专门的指令提高性能。 对于一个比较好的hash算法来说，大部分的时间是花在访问内存之上（没办法，存储器墙摆在那里。如果在计算上都花了很多时间，这就是一个糟糕的算法）。 来分析一下一个例子，代码来自[7]： unsigned int SDBMHash(char *str) { unsigned int hash = 0; while (*str) { // equivalent to: hash = 65599*hash + (*str++); hash = (*str++) + (hash &lt;&lt; 6) + (hash &lt;&lt; 16) - hash; }... <a href="/2017/08/Faster-Hash.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>16 Aug 2017</small>
+        <small><a style="color:grey" href="/2017/08/Hybrid-Logical-Clock.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2017/08/Hybrid-Logical-Clock.html">Hybrid Logical Clock</a>
+        <p class="nice-text">Hybrid Logical Clock 发布系统中的时间有很重要的作用，比如Spanner的TrueTime[2]。但是TrueTime实现的难度太大，就算开源社区实现了，也不太好被一般的用户使用。所以CockRoachDB使用了Hybrid Logical Clock(HLC)，HLC是一种Logical Clock的实现，HPC将Logical Clock和物理时钟联系起来，与物理时间之间的误差在一个固定的值之内，这个值由NTP决定。 介绍 分布式系统中有几个关于时间的概念： 1. Logical clock (LC)：逻辑时间是有Lamport提出的，LC独立于物理上的时间存在。 2. Physical Time (PT)： 3. TrueTime (TT)：TT出现的时间比较近，在Google的Spanner中被使用。目前看来，这个最有B格。 4. HybridTime (HT)： 背景 对于由一系列可能随时间变化的节点组成的分布式系统，每个节点可以执行3中操作：1.发送动作，2. 接收动作和3.本地动作。时间戳算法为每个时间分配时间戳。如果使用LC算法来分配时间戳，则给时间e分配的时间记为 lc.e。 HLC HLC的设计目标是提供像LC一样的单向因果检测，同时保持时钟的值总是接近物理的时间（这里是NTP的时间）。一个HLC的表述如下： 给定一个分布式系统，为每一个事件分配一个时间戳，有： 1. e hb f ⇒ l.e &lt; l.f，e事件happen before f，则有l.e &lt; l.f;  2. Space requirement for l.e is O(1)... <a href="/2017/08/Hybrid-Logical-Clock.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>15 Aug 2017</small>
+        <small><a style="color:grey" href="/2017/08/Distributed-%E6%97%B6%E9%97%B40x01.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2017/08/Distributed-%E6%97%B6%E9%97%B40x01.html">Distributed — 时间0x01</a>
+        <p class="nice-text">Distributed — 时间0x01 之前说了分布式系统中一些关于时间的基本概念和一些其他的东西，这里我们来讨论分布式系统中物理时间。 首先有一下的几点： 1. 相对论中，由于存在多个参考系，因此时间测量可能是不准确的。当然，地球上的分布式系统中，相对型的影响是可以忽略的。 2. 即使这样，受目前技术能力的限制，我们还是不能准确记录不同点上的事件发生的时间，以此表明事件发生的顺序。 我们将两个时钟读数之间的瞬间不同被称为始终漂移（clock skew）。时钟漂移以单个时钟读数和完美的参考时钟之间的漂移来度量。此外，参考时钟度量的每个单位时间内，和完美的参考时钟之间的漂移量称为漂移率。目前，原子钟时漂移率最小的时钟（Spanner中就使用了原子钟）。 原子时钟的输出被用作实际时间的标准，称为国际原子时间，而秒、年等我们使用的时间单位来源于天文时间，与原子时间并不一致， 通用协调时间（UTC）是国际计时标准，它基于原子时间的，但是偶尔需要增加闰秒或极偶尔的情况下要删除闰秒（这个闰秒导致了很多的软件故障）[1]。 同步物理时钟 为了知道分布式系统P的进程中事件发生的具体时间，有必要用权威的外部时间源同步进程的时钟Ci – 外部同步（external synchronization）。 如果时钟Ci与其他时钟同步到一个已知的精度，那么我们就能通过本地时钟度量在不同计算机上发生的两个事件的间隔 – 内部同步（internal synchronization）。 这里要定义一下时钟的正确性。正如我们所知，完全准确的时钟时几乎不可能的，所以： 时钟正确性（correctness）通常定义为，如果一个硬件时钟H的漂移率在一个已知的范围ρ&gt;0内，那么该时钟是正确的。 1. 这表明度量实际时间t和t’的时间间隔的误差是有界的 (1- ρ)(t’-t) ≤ H(t’)-H(t) ≤ (1+ ρ)(t’-t) 2. 该条件禁止了硬件时钟值的跳跃，有时，软件也时钟也要求遵循该条件。但是用一个较弱的单调性条件就足够了。 3. 单调性是指一个时钟C前进的条件 ``` t’&gt;t ==&gt; C(t’) &gt; C(t) ``` 现在来看看时钟同步中的一些情况: 一个进程在消息m中将本地时钟的时间发送给另一个进程: 最简单的做法就是接收进程可以将它的时钟设成t+T(trans)，但是T(trans)是不确定的。 在同步的系统中： 设消息传输时间的不确定性为u，那么有u=(max-min)； 如果接收放将时钟设置为t+min，那么时钟偏移至多为u；... <a href="/2017/08/Distributed-%E6%97%B6%E9%97%B40x01.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>08 Aug 2017</small>
+        <small><a style="color:grey" href="/2017/08/Chain-Replication.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2017/08/Chain-Replication.html">Chain Replication</a>
+        <p class="nice-text">Chain Replication for Supporting High Throughput and Availability Chain Replication是一个容易理解的复制方式，primary-backup，N个服务器可以容忍N-1服务器失效。它不处理拜占庭类的错误。 上面这幅图就很容易说明了它的工作方式，更新操作发送给head，随着chain传递到tail，而查询等的操作都发送给tail。 ​ 在client看来: 错误处理 在这里添加了一个master的服务，它用来探测服务器故障，通知服务器它的pre-decessor 和 successor 更新消息，通知client哪一个服务器是head，哪一个服务器是tail。Master自身使用Paxos来保证可靠性。 head 故障 head的下一个服务器成为新的head。 PendingobjID is defined as the set of requests received by any server in the chain and not yet processed by the tail, so deleting server H from the chain... <a href="/2017/08/Chain-Replication.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>01 Aug 2017</small>
+        <small><a style="color:grey" href="/2017/08/Viewstamped-Replication.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2017/08/Viewstamped-Replication.html">Viewstamped Replication</a>
+        <p class="nice-text">Viewstamped Replication Viewstamped Replication(VR)是一个适用于故障-停止的异步系统中的一个关于复制的算法，发布于80年代[2]。 在论文[1]中有一段这样的话: VR was originally developed in the 1980s, at about the same time as Paxos [5, 6], but without knowledge of that work. It differs from Paxos in that it is a replication protocol rather than a consensus protocol: it uses consensus, with a protocol very... <a href="/2017/08/Viewstamped-Replication.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>26 Jul 2017</small>
+        <small><a style="color:grey" href="/2017/07/Log-structured-Memory-for-DRAM-based-Storage.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2017/07/Log-structured-Memory-for-DRAM-based-Storage.html">Log-structured Memory for DRAM-based Storage</a>
+        <p class="nice-text">Log-structured Memory for DRAM-based Storage 引言 Log-structured的文件系统是很有名的一类文件系统了，其Log-structured设计的主要目的就是讲写入转化为顺序写来提高性能。而这篇文章在Main-Memory的存储系统是讨论了Log-structured的内存分配，主要目的是提高内存利用率，此外就是提高性能。这个是RAMCloud系统的一部分。 动机 通用的使用malloc(or类似方式)的内存管理方式的一个缺点就是低的内存利用率: 从这个图标来看，各个的利用率都很不好看。 基本设计 在看这里之前需要对Log-Structured File System有些了家，如果没有，可以看看论文[2]。这里的allocator时为RAMCloud设计的，这里就可以把它看作是一个Key-Value Service。基本情况如下: LFS中log包含了很多额外的索引的信息，为的是方便读取。由于DRAM的特点以及这个allocator不会存在文件系统那样的结构，所以log的结构上会简单很多。每一个object必须包含了以下的数据(paper中还讨论了很多关于从持久化的存储中recovery的内容，这里只关注这个内存分配器的设计，RAMCloud关于recovery有另外的论文): the table identifier， key, and version number for the object in addition to its value 。 每个segment包含了整个log的信息摘要。 删除一个object时候，是在log的后面添加一个tombstone记录，tombstone 包含了 table identifier, key,和 被删除object的version number。 Tombstones have proven to be a mixed blessing in RAMCloud:... <a href="/2017/07/Log-structured-Memory-for-DRAM-based-Storage.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>25 Jul 2017</small>
+        <small><a style="color:grey" href="/2017/07/Facebook-F4.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2017/07/Facebook-F4.html">Facebook F4</a>
+        <p class="nice-text">f4: Facebook’s Warm BLOB Storage System F4使用设计和Haystack一起使用，来降低成本的对象存储系统，一个基本的出发点就是Haystack中保存的对象(比如图片)在刚刚一开始用户传上去的时候使用频繁，不久之后使用率就会大大降低。Haystack 3-备份的形式好处在于性能良好，缺点在与成本比较高。F4使用了Reed-Solomon编码在实现高可靠的同时将副本的数量降下来。 Overview F4的数据都是从Haystack转移过来的，所以对于F4来说，它不需要insert的操作。F4只支持read和delete操作。通过10 + 4的所罗门编码blocks，每一个block的size为1GB: The block-size for encoding is chosen to be a large value—typically 1 GB—for two reasons. First, it decreases the number of BLOBs that span multiple blocks and thus require multiple I/O operations to read. Second, it reduces the... <a href="/2017/07/Facebook-F4.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>20 Jul 2017</small>
+        <small><a style="color:grey" href="/2017/07/Consistent-Hash.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2017/07/Consistent-Hash.html">Consistent Hash</a>
+        <p class="nice-text">Consistent Hash About 一致性hash算法的概念在很多地方都可以找到很详细的说明，这里就不在说明。简单的来说：一致性hash就是如何将N个对象就可能平均分配到M个节点之中（这里抽象为一个节点），并且在节点的数量在增加或者减少时尽量减少对象的重新分配，还要保证在节点增加时原有已分配的内容可以被映射到新的缓冲中去，而不会被映射到旧的缓冲集合中的其他缓冲区。 基于环的一致性Hash算法 基本思想 这个算法时最经典的一致性Hash算法。这个算法的基本思想是将value映射为一个值，通常情况下是一个int，而hash值存在一个数值空间，将这个空间抽象为一个环，比如0 - 2^ 32-1，0和2^32-1首尾相接。在这个空间之中，从对象的hash值出发（沿着一个方向），直到遇到一个节点，那么这个对象就放入这个节点。 当节点减少时，只有这个节点到下一个节点之间的对象需要重新移动；当在环中增加一个节点时，只有这个节点到上一个节点之间的对象需要重新移动。满足了一致性hash的基本要求。 一个优化 Hash算法不能保证完全hash值完全平均分配，而且完全平均分配从理论上证明了这是不可能的（具体记不清了）。不过在节点足够多以及hash函数很好的话，这还好。但是当节点的数量很少时，这个就很容易发生不平均的问题。为了优化这种情况，引入了“虚拟节点”的概念： 所谓虚拟节点，就是一个实际的节点回应了对个虚拟的节点。 通过虚拟出更多的节点来优化这个问题。 Jump Consistent Hash jump consistent hash, a fast, minimal memory, consistent hash algorithm that can be expressed in about 5 lines of code. In comparison to the algorithm of Karger et al., jump consistent hash... <a href="/2017/07/Consistent-Hash.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>12 Jul 2017</small>
+        <small><a style="color:grey" href="/2017/07/Finding-a-needle-in-Haystack.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2017/07/Finding-a-needle-in-Haystack.html">Finding a Needle in Haystack</a>
+        <p class="nice-text">Finding a Needle in Haystack: Facebook’s photo storage Haystack是对象存储的经典设计，它是Facebook的照片应用而专门优化定制的对象存储系统。Facebook在峰值时需提供每秒查询超过1 million图片的能力。 设计上的关键点： 传统的基于NAS or NFS的存储图片的方式，因为元数据查询而导致了过多的磁盘操作。在Haystack的设计中，追求尽量减少每个图片的元数据，让Haystack能在内存中执行所有的元数据查询。在传统的POSIX的文件系统中，读取一个图片要经过读取目录信息，读取文件信息，最后才能读取文件信息，要经过多次的磁盘操作。访问文件的元数据成为了吞吐量的瓶颈。 每个数据只会写入一次、读操作频繁、从不修改、很少删除； 设计目标： 1. 高吞吐量和低延迟。 2. 容错。 3. 高性价比。 4. 简单。 架构 Haystack架构包含3个核心组件：Haytack Store、Haystack Directory和Haystack Cache。 1. Store是持久化存储系统，并负责管理图片的文件系统元数据。Store将数据存储在物理的卷上，此外，不同机器上的多个物理卷对应一个逻辑卷。一个图片存储到一个逻辑卷时，图片被写入到所有对应的物理卷。在物理卷的基础之上加上一个逻辑卷的方法可以解决一个物理卷损坏时导致的数据丢失和服务不可用。 2. Directory维护了逻辑到物理卷的映射以及其的元数据，比如某个图片保存在哪个逻辑卷已经某个逻辑卷的空闲空间的信息。 3. Cache的功能类似系统内部的CDN，主要处理热门的图片。Cache会尽可能的cache图片数据。Cache的存在也让系统在没有CDN的情况下也能很好的工作。 基本操作 访问一个图片：当用户使用Directory为每个图片来构建的一个URL来访问一个图片。这个URL包含几段信息，每一段内容对应了到从浏览器访问CDN(或者Cache)直至最终在一台Store机器上检索到图片的过程。一个典型的URL如下： http://&lt;CDN&gt;/&lt;Cache&gt;/&lt;Machine id&gt;/&lt;Logical volume, Photo&gt; 第一个部分指明了从哪个CDN查询此图片。到CDN后它使用最后部分的URL，包含了逻辑卷和图片ID等信息，即可查找缓存的图片。如果CDN未命中缓存，则从URL中删除相关信息，然后访问Cache。Cache的查找过程与之类似，如果还没命中，则去掉相关信息，请求被发至指定的Store机器，即。访问的过程也可以不经过CDN，而直接访问Cache。 Cache向Store请求一个图片时，需要提供逻辑卷id、key、alternate key，和cookie。Cookie的设计主要是为了安全，cookie是个数字，嵌在URL中。当一张新图片被上传，Directory为其随机分配一个cookie值，并作为应用元数据之一存储在Directory。此cookie可以保证所有发往Cache或CDN的请求都是经过Directory“批准”的，而Store，Cache就能放心处理数据。 当Store机器接收到Cache机器发来的图片查询请求，由于元数据会被保存在内存之中，可以快速查找。如果图片没有被删除，Store在卷文件（一个卷文件保存了大量的图片）中seek到相应的offset，从磁盘上读取整个图片的数据（这里被称为needle），然后检查cookie和数据完整性，若都合法则将图片数据返回到Cache机器。 上传一个图片：用户上传一个图片时，图片首先被发送到web服务器。web服务器随后从Directory中请求一个可写逻辑卷，然后web服务器为图片分配一个唯一的ID，web服务器必须向store辑卷id、key、alternate key、cookie和真实数据等信息。Store接受到之后，store创建一个新的needle，添加到卷文件的末尾，更新保存在内存中的元数据和映射。 更新一个图片：Haystack的设计是不考虑修改图片的。Store append-only的工作方式也不能很好的支持修改性的操作，又haystack并不允许覆盖needle，所以图片的修改都是直接通过添加一个新needle，其拥有相同的key和alternate key来完成。而如果更新之后的needle被写入到与老的needle不同的逻辑卷，需要Directory更新它的应用元数据，未来的请求都路由到新逻辑卷，如果被写入到同一个逻辑卷，则也会被store保存到同一个物理卷，根据offset的不同就可以判断文件的新旧。... <a href="/2017/07/Finding-a-needle-in-Haystack.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>22 Jun 2017</small>
+        <small><a style="color:grey" href="/2017/06/%E6%AF%95%E4%B8%9A%E4%BA%86.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2017/06/%E6%AF%95%E4%B8%9A%E4%BA%86.html">毕业了</a>
+        <p class="nice-text">毕业了 不悔梦归处，只恨太匆匆 Somewhere, a voice calls, in the depths of my heart 　　May I always be dreaming, the dreams that move my heart 　　 　　So many tears of sadness, uncountable through and through 　　I know on the other side of them I'll find you 　　 　　Everytime we fall down to... <a href="/2017/06/%E6%AF%95%E4%B8%9A%E4%BA%86.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>03 Jun 2017</small>
+        <small><a style="color:grey" href="/2017/06/Spanner.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2017/06/Spanner.html">Spanner -- Google’s Globally Distributed Database</a>
+        <p class="nice-text">Spanner: Google’s Globally Distributed Database 引言 基本架构 True Time 事务 评估 参考 Corbett, J. C., Dean, J., Epstein, M., Fikes, A., Frost, C., Furman, J. J., Ghemawat, S., Gubarev, A., Heiser, C., Hochschild, P., Hsieh, W., Kanthak, S., Kogan, E., Li, H., Lloyd, A., Melnik, S., Mwaura, D., Nagle, D.,... <a href="/2017/06/Spanner.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>20 May 2017</small>
+        <small><a style="color:grey" href="/2017/05/%E4%B8%80%E4%B8%AAOJ%E7%9A%84%E8%AE%BE%E8%AE%A1.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2017/05/%E4%B8%80%E4%B8%AAOJ%E7%9A%84%E8%AE%BE%E8%AE%A1.html">一个OJ的设计</a>
+        <p class="nice-text">一个OJ的设计
+
+参考
+
+ <a href="/2017/05/%E4%B8%80%E4%B8%AAOJ%E7%9A%84%E8%AE%BE%E8%AE%A1.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>09 May 2017</small>
+        <small><a style="color:grey" href="/2017/05/Amazon-Dynamo.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2017/05/Amazon-Dynamo.html">Dynamo -- Amazon’s Highly Available Key-value Store</a>
+        <p class="nice-text">Dynamo: Amazon’s Highly Available Key-value Store
+
+引言
+
+基本架构
+
+一致性
+
+Highly Available
+
+参考
+
+
+  Dynamo: Amazon’s Highly Available Key-value Store, SOSP’07.
+
+ <a href="/2017/05/Amazon-Dynamo.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>28 Apr 2017</small>
+        <small><a style="color:grey" href="/2017/04/Chubby.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2017/04/Chubby.html">The Chubby Lock Service</a>
+        <p class="nice-text">The Chubby Lock Service for Loosely-coupled Distributed Systems
+
+引言
+
+基本架构
+
+参考
+
+
+  The Chubby Lock Service for Loosely-coupled Distributed Systems, OSDI 2016.
+
+ <a href="/2017/04/Chubby.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>22 Apr 2017</small>
+        <small><a style="color:grey" href="/2017/04/Bigtable.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2017/04/Bigtable.html">Bigtable -- A Distributed Storage System for Structured Data</a>
+        <p class="nice-text">Bigtable: A Distributed Storage System for Structured Data 引言 基本架构 细节 评估 参考 Chang, F., Dean, J., Ghemawat, S., Hsieh, W. C., Wallach, D. A., Burrows, M., Chandra, T., Fikes, A., and Gruber, R. E. 2008. Bigtable: A distributed storage system for structured data. ACM Trans. Comput. Syst. 26, 2,... <a href="/2017/04/Bigtable.html">Read more!</a></p>
+    </li>
+    
+    <li class="post">
+        <small>15 Apr 2017</small>
+        <small><a style="color:grey" href="/2017/04/GFS.html#disqus_thread"></a></small>
+        <br>
+        <a class="nice-title" href="/2017/04/GFS.html">The Google File System</a>
+        <p class="nice-text">The Google File System
+
+引言
+
+基本架构
+
+CFS
+
+参考
+
+
+  The Google File System，SOSP 2003.
+
+ <a href="/2017/04/GFS.html">Read more!</a></p>
+    </li>
+    
+</ul>
+
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES * * */
+    var disqus_shortname = 'nagekar';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+</script></span></div>
+</div>
+
+
+      </div>
+
+      <div class="tile is-4 is-child">
+        <div class="tile is-parent is-vertical sidebar">
+
+          <div class="tile is-child widget">
+
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Recent Posts
+                </p>
+              </header>
+              <div class="card-content">
+                <div class="content nice-text">
+                  <ul>
+                  
+                  <li><a href="/2018/10/LegoOS.html">
+                    LegoOS -- A Disseminated, Distributed OS for Hardware Resource Disaggregation
+                  </a></li>
+                  
+                  <li><a href="/2018/10/Level-Hashing.html">
+                    Write-Optimized and High-Performance Hashing Index Scheme for Persistent Memory
+                  </a></li>
+                  
+                  <li><a href="/2018/10/Classical-Papers.html">
+                    计算机科学经典论文
+                  </a></li>
+                  
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tile is-child widget">
+
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Sponsored
+                </p>
+              </header>
+              <div class="card-content">
+                <div class="content nice-text">
+                  <img src="/assets/images/Dust_Bunny.jpg"/>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="tile is-child widget">
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Recommended Websites
+                </p>
+              </header>
+              <!-- <div class="card-content">
+                <div class="content nice-text">
+                  <ul>
+                    <li>
+                      <a href="https://xkcd.com">xkcd</a>
+                    </li>
+                    <li>
+                      <a href="http://commitstrip.com">Commit Strip</a>
+                    </li>
+                    <li>
+                      <a href="http://www.smbc-comics.com">SMBC Comics</a>
+                    </li>
+                    <li>
+                      <a href="https://blog.codinghorror.com">Coding Horror</a>
+                    </li>
+                    <li>
+                      <a href="http://waitbutwhy.com">Wait Buy Why</a>
+                    </li>
+                    <li>
+                      <a href="https://simplysoch.wordpress.com/">Simply Soch</a>
+                    </li>
+                  </ul>
+                </div> -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <p>
+        Some rights reserved.
+      </p>
+      <p>
+        Made with <i class="fa fa-heart"></i> and <a href="https://github.com/jgthms/bulma">Bulma</a>, <a href="https://jekyllrb.com/">Jekyll</a>. Hosted on <a href="https://github.com/">Github</a>
+      </p>
+      <p>
+        <a class="icon" href="">
+          <i class="fa fa-github" title="Github"></i>
+        </a>
+        <a class="icon" href="">
+          <i class="fa fa-linkedin" title="Linkedin"></i>
+        </a>
+        <a class="icon" href="">
+          <i class="fa fa-envelope" title="Email"></i>
+        </a>
+      </p>
+    </div>
+  </div>
+</footer>
+
+<!-- js -->
+<script src="/assets/js/custom.js"></script>
+<script src="/assets/js/typewriter.js"></script>
+</body>
+</html>

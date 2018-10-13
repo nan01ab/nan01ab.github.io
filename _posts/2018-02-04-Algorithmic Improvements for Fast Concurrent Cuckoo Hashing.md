@@ -36,9 +36,7 @@ P2: Minimize the size and execution time of critical sections. 同上.
 P3: Optimize the concurrency control mechanism. 这里的名堂就多了去了。这里还讨论了使用HTM的优化。
 ```
 
-
-
-
+.
 
 ### 0x02 Algorithmic Optimizations 
 
@@ -64,7 +62,7 @@ P3: Optimize the concurrency control mechanism. 这里的名堂就多了去了�
 This optimization is key to reducing the size of the critical section: While the total number of slots examined is still M, this is work that can be performed without a lock held. With BFS, however, at most five buckets must be examined and modified with the lock actually held, reducing both the duration of the critical section and the number of cache lines dirtied while doing so.
 ```
 
-
+.
 
 ##### Increase Set-associativity
 
@@ -73,11 +71,9 @@ This optimization is key to reducing the size of the critical section: While the
 1. 会降低查询的性能，需要查找的slot更加多了。而且数据变得更加分散，缓存的友好度降低；
 2. 会提好写的性能，因为有空slot的可能性提高了。
 
+ 个人觉得这里更多的是权衡，trade-off.
 
-
-  个人觉得这里更多的是权衡，trade-off.
-
-
+.
 
 #####  Fine-grained Locking 
 
@@ -87,7 +83,7 @@ This optimization is key to reducing the size of the critical section: While the
 Here we favor spinlocks using compare-and-swap over more general purpose mutexes. A spinlock wastes CPU cycles spinning on the lock while other writers are active, but has low overhead, particularly for uncontended access. Because the operations that our hash tables support are all very short and have low contention, very simple spinlocks are often the best choice.
 ```
 
-
+.
 
 ### 0x02 HTM
 

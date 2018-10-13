@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <link rel="stylesheet" href="/assets/css/normalize.css"/>
+  <link rel="stylesheet" href="/assets/css/bulma.css"/>
+  <link rel="stylesheet" href="/assets/css/custom.css"/>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <!-- <link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto" rel="stylesheet"> -->
+
+  <!-- Icons -->
+  <link rel="shortcut icon" href="/assets/images/favicon.ico">
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+
+  <title>
+    
+      Algorithmic Improvements for Fast Concurrent Cuckoo Hashing &middot; Columba M71's Blog
+    
+  </title>
+
+</head>
+
+
+<body>
+
+<section class="hero is-dark">
+  <div class="hero-body">
+    <div class="container">
+        <h1 class="title">
+          <span class="typewrite" data-period="2000" data-type='[ "Columba M71"]'>
+            <span class="wrap"></span>
+          </span>
+        </h1>
+      <h4 class="subtitle" id="quote">
+      </h4>
+    </div>
+  </div>
+</section>
+
+<div class="main-container">
+  <div class="tile is-ancestor is-vertical">
+
+
+    <nav class="nav has-shadow">
+
+      <div class="nav-left">
+
+        <a href="/" class="nav-item">
+          <span class="icon">
+            <i class="fa fa-home" aria-hidden="true" title="Homepage"></i>
+          </span>
+        </a>
+
+        <a href="https://github.com/hnu2013wwj" class="nav-item">
+          <span class="icon">
+            <i class="fa fa-github" aria-hidden="true" title="Github"></i>
+          </span>
+        </a>
+
+        <div class="nav-item" id="searchFieldNav">
+          <div class="field has-addons">
+            <p class="control">
+              <input class="input is-small" type="text" placeholder="Find an article" id="search-text">
+            </p>
+            <p class="control">
+              <a class="button is-dark is-small" onclick="searchHandler();">
+                Search
+              </a>
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="nav-right nav-menu" id='nav-menu'>
+        <a href="/archive" class="nav-item">Archive</a>
+        <a href="/tags" class="nav-item">Tags</a>
+      </div>
+
+      <span class="nav-toggle" id="nav-toggle">
+          <span></span>
+          <span></span>
+          <span></span>
+    </nav>
+
+    <div class="tile is-parent">
+      <div class="tile is-8 is-child main">
+
+        <div class="box">
+    <h1 class="post-title">Algorithmic Improvements for Fast Concurrent Cuckoo Hashing</h1>
+    <hr/>
+    <div class="content"><span class="post-text"><h2 id="algorithmic-improvements-for-fast-concurrent-cuckoo-hashing">Algorithmic Improvements for Fast Concurrent Cuckoo Hashing</h2>
+
+<h3 id="0x00-引言">0x00 引言</h3>
+
+<p>这篇paper是MemC3[2]的进一步的工作，发表的时间晚了一年(2014，想想当时年轻的我，心塞塞的)。这里继续讨论了对hash table的一些优化，主要是对MemC3中的hash table的设计，特别是并发方面。此外，还利用了HTM做的一些优化。</p>
+
+<h3 id="0x01--improve-concurrency">0x01  Improve Concurrency</h3>
+
+<p>先来看一看结果，性能数据还是灰常赞的(可怜的TBB，经常被比较，总是被打败).</p>
+
+<p><img src="/assets/img/fcch-throughput.png" alt="fcch-throughput" /></p>
+
+<p>并发方面的优化基于一下基本principle:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>P1: Avoid unnecessary or unintentional access to common data.  这个基本不用说了，最基本的套路.
+
+P2: Minimize the size and execution time of critical sections. 同上.
+
+P3: Optimize the concurrency control mechanism. 这里的名堂就多了去了。这里还讨论了使用HTM的优化。
+</code></pre></div></div>
+
+<p>.</p>
+
+<h3 id="0x02-algorithmic-optimizations">0x02 Algorithmic Optimizations</h3>
+
+<h5 id="lock-after-discovering-a-cuckoo-path">Lock After Discovering a Cuckoo Path</h5>
+
+<p>这个优化是为了减少临界区的大小，这里给出paper中算法的描述就很好理解了:</p>
+
+<p><img src="/assets/img/fcch-lock-after.png" alt="fcch-lock-after" /></p>
+
+<p>​</p>
+
+<p>原算法是先查找是否还有空闲的slot，如果有就添加，没有就找出一个path在添加，这样的话主要的过程是一直被lock的。优化的方式如第二个算法：将lock拆成了几个部分，其中一个最主要的是查找path的过程是不在lock的范围内的。这样的优点就是比较耗时间的操作在临界区之外，缺点是执行根据path的isnert操作时，需要额外的检查。</p>
+
+<h5 id="breadth-first-search-for-an-empty-slot">Breadth-first Search for an Empty Slot</h5>
+
+<p>原来采用的查找空slot的方法是贪婪算法，这里优化为BFS算法。原算法的一个优化是同时查找多个可行的path(实际上就是2个)，本质上是类似DFS的算法。BFS的优化可以理解为查找了所有的可行的path，来找到一个更加好的。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>This optimization is key to reducing the size of the critical section: While the total number of slots examined is still M, this is work that can be performed without a lock held. With BFS, however, at most five buckets must be examined and modified with the lock actually held, reducing both the duration of the critical section and the number of cache lines dirtied while doing so.
+</code></pre></div></div>
+
+<p>.</p>
+
+<h5 id="increase-set-associativity">Increase Set-associativity</h5>
+
+<p>更高的组相联程度有以下方面的影响:</p>
+
+<ol>
+  <li>会降低查询的性能，需要查找的slot更加多了。而且数据变得更加分散，缓存的友好度降低；</li>
+  <li>会提好写的性能，因为有空slot的可能性提高了。</li>
+</ol>
+
+<p>个人觉得这里更多的是权衡，trade-off.</p>
+
+<p>.</p>
+
+<h5 id="fine-grained-locking">Fine-grained Locking</h5>
+
+<p>经过一番优化之后，这里的临界区都比较小了，采用spin lock是一个更加好的选择。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Here we favor spinlocks using compare-and-swap over more general purpose mutexes. A spinlock wastes CPU cycles spinning on the lock while other writers are active, but has low overhead, particularly for uncontended access. Because the operations that our hash tables support are all very short and have low contention, very simple spinlocks are often the best choice.
+</code></pre></div></div>
+
+<p>.</p>
+
+<h3 id="0x02-htm">0x02 HTM</h3>
+
+<p>这里讨论了使用Intel TSX作为lock的一个替代。TSX存在的一个问题是在一些情况下会造成transaction的abort(事务内存)，主要是以下的原因:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>1. Data conflicts on transactionally accessed addresses;
+
+2. Limited resources for transactional stores;
+
+3. Use of TSX-unfriendly instructions or system calls. such as brk, futex, or mmap. 
+</code></pre></div></div>
+
+<p>前面的两个原因通过之前提到的优化就已经被很好缓解了。第三个原因就是在实现中尽量避免了使用这些syscalls。</p>
+
+<p><img src="/assets/img/fcch-tsx.png" alt="fcch-tsx" /></p>
+
+<p>具体地评估数据可以参看原论文[1]. 此外，这个的代码已经来源了在github上: libcuckoo.</p>
+
+<h2 id="参考">参考</h2>
+
+<ol>
+  <li>Algorithmic Improvements for Fast Concurrent Cuckoo Hashing， EuroSys 2014.</li>
+  <li>MemC3: Compact and Concurrent MemCache with Dumber Caching and Smarter Hashing，NSDI ’13.</li>
+</ol>
+</span></div>
+</div>
+
+
+      </div>
+
+      <div class="tile is-4 is-child">
+        <div class="tile is-parent is-vertical sidebar">
+
+          <div class="tile is-child widget">
+
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Recent Posts
+                </p>
+              </header>
+              <div class="card-content">
+                <div class="content nice-text">
+                  <ul>
+                  
+                  <li><a href="/2018/10/LegoOS.html">
+                    LegoOS -- A Disseminated, Distributed OS for Hardware Resource Disaggregation
+                  </a></li>
+                  
+                  <li><a href="/2018/10/Level-Hashing.html">
+                    Write-Optimized and High-Performance Hashing Index Scheme for Persistent Memory
+                  </a></li>
+                  
+                  <li><a href="/2018/10/Classical-Papers.html">
+                    计算机科学经典论文
+                  </a></li>
+                  
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tile is-child widget">
+
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Sponsored
+                </p>
+              </header>
+              <div class="card-content">
+                <div class="content nice-text">
+                  <img src="/assets/images/Dust_Bunny.jpg"/>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="tile is-child widget">
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Recommended Websites
+                </p>
+              </header>
+              <!-- <div class="card-content">
+                <div class="content nice-text">
+                  <ul>
+                    <li>
+                      <a href="https://xkcd.com">xkcd</a>
+                    </li>
+                    <li>
+                      <a href="http://commitstrip.com">Commit Strip</a>
+                    </li>
+                    <li>
+                      <a href="http://www.smbc-comics.com">SMBC Comics</a>
+                    </li>
+                    <li>
+                      <a href="https://blog.codinghorror.com">Coding Horror</a>
+                    </li>
+                    <li>
+                      <a href="http://waitbutwhy.com">Wait Buy Why</a>
+                    </li>
+                    <li>
+                      <a href="https://simplysoch.wordpress.com/">Simply Soch</a>
+                    </li>
+                  </ul>
+                </div> -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <p>
+        Some rights reserved.
+      </p>
+      <p>
+        Made with <i class="fa fa-heart"></i> and <a href="https://github.com/jgthms/bulma">Bulma</a>, <a href="https://jekyllrb.com/">Jekyll</a>. Hosted on <a href="https://github.com/">Github</a>
+      </p>
+      <p>
+        <a class="icon" href="">
+          <i class="fa fa-github" title="Github"></i>
+        </a>
+        <a class="icon" href="">
+          <i class="fa fa-linkedin" title="Linkedin"></i>
+        </a>
+        <a class="icon" href="">
+          <i class="fa fa-envelope" title="Email"></i>
+        </a>
+      </p>
+    </div>
+  </div>
+</footer>
+
+<!-- js -->
+<script src="/assets/js/custom.js"></script>
+<script src="/assets/js/typewriter.js"></script>
+</body>
+</html>

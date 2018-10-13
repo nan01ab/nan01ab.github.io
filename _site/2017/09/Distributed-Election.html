@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <link rel="stylesheet" href="/assets/css/normalize.css"/>
+  <link rel="stylesheet" href="/assets/css/bulma.css"/>
+  <link rel="stylesheet" href="/assets/css/custom.css"/>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <!-- <link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto" rel="stylesheet"> -->
+
+  <!-- Icons -->
+  <link rel="shortcut icon" href="/assets/images/favicon.ico">
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+
+  <title>
+    
+      Distributed -- Election &middot; Columba M71's Blog
+    
+  </title>
+
+</head>
+
+
+<body>
+
+<section class="hero is-dark">
+  <div class="hero-body">
+    <div class="container">
+        <h1 class="title">
+          <span class="typewrite" data-period="2000" data-type='[ "Columba M71"]'>
+            <span class="wrap"></span>
+          </span>
+        </h1>
+      <h4 class="subtitle" id="quote">
+      </h4>
+    </div>
+  </div>
+</section>
+
+<div class="main-container">
+  <div class="tile is-ancestor is-vertical">
+
+
+    <nav class="nav has-shadow">
+
+      <div class="nav-left">
+
+        <a href="/" class="nav-item">
+          <span class="icon">
+            <i class="fa fa-home" aria-hidden="true" title="Homepage"></i>
+          </span>
+        </a>
+
+        <a href="https://github.com/hnu2013wwj" class="nav-item">
+          <span class="icon">
+            <i class="fa fa-github" aria-hidden="true" title="Github"></i>
+          </span>
+        </a>
+
+        <div class="nav-item" id="searchFieldNav">
+          <div class="field has-addons">
+            <p class="control">
+              <input class="input is-small" type="text" placeholder="Find an article" id="search-text">
+            </p>
+            <p class="control">
+              <a class="button is-dark is-small" onclick="searchHandler();">
+                Search
+              </a>
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="nav-right nav-menu" id='nav-menu'>
+        <a href="/archive" class="nav-item">Archive</a>
+        <a href="/tags" class="nav-item">Tags</a>
+      </div>
+
+      <span class="nav-toggle" id="nav-toggle">
+          <span></span>
+          <span></span>
+          <span></span>
+    </nav>
+
+    <div class="tile is-parent">
+      <div class="tile is-8 is-child main">
+
+        <div class="box">
+    <h1 class="post-title">Distributed -- Election</h1>
+    <hr/>
+    <div class="content"><span class="post-text"><h2 id="distributed--election">Distributed – Election</h2>
+
+<p>很多的分布式算法中需要一个协调人来做一些特殊的决策，如何在一些进程中选举出这个协调人就是分布式选举算法的内容。</p>
+
+<h3 id="几个选举算法">几个选举算法</h3>
+
+<p>在这个算法中，都假定每个进程都被一个数字唯一的表示，一个进程也知道其它所有进程的标识符。</p>
+
+<h3 id="the-bully-algorithm">The Bully Algorithm</h3>
+
+<p>Bully算法是一个出现的比较早比较简单的算法，先通过这个算法来讨论一下分布式选举中需要解决的问题。
+Bully算法假设一下条件:</p>
+<ol>
+  <li>
+    <p>同步系统；</p>
+  </li>
+  <li>
+    <p>进程可能随时fail；</p>
+  </li>
+  <li>
+    <p>进程的fail之后停止运行，通过重启恢复运行；</p>
+  </li>
+  <li>
+    <p>有failure检查，用于发现failed的进程；</p>
+  </li>
+  <li>
+    <p>信息传递时可靠的；</p>
+  </li>
+  <li>
+    <p>每个进程知道所有的其它进程的id和地址。</p>
+  </li>
+</ol>
+
+<p>在Bully算法之中，有以下类别的消息[1]:</p>
+<ol>
+  <li>
+    <p>Election Message: 用于宣布一次选举；</p>
+  </li>
+  <li>
+    <p>Answer (Alive) Message: 回复Election Message；</p>
+  </li>
+  <li>
+    <p>Coordinator (Victory) Message: 被选举为Coordinator的进程向其它进程宣布它被选举为Coordinator。</p>
+  </li>
+</ol>
+
+<p>这个算法的基本的过程如下:</p>
+<ol>
+  <li>如果进程p拥有最大的id（process id)，p向其它所有进程发送Coordinator Message说明它赢得了选举，否则，p向其它的id比自己高的进程广播一个Election Message；</li>
+  <li>如果p在发送了Election Message之后没有收到Answer Message，p向其它所有进程发送Coordinator Message说明它赢得了选举。</li>
+  <li>如果p收到了一个Answer Message且来自一个id更大的进程，则不发送消息，等待别的进程发送来的Coordinator Message，如果一段时间之后没有收到Coordinator Message，则重复选举过程。</li>
+  <li>如果p收到了一个Answer Message且来自一个id更大的进程，则回复一个Answer Message。然后p启动一个选举过程，向其它的id更大的进程发送Election Message。</li>
+  <li>如果p收到了一个Coordinator Message，则将发送这个消息的进程当作Coordinator。</li>
+</ol>
+
+<p>随着算法的运行，id较小的进程会逐渐放弃选举为Coordinator，最终，id最大的进程会赢得选举。</p>
+
+<h3 id="a-ring-algorithm">A Ring Algorithm</h3>
+<p>这里的基于环的算法不是互斥算法中基于环的算法。在这个算法中，假定进程被排列为环，每个进程都知道另外一个进程的下一个进程(不仅仅是自己的下一个进程)，这个算法也假定消息的发送接收是可靠的。
+    1. 当任意进程注意到coordinator不工作时，它发送一个带有自己process number的Election Message给它的下一个进程；
+    2. 如果这个进程的下一个进程不工作，则将消息发送到下一个进程的下一个进程，如下一个进程的下一个进程，以此类推往后面的进程发送消息；
+    3. 每一个接收到这个消息的进程在这个消息之中添加自己的process number，然后重复2(所有进程的process number在这个消息被表示为一个list)；
+    4. 当这个消息回到最初的进程时，这个进程根据消息中process number的list，找到process number最大的进程，然后发送一个Coordinator Message重复循环过程来告知那个进程被选举为coordinator。
+    5. 此外，还会重新组织环，在Election Message消息发送中被认为已经不能工作的进程会被从环中去除，也会重新添加重启之后继续工作的进程。</p>
+
+<h3 id="不稳定系统中的选举">不稳定系统中的选举</h3>
+
+<h3 id="几个例子">几个例子</h3>
+
+<h4 id="viewstamp-replication">Viewstamp Replication</h4>
+
+<h4 id="paxos">Paxos</h4>
+
+<h4 id="raft">Raft</h4>
+
+<h4 id="pacifica">PacificA</h4>
+
+<p>在PacificA中，谁是Primary是有Configuration Manager决定的，</p>
+
+<h2 id="参考">参考</h2>
+
+<ol>
+  <li>https://en.wikipedia.org/wiki/Bully_algorithm，维基百科.</li>
+  <li>《Distributed Systems: Principles and Paradigms》第二版，ISBN: 0-13-239227-5.</li>
+  <li>https://en.wikipedia.org/wiki/Leader_election，维基百科.</li>
+</ol>
+
+</span></div>
+</div>
+
+
+      </div>
+
+      <div class="tile is-4 is-child">
+        <div class="tile is-parent is-vertical sidebar">
+
+          <div class="tile is-child widget">
+
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Recent Posts
+                </p>
+              </header>
+              <div class="card-content">
+                <div class="content nice-text">
+                  <ul>
+                  
+                  <li><a href="/2018/10/LegoOS.html">
+                    LegoOS -- A Disseminated, Distributed OS for Hardware Resource Disaggregation
+                  </a></li>
+                  
+                  <li><a href="/2018/10/Level-Hashing.html">
+                    Write-Optimized and High-Performance Hashing Index Scheme for Persistent Memory
+                  </a></li>
+                  
+                  <li><a href="/2018/10/Classical-Papers.html">
+                    计算机科学经典论文
+                  </a></li>
+                  
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tile is-child widget">
+
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Sponsored
+                </p>
+              </header>
+              <div class="card-content">
+                <div class="content nice-text">
+                  <img src="/assets/images/Dust_Bunny.jpg"/>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="tile is-child widget">
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Recommended Websites
+                </p>
+              </header>
+              <!-- <div class="card-content">
+                <div class="content nice-text">
+                  <ul>
+                    <li>
+                      <a href="https://xkcd.com">xkcd</a>
+                    </li>
+                    <li>
+                      <a href="http://commitstrip.com">Commit Strip</a>
+                    </li>
+                    <li>
+                      <a href="http://www.smbc-comics.com">SMBC Comics</a>
+                    </li>
+                    <li>
+                      <a href="https://blog.codinghorror.com">Coding Horror</a>
+                    </li>
+                    <li>
+                      <a href="http://waitbutwhy.com">Wait Buy Why</a>
+                    </li>
+                    <li>
+                      <a href="https://simplysoch.wordpress.com/">Simply Soch</a>
+                    </li>
+                  </ul>
+                </div> -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <p>
+        Some rights reserved.
+      </p>
+      <p>
+        Made with <i class="fa fa-heart"></i> and <a href="https://github.com/jgthms/bulma">Bulma</a>, <a href="https://jekyllrb.com/">Jekyll</a>. Hosted on <a href="https://github.com/">Github</a>
+      </p>
+      <p>
+        <a class="icon" href="">
+          <i class="fa fa-github" title="Github"></i>
+        </a>
+        <a class="icon" href="">
+          <i class="fa fa-linkedin" title="Linkedin"></i>
+        </a>
+        <a class="icon" href="">
+          <i class="fa fa-envelope" title="Email"></i>
+        </a>
+      </p>
+    </div>
+  </div>
+</footer>
+
+<!-- js -->
+<script src="/assets/js/custom.js"></script>
+<script src="/assets/js/typewriter.js"></script>
+</body>
+</html>

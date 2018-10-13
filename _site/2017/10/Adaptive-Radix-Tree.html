@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <link rel="stylesheet" href="/assets/css/normalize.css"/>
+  <link rel="stylesheet" href="/assets/css/bulma.css"/>
+  <link rel="stylesheet" href="/assets/css/custom.css"/>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <!-- <link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto" rel="stylesheet"> -->
+
+  <!-- Icons -->
+  <link rel="shortcut icon" href="/assets/images/favicon.ico">
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+
+  <title>
+    
+      Adaptive Radix Tree &middot; Columba M71's Blog
+    
+  </title>
+
+</head>
+
+
+<body>
+
+<section class="hero is-dark">
+  <div class="hero-body">
+    <div class="container">
+        <h1 class="title">
+          <span class="typewrite" data-period="2000" data-type='[ "Columba M71"]'>
+            <span class="wrap"></span>
+          </span>
+        </h1>
+      <h4 class="subtitle" id="quote">
+      </h4>
+    </div>
+  </div>
+</section>
+
+<div class="main-container">
+  <div class="tile is-ancestor is-vertical">
+
+
+    <nav class="nav has-shadow">
+
+      <div class="nav-left">
+
+        <a href="/" class="nav-item">
+          <span class="icon">
+            <i class="fa fa-home" aria-hidden="true" title="Homepage"></i>
+          </span>
+        </a>
+
+        <a href="https://github.com/hnu2013wwj" class="nav-item">
+          <span class="icon">
+            <i class="fa fa-github" aria-hidden="true" title="Github"></i>
+          </span>
+        </a>
+
+        <div class="nav-item" id="searchFieldNav">
+          <div class="field has-addons">
+            <p class="control">
+              <input class="input is-small" type="text" placeholder="Find an article" id="search-text">
+            </p>
+            <p class="control">
+              <a class="button is-dark is-small" onclick="searchHandler();">
+                Search
+              </a>
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="nav-right nav-menu" id='nav-menu'>
+        <a href="/archive" class="nav-item">Archive</a>
+        <a href="/tags" class="nav-item">Tags</a>
+      </div>
+
+      <span class="nav-toggle" id="nav-toggle">
+          <span></span>
+          <span></span>
+          <span></span>
+    </nav>
+
+    <div class="tile is-parent">
+      <div class="tile is-8 is-child main">
+
+        <div class="box">
+    <h1 class="post-title">Adaptive Radix Tree</h1>
+    <hr/>
+    <div class="content"><span class="post-text"><h2 id="the-adaptive-radix-tree--artful-indexing-for-main-memory-databases">The Adaptive Radix Tree:  ARTful Indexing for Main-Memory Databases</h2>
+
+<h3 id="引言">引言</h3>
+
+<p>​	Adaptive Radix Tree是最近出现的为Main-Memory Database设计的的支持范围数据结构里面个人认为最优美的一种了，不如Masstree，Bwtree那么复杂，另外，相比于传统的一些结构如T-tree，也更好的适应了现代的多核处理器。这篇时关于Adaptive Radix Tree(ART)的基本结构的，另外有一篇时关于ART的Concurrency Control的，之后会加上。</p>
+
+<p>​	ART的主要思路时使用不同大小的Node，来减少内存使用。同时加上一些额外的如高度上的优化。</p>
+
+<h3 id="基本结构">基本结构</h3>
+
+<p>前面提到，ART的内部Node有不同的大小。一般而言，离root比较远的Node里面保护的数据项时比较小的。一般的Radix Tree使用完整的Node的话，会浪费很多的内存，而ART就解决了这个问题：</p>
+
+<p><img src="/assets/img/art-node.png" alt="art-node" /></p>
+
+<p>ART可以做到 <strong>With 32 bit keys, for example, a radix tree using s = 1 has 32 levels, while a span of 8 results in only 4 levels.</strong></p>
+
+<p>内部 Node描述：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>* Node4: The smallest node type can store up to 4 child pointers and uses an array of length 4 for keys and another array of the same length for pointers. The keys and pointers are stored at corresponding positions and the keys are sorted.
+* Node16: This node type is used for storing between 5 and 16 child pointers. Like the Node4, the keys and pointers are stored in separate arrays at corresponding positions, but both arrays have space for 16 entries. A key can be found efficiently with binary search or, on modern hardware, with parallel comparisons using SIMD instructions.
+* Node48: As the number of entries in a node increases, searching the key array becomes expensive. Therefore, nodes with more than 16 pointers do not store the keys explicitly. Instead, a 256-element array is used, which can be indexed with key bytes directly. If a node has between 17 and 48 child pointers, this array stores indexes into a second array which contains up to 48 pointers. This indirection saves space in comparison to 256 pointers of 8 bytes, because the indexes only require 6 bits (we use 1 byte for simplicity).
+* Node256: The largest node type is simply an array of 256 pointers and is used for storing between 49 and 256 entries. With this representation, the next node can be found very efficiently using a single lookup of the key byte in that array. No additional indirection is necessary. If most entries are not null, this representation is also very space efficient because only pointers need to be stored.
+</code></pre></div></div>
+
+<p>对于Leaf Node，也有不同的策略：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>• Single-value leaves: The values are stored using an additional leaf node type which stores one value.
+
+• Multi-value leaves: The values are stored in one of four different leaf node types, which mirror the structure of inner nodes, but contain values instead of pointers.
+
+• Combined pointer/value slots: If values fit into point- ers, no separate node types are necessary. Instead, each pointer storage location in an inner node can either store a pointer or a value. Values and pointers can be distinguished using one additional bit per pointer or with pointer tagging.
+</code></pre></div></div>
+
+<p>对于inner Node，不仅仅可以表示一个串的一个字符，还可以是一个prefix，这样可以在一些情况下减少树的高度，节约内存，也可以提高缓存友好性。</p>
+
+<p>综合这些之后，基本的搜索算法如下：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>search (node, key, depth) 
+  if node==NULL
+	return NULL if isLeaf(node)
+  if leafMatches(node, key, depth) return node
+	return NULL
+  if checkPrefix(node,key,depth)!=node.prefixLen
+     return NULL 
+  depth=depth+node.prefixLen 
+  next=findChild(node, key[depth]) 
+  return search(next, key, depth+1)
+</code></pre></div></div>
+
+<p>此外的较为复杂的就是insert的算法了，基本的算法如下：</p>
+
+<p><img src="/assets/img/art-insert.png" alt="art-insert" /></p>
+
+<p>主要要考虑一下情况：</p>
+
+<ol>
+  <li>为空，则要添加节点；</li>
+  <li>添加到的节点时leaf节点，则要考虑到prefix；而且会对原来的leaf node做相应的修改；</li>
+  <li>inner node对应的prefix不同时，则表明要重新处理这个prefix</li>
+  <li>之后查找对于对应的下一个节点，存在，递归查找，不存在，这个节点满了的话，需要拓展节点，之后添加新的子节点。</li>
+</ol>
+
+<p>删除操作就看作是insert的逆操作即可。</p>
+
+<h3 id="分析">分析</h3>
+
+<ul>
+  <li>内存</li>
+</ul>
+
+<p>ART一个主要优点就是更小的内存使用：</p>
+
+<p><img src="/assets/img/art-memory.png" alt="art-memory" /></p>
+
+<ul>
+  <li>性能</li>
+</ul>
+
+<p>关于性能这里只关注了缓存相关的，一个paper中的表格如下：在密集的key的情况下，ART的缓存命中率高了不少。这是因为ART的节点很”紧凑”。</p>
+
+<p><img src="/assets/img/art-cache.png" alt="art-cache" /></p>
+
+<p>总之，ART时非常优美的，相比于其它的一些数据结构来说(Bwtree的算法复杂程度比ART高了几个数量级)，简单性能有很不错。</p>
+
+<h3 id="参考">参考</h3>
+
+<ol>
+  <li>The Adaptive Radix Tree: ARTful Indexing for Main-Memory Databases,  ICDE 2013.</li>
+</ol>
+</span></div>
+</div>
+
+
+      </div>
+
+      <div class="tile is-4 is-child">
+        <div class="tile is-parent is-vertical sidebar">
+
+          <div class="tile is-child widget">
+
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Recent Posts
+                </p>
+              </header>
+              <div class="card-content">
+                <div class="content nice-text">
+                  <ul>
+                  
+                  <li><a href="/2018/10/LegoOS.html">
+                    LegoOS -- A Disseminated, Distributed OS for Hardware Resource Disaggregation
+                  </a></li>
+                  
+                  <li><a href="/2018/10/Level-Hashing.html">
+                    Write-Optimized and High-Performance Hashing Index Scheme for Persistent Memory
+                  </a></li>
+                  
+                  <li><a href="/2018/10/Classical-Papers.html">
+                    计算机科学经典论文
+                  </a></li>
+                  
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tile is-child widget">
+
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Sponsored
+                </p>
+              </header>
+              <div class="card-content">
+                <div class="content nice-text">
+                  <img src="/assets/images/Dust_Bunny.jpg"/>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="tile is-child widget">
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Recommended Websites
+                </p>
+              </header>
+              <!-- <div class="card-content">
+                <div class="content nice-text">
+                  <ul>
+                    <li>
+                      <a href="https://xkcd.com">xkcd</a>
+                    </li>
+                    <li>
+                      <a href="http://commitstrip.com">Commit Strip</a>
+                    </li>
+                    <li>
+                      <a href="http://www.smbc-comics.com">SMBC Comics</a>
+                    </li>
+                    <li>
+                      <a href="https://blog.codinghorror.com">Coding Horror</a>
+                    </li>
+                    <li>
+                      <a href="http://waitbutwhy.com">Wait Buy Why</a>
+                    </li>
+                    <li>
+                      <a href="https://simplysoch.wordpress.com/">Simply Soch</a>
+                    </li>
+                  </ul>
+                </div> -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <p>
+        Some rights reserved.
+      </p>
+      <p>
+        Made with <i class="fa fa-heart"></i> and <a href="https://github.com/jgthms/bulma">Bulma</a>, <a href="https://jekyllrb.com/">Jekyll</a>. Hosted on <a href="https://github.com/">Github</a>
+      </p>
+      <p>
+        <a class="icon" href="">
+          <i class="fa fa-github" title="Github"></i>
+        </a>
+        <a class="icon" href="">
+          <i class="fa fa-linkedin" title="Linkedin"></i>
+        </a>
+        <a class="icon" href="">
+          <i class="fa fa-envelope" title="Email"></i>
+        </a>
+      </p>
+    </div>
+  </div>
+</footer>
+
+<!-- js -->
+<script src="/assets/js/custom.js"></script>
+<script src="/assets/js/typewriter.js"></script>
+</body>
+</html>

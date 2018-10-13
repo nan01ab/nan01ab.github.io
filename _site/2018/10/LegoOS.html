@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <link rel="stylesheet" href="/assets/css/normalize.css"/>
+  <link rel="stylesheet" href="/assets/css/bulma.css"/>
+  <link rel="stylesheet" href="/assets/css/custom.css"/>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <!-- <link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto" rel="stylesheet"> -->
+
+  <!-- Icons -->
+  <link rel="shortcut icon" href="/assets/images/favicon.ico">
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+
+  <title>
+    
+      LegoOS -- A Disseminated, Distributed OS for Hardware Resource Disaggregation &middot; Columba M71's Blog
+    
+  </title>
+
+</head>
+
+
+<body>
+
+<section class="hero is-dark">
+  <div class="hero-body">
+    <div class="container">
+        <h1 class="title">
+          <span class="typewrite" data-period="2000" data-type='[ "Columba M71"]'>
+            <span class="wrap"></span>
+          </span>
+        </h1>
+      <h4 class="subtitle" id="quote">
+      </h4>
+    </div>
+  </div>
+</section>
+
+<div class="main-container">
+  <div class="tile is-ancestor is-vertical">
+
+
+    <nav class="nav has-shadow">
+
+      <div class="nav-left">
+
+        <a href="/" class="nav-item">
+          <span class="icon">
+            <i class="fa fa-home" aria-hidden="true" title="Homepage"></i>
+          </span>
+        </a>
+
+        <a href="https://github.com/hnu2013wwj" class="nav-item">
+          <span class="icon">
+            <i class="fa fa-github" aria-hidden="true" title="Github"></i>
+          </span>
+        </a>
+
+        <div class="nav-item" id="searchFieldNav">
+          <div class="field has-addons">
+            <p class="control">
+              <input class="input is-small" type="text" placeholder="Find an article" id="search-text">
+            </p>
+            <p class="control">
+              <a class="button is-dark is-small" onclick="searchHandler();">
+                Search
+              </a>
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="nav-right nav-menu" id='nav-menu'>
+        <a href="/archive" class="nav-item">Archive</a>
+        <a href="/tags" class="nav-item">Tags</a>
+      </div>
+
+      <span class="nav-toggle" id="nav-toggle">
+          <span></span>
+          <span></span>
+          <span></span>
+    </nav>
+
+    <div class="tile is-parent">
+      <div class="tile is-8 is-child main">
+
+        <div class="box">
+    <h1 class="post-title">LegoOS -- A Disseminated, Distributed OS for Hardware Resource Disaggregation</h1>
+    <hr/>
+    <div class="content"><span class="post-text"><h2 id="legoos-a-disseminated-distributed-os-for-hardware-resource-disaggregation">LegoOS: A Disseminated, Distributed OS for Hardware Resource Disaggregation</h2>
+
+<h3 id="0x00-引言">0x00 引言</h3>
+
+<p>这篇文章是OSDI 2018的best paper之一。这篇paper针对目前这样一个情况，提出了一种新的OS架构：目前硬件资源在数据中心这样的地方很多时候分布在不同的机器之后，而传统的一个系统由固定的几个硬件组成，主要的如内存，处理器，硬盘等。不同的应用的特性不同，对资源的使用也不同，就可能出现在一台机器上的一些资源已经很紧张了，另外的一些资源却没有怎么使用。</p>
+
+<p>针对这种情况，这里提出了一种叫做splitkernel 的架构，在splitkernel的模式下，设计并实现了一个LegoOS的操作系统，这个系统的主要特点就是资源分布在不同的地方，每一个地方运行不同的系统组件，各个组件之间由高速网络连接(这里使用的就是RDMA)，这些组件的组合就形成了一个新的系统。Lego这个名字取的很生动形象。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Following the splitkernel model, we built LegoOS, the first OS designed for hardware resource disaggregation. LegoOS is a distributed OS that appears to applications as a set of virtual servers (called vNodes). A vNode can run on multiple processor, memory, and storage components and one component can host resources for multiple vNodes. LegoOS cleanly separates OS functionalities into three types of monitors, process monitor, memory monitor, and storage monitor. LegoOS monitors share no or minimal states and use a customized RDMA-based network stack to communicate with each other.
+</code></pre></div></div>
+
+<p>.</p>
+
+<h3 id="0x01-the-splitkernel-os-architecture">0x01 The Splitkernel OS Architecture</h3>
+
+<p>splitkernel的基本架构与传统的Monolithic Kernel和Multi-Kernel架构的对比(Multi-Kernel也是一种新的内核架构，主要思想是在不同的硬件部分运行不同的内核，这些内核可以针对不同的硬件定制，但是这些还是在一个机器上面的，关于Multi-Kernel可参考[2])</p>
+
+<p><img src="/assets/img/legoos-arch.png" alt="legoos-arch" /></p>
+
+<p>对于splitkernel由4个设计的核心原则:</p>
+
+<ul>
+  <li>
+    <p>Split OS functionalities，分离内核功能，将传统内核的功能大散为monitors，每一个monitors管理自己的资源，为硬件资源提供保护、虚拟化等的功能；</p>
+  </li>
+  <li>
+    <p>Run monitors at hardware components，不同的硬件上运行不同的硬件程序。</p>
+
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>This design makes it easy to integrate heterogeneous hardware in datacenters — to deploy a new hardware device, its developers only need to build the device, implement a monitor to manage it, and attach the device to the network. Similarly, it is easy to reconfigure, restart, and remove hardware components.
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>Message passing across non-coherent components，模块之间通过消息传递来交换，这些消息不考虑coherent，coherent是个很复杂的东西，会给系统带来很高的成本。</p>
+
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>A splitkernel still retains the coherence guarantee that hardware already provides within a component (e.g., cache coherence across cores in a CPU), and applications running on top of a splitkernel can use message passing to implement their desired level of co- herence for their data across components.
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>Global resource management and failure handling，全局的资源和错误管理。在splitkernel中，一个资源组件可以被多个应用使用，自然故障就会影响到这些所有的应用。为了保证系统的可拓展性，splitkernel只会粗粒度地管理资源，更加细粒度的管理则交给monitors自己。对于容错，使用的就是常见的添加冗余的方式。</p>
+  </li>
+</ul>
+
+<p>.</p>
+
+<h3 id="0x02-legoos-design">0x02 LegoOS Design</h3>
+
+<p>splitkernel是一种kernel的架构，具体的实现这里实现了一个LegoOS。LegoOS中的组件这里只讨论了处理器，内存和存储，分别叫做 pComponent, mComponent, 和 sComponent。</p>
+
+<p>LegoOS暴露出一组vNodes(virtual nodes)给用户。在用户看了，一个vNode就像一个虚拟机，每一个vNode由一个唯一的id、一个唯一的IP地址和一个存储设备挂载点。每一个vNode之间的资源是隔离的。一个vNode可以同时使用多个pComponent, mComponent, 和 sComponent，与此同时，一个硬件组件又可以被多个vNode使用(简直就像乐高积木一样好玩)。具体的硬件资源信息对用户是透明的，他们不知道具体的硬件资源的使用。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>With splitkernel’s design principle of components not being coherent, LegoOS does not support writable shared memory across processors. LegoOS assumes that threads within the same process access shared memory and threads belonging to different processes do not share writable memory, and LegoOS makes scheduling decision based on this assumption.
+</code></pre></div></div>
+
+<p>组件之间通过网络连接</p>
+
+<p><img src="/assets/img/legoos-component.png" alt="legoos-component" /></p>
+
+<h4 id="process-management">Process Management</h4>
+
+<p>LegoOS 的 process monitor运行在pComponent上面的内核空间，管理着pComponent的硬件资源。然后在pComponent的用户空间内运行应用程序。LegoOS 为内核的后台线程专门提供了少量CPU核心, 其余的CPU核心用于运行应用程序线程。pComponent的私有的memory被视为virtual cache，这里叫做ExCache。</p>
+
+<p>当一个新进程被启动时, LegoOS使用一个全局的策略为其选择一个pComponent，在此之后，LegoOS之后使用应用需要的最少的CPU核心去运行它。一个应用线程分配到核心后， 正常情况下，LegoOS会让这个线程一直运行，没有调度和抢占之类的东西，只有在这个pComponent运行的线程超过了它的CPU核心数量的时候才会有调度之类的行为。由于CPU资源和其它资源是分开的，这样分配CPU资源的时候就只需要CPU资源的因素了。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>LegoOS improves the overall processor utilization in a disaggregated cluster, since it can freely schedule processes on any pComponents without considering memory allocation. Thus, we do not push for perfect core utilization when scheduling indi- vidual threads and instead aim to minimize scheduling and context switch performance overheads.
+</code></pre></div></div>
+
+<p>此外，LegoOS支持Linux的API。但是Linux的API是有状态的，LegoOS则是追求无状态的设计原则。为了实现这些目标，这里的做法是在pComponent的monitor上添加了一层，由于保持状态，达到实现支持Linux API的目的。</p>
+
+<p>.</p>
+
+<h4 id="memory-management">Memory Management</h4>
+
+<p>在LegoOS中，mComponent被分为三种类型：匿名内存 (i.e., heaps, stacks),内存映射文件, 以及存储的buffer。LegoOS的memory monitor同时管理虚拟和物理的地址空间，负责内存的读写操作，以及他们的分配、回收和映射等操作。</p>
+
+<p>在LegoOS的mComponent上面，是不运行用户进程的，它只运行kernel的代码，提供内存相关的服务。LegoOS将一个进程的地址空间跨越多个mComponent，以便于实现更加好的性能和更好的内存利用率。此外，在一个进程被新创建的时候，LegoOS使用一个全局的内存资源管理器来给这个进程分配一个home mComponent(有一点是它老家的感觉).</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>At the higher level, we split each virtual memory address space into coarse-grained, fix-sized virtual regions, or vRegions (e.g., of 1 GB). Each vRegion that contains allocated virtual memory addresses (an active vRegion) is owned by an mComponent. The owner of a vRegion handles all memory accesses and virtual memory requests within the vRegion.
+</code></pre></div></div>
+
+<p><img src="/assets/img/legoos-memory.png" alt="legoos-memory" /></p>
+
+<h4 id="storage-management">Storage Management</h4>
+
+<p>同之前的设计一样，LegoOS也追求sComponent的无状态的设计，使用它的每一个IO请求都包含了需要的所有消息，包括完整的路径，绝对的文件偏移等。Lego支持类似Posix的层级式的文件存储组织方式，但这个只是对外的提供的接口抽象。在内部的实现上来说，Lego的storage monitor 将完整的路径视为一个文件的名字，并将一个vNode的文件在一个sComponent的一个内部的目录下面。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>To locate a file, LegoOS storage moni- tor maintains a simple hash table with the full paths of files (and directories) as keys. From our observation, most datacenter applications only have a few hundred files or less. Thus, a simple hash table for a whole vNode is sufficient to achieve good lookup performance.
+</code></pre></div></div>
+
+<p>对于存储的buffer，LegoOS将其保存在mComponents而不是sComponents(上面提到过mComponent有三种类型，一种就是存储buffer)，因为主要的内存资源在mComponent。</p>
+
+<h4 id="global-resource-management">Global Resource Management</h4>
+
+<p>前面提到了monitors负责细粒度的资源分配，粗粒度的资源分配是有全局的资源管理器实现的。LegoOS将管理CPU，内存和磁盘的全局管理器分配叫做GPM, GMM,和 GSM。这些资源管理器可以运行在一个普通的Linux机器上面，它们只维护大致的一个信息，同过在每次做分配资源决定的时候后者周期性的询问monitors来更新信息。</p>
+
+<p>这里举例来说明，process monitors 只有在创建新的进程的时候才会询问GPM，然后GPM选择一个可以满足其要求的pComponent来运行这个进程，而分配线程到的时候，process monitors直接自己处理就行。同理，分配内存也是一样的，只有在要分配新的vRegion的时候才询问GMM。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>LegoOS decouples the allocation of different resources and can freely allocate each type of resource from a pool of components. Doing so largely improves resource packing compared to a monolithic server cluster that packs all type of resources a job requires within one physical machine. 
+</code></pre></div></div>
+
+<p>.</p>
+
+<p>关于错误处理和实现的信息在论文中有更多的内容。</p>
+
+<p>.</p>
+
+<h3 id="0x03-evaluation">0x03 Evaluation</h3>
+
+<p>具体数据参看论文</p>
+
+<p><img src="/assets/img/legoos-benchmark.png" alt="legoos-benchmark" /></p>
+
+<h2 id="参考">参考</h2>
+
+<ol>
+  <li>LegoOS: A Disseminated, Distributed OS for Hardware Resource Disaggregation, OSDI ’18.</li>
+  <li>The Multikernel: A new OS architecture for scalable multicore systems, SOSP 2009.</li>
+</ol>
+</span></div>
+</div>
+
+
+      </div>
+
+      <div class="tile is-4 is-child">
+        <div class="tile is-parent is-vertical sidebar">
+
+          <div class="tile is-child widget">
+
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Recent Posts
+                </p>
+              </header>
+              <div class="card-content">
+                <div class="content nice-text">
+                  <ul>
+                  
+                  <li><a href="/2018/10/LegoOS.html">
+                    LegoOS -- A Disseminated, Distributed OS for Hardware Resource Disaggregation
+                  </a></li>
+                  
+                  <li><a href="/2018/10/Level-Hashing.html">
+                    Write-Optimized and High-Performance Hashing Index Scheme for Persistent Memory
+                  </a></li>
+                  
+                  <li><a href="/2018/10/Classical-Papers.html">
+                    计算机科学经典论文
+                  </a></li>
+                  
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tile is-child widget">
+
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Sponsored
+                </p>
+              </header>
+              <div class="card-content">
+                <div class="content nice-text">
+                  <img src="/assets/images/Dust_Bunny.jpg"/>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="tile is-child widget">
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Recommended Websites
+                </p>
+              </header>
+              <!-- <div class="card-content">
+                <div class="content nice-text">
+                  <ul>
+                    <li>
+                      <a href="https://xkcd.com">xkcd</a>
+                    </li>
+                    <li>
+                      <a href="http://commitstrip.com">Commit Strip</a>
+                    </li>
+                    <li>
+                      <a href="http://www.smbc-comics.com">SMBC Comics</a>
+                    </li>
+                    <li>
+                      <a href="https://blog.codinghorror.com">Coding Horror</a>
+                    </li>
+                    <li>
+                      <a href="http://waitbutwhy.com">Wait Buy Why</a>
+                    </li>
+                    <li>
+                      <a href="https://simplysoch.wordpress.com/">Simply Soch</a>
+                    </li>
+                  </ul>
+                </div> -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <p>
+        Some rights reserved.
+      </p>
+      <p>
+        Made with <i class="fa fa-heart"></i> and <a href="https://github.com/jgthms/bulma">Bulma</a>, <a href="https://jekyllrb.com/">Jekyll</a>. Hosted on <a href="https://github.com/">Github</a>
+      </p>
+      <p>
+        <a class="icon" href="">
+          <i class="fa fa-github" title="Github"></i>
+        </a>
+        <a class="icon" href="">
+          <i class="fa fa-linkedin" title="Linkedin"></i>
+        </a>
+        <a class="icon" href="">
+          <i class="fa fa-envelope" title="Email"></i>
+        </a>
+      </p>
+    </div>
+  </div>
+</footer>
+
+<!-- js -->
+<script src="/assets/js/custom.js"></script>
+<script src="/assets/js/typewriter.js"></script>
+</body>
+</html>

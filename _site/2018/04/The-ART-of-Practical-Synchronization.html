@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <link rel="stylesheet" href="/assets/css/normalize.css"/>
+  <link rel="stylesheet" href="/assets/css/bulma.css"/>
+  <link rel="stylesheet" href="/assets/css/custom.css"/>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <!-- <link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto" rel="stylesheet"> -->
+
+  <!-- Icons -->
+  <link rel="shortcut icon" href="/assets/images/favicon.ico">
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+
+  <title>
+    
+      The ART of Practical Synchronization &middot; Columba M71's Blog
+    
+  </title>
+
+</head>
+
+
+<body>
+
+<section class="hero is-dark">
+  <div class="hero-body">
+    <div class="container">
+        <h1 class="title">
+          <span class="typewrite" data-period="2000" data-type='[ "Columba M71"]'>
+            <span class="wrap"></span>
+          </span>
+        </h1>
+      <h4 class="subtitle" id="quote">
+      </h4>
+    </div>
+  </div>
+</section>
+
+<div class="main-container">
+  <div class="tile is-ancestor is-vertical">
+
+
+    <nav class="nav has-shadow">
+
+      <div class="nav-left">
+
+        <a href="/" class="nav-item">
+          <span class="icon">
+            <i class="fa fa-home" aria-hidden="true" title="Homepage"></i>
+          </span>
+        </a>
+
+        <a href="https://github.com/hnu2013wwj" class="nav-item">
+          <span class="icon">
+            <i class="fa fa-github" aria-hidden="true" title="Github"></i>
+          </span>
+        </a>
+
+        <div class="nav-item" id="searchFieldNav">
+          <div class="field has-addons">
+            <p class="control">
+              <input class="input is-small" type="text" placeholder="Find an article" id="search-text">
+            </p>
+            <p class="control">
+              <a class="button is-dark is-small" onclick="searchHandler();">
+                Search
+              </a>
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="nav-right nav-menu" id='nav-menu'>
+        <a href="/archive" class="nav-item">Archive</a>
+        <a href="/tags" class="nav-item">Tags</a>
+      </div>
+
+      <span class="nav-toggle" id="nav-toggle">
+          <span></span>
+          <span></span>
+          <span></span>
+    </nav>
+
+    <div class="tile is-parent">
+      <div class="tile is-8 is-child main">
+
+        <div class="box">
+    <h1 class="post-title">The ART of Practical Synchronization</h1>
+    <hr/>
+    <div class="content"><span class="post-text"><h2 id="the-art-of-practical-synchronization">The ART of Practical Synchronization</h2>
+
+<h3 id="0x00-引言">0x00 引言</h3>
+
+<p>这篇文章是关于Adaptive Radix Tree上同步机制的一篇文章，ART是Hyper数据库中主要的索引数据结构。这里介绍了两个同步机制:</p>
+
+<p><strong>Optimistic Lock Coupling</strong> , and</p>
+
+<p><strong>Read-Optimized Write EXclusion (ROWEX)</strong></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>We synchronize the Adaptive Radix Tree (ART) using two such protocols, Optimistic Lock Coupling and Read-Optimized Write EXclusion (ROWEX). Both perform and scale very well while being much easier to implement than lock-free techniques.
+</code></pre></div></div>
+
+<p>各种的同步机制是一个可拓展性和复杂程度上的一个平衡:</p>
+
+<p><img src="/assets/img/art-sync-paradigm.png" alt="art-sync-paradigm" /></p>
+
+<p>从这里看到，这里提高的方法中ROWEX和optimistic lock coupling在在没有特殊硬件的支持下这两个方面的平衡是最后的。近些年HTM被一些硬件支持(intel TSX，IBM Power 8, 9)，看起来更加好。</p>
+
+<p>如果这里对ART不了解，可以先看一看[2]；如果对HTM不了解，可以看看网上的介绍文章，也能找到相关的论文；如果对 lock coupling不了解，可以先看一看[3]，(不过这篇论文很老了，比较难找，不过还是可以在网上找到的)，</p>
+
+<blockquote>
+
+</blockquote>
+
+<h3 id="0x01-optimistic-lock-coupling">0x01 Optimistic Lock Coupling</h3>
+
+<p>Lock Coupling同一时刻最多持有2个lock，是一种标准的Btree的同步机制。ART的一个特点有利于使用这样的同步机制，在ART中，一个修改操作最多影响到2个结点，修改的结点(删除，添加 or 更新)和其父结点，这个比Btree的情况更加简单。Optimistic Lock Coupling(OLC)是 Lock Coupling乐观版本，其基本出发点是:</p>
+
+<ol>
+  <li>使用read-write locks提高读的性能，对于修改的操作也是先获取read lock，只有在必要的时候在升级为write lock。</li>
+  <li>Optimistic的基本和非Optimistic的版本相似，不过在非乐观的版本中，会造成一些不必要的lock，造成额外的开支。解决的办法和OCC的思想基本相同，先假设这里不会有并发的修改，在真正要修改的时候在做检查，这里使用的是version number的方式。</li>
+</ol>
+
+<p>一个伪代码：</p>
+
+<p><img src="/assets/img/art-sync-lockup.png" alt="art-sync-lockup" /></p>
+
+<p>对于insert操作，和获取一般的lock相似，不过要额外做的是增加version number。read操作的时候在必要的时刻在进行检查，如上面的伪代码所示。</p>
+
+<p>另外对于delete操作，这里的问题和很多很多并发的数据结构一样，何时回收内存？这里采用的是常见的基于epoch的方法。</p>
+
+<p><img src="/assets/img/art-sync-write.png" alt="art-sync-write" /></p>
+
+<blockquote>
+
+</blockquote>
+
+<h3 id="0x02-read-optimized-write-exclusion">0x02 Read-Optimized Write EXclusion</h3>
+
+<p>​    一般而言，类似OCC方式的机制都存在不能很好的适应write多的情况。</p>
+
+<p>​     ROWEX是一种介于传统locking和lock free之间的一种同步机制，它能保证read不会被阻塞。当然，它比前面的OLC复杂不少。基本思路如下:</p>
+
+<ol>
+  <li>在更新一个节点之前，先回去这个节点的lock，但是这个lock只会阻塞其它的writer。reader从来不获取lock，也从来不做类似version number的方式。这样如何保证reader的正确性呢？这里由writer来解决这个问题；</li>
+  <li>writer的操作必须是原子的，writer也只会在必要的时刻才回去lock。</li>
+</ol>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>One important invariant of ART is that every insertion/deletion order results in the same tree because there are no rebalancing operations. Each key, therefore, has a deterministic physical location. In B-link trees, in contrast, a key may have been moved to a node on the right (and never to the left due to deliberately omitting underflow handling).
+</code></pre></div></div>
+
+<p>在ART中，Radix的优点就是不会像tree结果一样有级联的更新操作。这里先以Node4作为例子:</p>
+
+<p>local modifications(本地更新)是比较简单的，只要保证修改节点内部的数据的时候是原子的就可以了。对于可能导致ART结构更改的，Node replacement 的机制是必要的。这个操作分为以下几步:</p>
+
+<ol>
+  <li>回去这个节点和其父结点的lock；</li>
+  <li>创建一个新结点，初始化数据，一部分or全部来自原来的结点；</li>
+  <li>修改父结点的指针；</li>
+  <li>标记旧结点为过时的，释放父结点的lock(这个时候不能删除，因为可能有reader正在使用这里面的数据，删除由基于epoch的机制进行)。</li>
+</ol>
+
+<p>Path compression 是另外的一个问题，这个是ART用来节约内存的优化。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>To change the prefix of the node atomically, we store both the prefix and its length in a single 8 byte value, which can be changed atomically.
+</code></pre></div></div>
+
+<p><img src="/assets/img/art-sync-path-compression.png" alt="art-sync-path-compression" /></p>
+
+<p>这里的一个难点在与现在的硬件只支持一个CAS的操作，没有multi-CAS。为了解决这个问题，在每一个结点中添加一个level字段，保存了包括prefix在内的的结点的高度，结点一旦被创建就不会被修改了，reader根据这些信息适当处理结点被更新之后prefix的问题：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code> With this additional information, the intermediate state in Figure 4 is safe, because a reader will detect that the prefix at the blue node has to be skipped. Similarly, it is also possible that a reader sees the final state of the blue node without having seen the green node before. In that situation, the reader can detect the missing prefix using level field and retrieve the missing key from the database.
+</code></pre></div></div>
+
+<p>.</p>
+
+<blockquote>
+
+</blockquote>
+
+<h3 id="0x03-评估">0x03 评估</h3>
+
+<p>论文中很详细</p>
+
+<blockquote>
+
+</blockquote>
+
+<h2 id="参考">参考</h2>
+
+<ol>
+  <li>The ART of Practical Synchronization, DaMoN 2016.</li>
+  <li>The Adaptive Radix Tree: ARTful Indexing for Main-Memory Databases,  ICDE 2013.</li>
+  <li>R. Bayer and M. Schkolnick. Concurrency of operations on B-trees. Acta Informatica, 9, 1977.</li>
+</ol>
+</span></div>
+</div>
+
+
+      </div>
+
+      <div class="tile is-4 is-child">
+        <div class="tile is-parent is-vertical sidebar">
+
+          <div class="tile is-child widget">
+
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Recent Posts
+                </p>
+              </header>
+              <div class="card-content">
+                <div class="content nice-text">
+                  <ul>
+                  
+                  <li><a href="/2018/10/LegoOS.html">
+                    LegoOS -- A Disseminated, Distributed OS for Hardware Resource Disaggregation
+                  </a></li>
+                  
+                  <li><a href="/2018/10/Level-Hashing.html">
+                    Write-Optimized and High-Performance Hashing Index Scheme for Persistent Memory
+                  </a></li>
+                  
+                  <li><a href="/2018/10/Classical-Papers.html">
+                    计算机科学经典论文
+                  </a></li>
+                  
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tile is-child widget">
+
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Sponsored
+                </p>
+              </header>
+              <div class="card-content">
+                <div class="content nice-text">
+                  <img src="/assets/images/Dust_Bunny.jpg"/>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="tile is-child widget">
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Recommended Websites
+                </p>
+              </header>
+              <!-- <div class="card-content">
+                <div class="content nice-text">
+                  <ul>
+                    <li>
+                      <a href="https://xkcd.com">xkcd</a>
+                    </li>
+                    <li>
+                      <a href="http://commitstrip.com">Commit Strip</a>
+                    </li>
+                    <li>
+                      <a href="http://www.smbc-comics.com">SMBC Comics</a>
+                    </li>
+                    <li>
+                      <a href="https://blog.codinghorror.com">Coding Horror</a>
+                    </li>
+                    <li>
+                      <a href="http://waitbutwhy.com">Wait Buy Why</a>
+                    </li>
+                    <li>
+                      <a href="https://simplysoch.wordpress.com/">Simply Soch</a>
+                    </li>
+                  </ul>
+                </div> -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <p>
+        Some rights reserved.
+      </p>
+      <p>
+        Made with <i class="fa fa-heart"></i> and <a href="https://github.com/jgthms/bulma">Bulma</a>, <a href="https://jekyllrb.com/">Jekyll</a>. Hosted on <a href="https://github.com/">Github</a>
+      </p>
+      <p>
+        <a class="icon" href="">
+          <i class="fa fa-github" title="Github"></i>
+        </a>
+        <a class="icon" href="">
+          <i class="fa fa-linkedin" title="Linkedin"></i>
+        </a>
+        <a class="icon" href="">
+          <i class="fa fa-envelope" title="Email"></i>
+        </a>
+      </p>
+    </div>
+  </div>
+</footer>
+
+<!-- js -->
+<script src="/assets/js/custom.js"></script>
+<script src="/assets/js/typewriter.js"></script>
+</body>
+</html>

@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <link rel="stylesheet" href="/assets/css/normalize.css"/>
+  <link rel="stylesheet" href="/assets/css/bulma.css"/>
+  <link rel="stylesheet" href="/assets/css/custom.css"/>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <!-- <link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto" rel="stylesheet"> -->
+
+  <!-- Icons -->
+  <link rel="shortcut icon" href="/assets/images/favicon.ico">
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+
+  <title>
+    
+      New Syscalls of Linux 4.x &middot; Columba M71's Blog
+    
+  </title>
+
+</head>
+
+
+<body>
+
+<section class="hero is-dark">
+  <div class="hero-body">
+    <div class="container">
+        <h1 class="title">
+          <span class="typewrite" data-period="2000" data-type='[ "Columba M71"]'>
+            <span class="wrap"></span>
+          </span>
+        </h1>
+      <h4 class="subtitle" id="quote">
+      </h4>
+    </div>
+  </div>
+</section>
+
+<div class="main-container">
+  <div class="tile is-ancestor is-vertical">
+
+
+    <nav class="nav has-shadow">
+
+      <div class="nav-left">
+
+        <a href="/" class="nav-item">
+          <span class="icon">
+            <i class="fa fa-home" aria-hidden="true" title="Homepage"></i>
+          </span>
+        </a>
+
+        <a href="https://github.com/hnu2013wwj" class="nav-item">
+          <span class="icon">
+            <i class="fa fa-github" aria-hidden="true" title="Github"></i>
+          </span>
+        </a>
+
+        <div class="nav-item" id="searchFieldNav">
+          <div class="field has-addons">
+            <p class="control">
+              <input class="input is-small" type="text" placeholder="Find an article" id="search-text">
+            </p>
+            <p class="control">
+              <a class="button is-dark is-small" onclick="searchHandler();">
+                Search
+              </a>
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="nav-right nav-menu" id='nav-menu'>
+        <a href="/archive" class="nav-item">Archive</a>
+        <a href="/tags" class="nav-item">Tags</a>
+      </div>
+
+      <span class="nav-toggle" id="nav-toggle">
+          <span></span>
+          <span></span>
+          <span></span>
+    </nav>
+
+    <div class="tile is-parent">
+      <div class="tile is-8 is-child main">
+
+        <div class="box">
+    <h1 class="post-title">New Syscalls of Linux 4.x</h1>
+    <hr/>
+    <div class="content"><span class="post-text"><h2 id="new-syscalls-of-linux-4x">New Syscalls of Linux 4.x</h2>
+
+<h3 id="引言">引言</h3>
+
+<p>Linux 4.19 就要发布了，按照套路，4.19应该是Linux 4.x的最后一个版本。Linux 4.0发布在2015年4月(那时候还是大二的小懵懂)。这几年中Linux改变了那些东西呢。这篇是总结了一下新增的syscalls的，其实syscall与新特性大部分时候都没啥关系，这里只是为了好玩。</p>
+
+<h3 id="syscalls">Syscalls</h3>
+
+<h4 id="copy_file_range">copy_file_range</h4>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">ssize_t</span> <span class="n">copy_file_range</span><span class="p">(</span><span class="kt">int</span> <span class="n">fd_in</span><span class="p">,</span> <span class="n">loff_t</span> <span class="o">*</span><span class="n">off_in</span><span class="p">,</span>
+                        <span class="kt">int</span> <span class="n">fd_out</span><span class="p">,</span> <span class="n">loff_t</span> <span class="o">*</span><span class="n">off_out</span><span class="p">,</span>
+                        <span class="kt">size_t</span> <span class="n">len</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">flags</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>Linux 4.5中添加的，主要是为了减少不必要的数据拷贝。比如从一个文件的数据拷贝到另外一个文件是，可以不经过user space。</p>
+
+<h4 id="mlock2">mlock2</h4>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="n">mlock</span><span class="p">(</span><span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">addr</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">len</span><span class="p">);</span>
+<span class="kt">int</span> <span class="n">mlock2</span><span class="p">(</span><span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">addr</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">len</span><span class="p">,</span> <span class="kt">int</span> <span class="n">flags</span><span class="p">);</span>
+<span class="kt">int</span> <span class="n">munlock</span><span class="p">(</span><span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">addr</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">len</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>Linux 4.4 添加的，mlock的强化版本，主要就是添加了一个flags的参数。主要功能就是将一个process的page不要被sweep到磁盘上面。</p>
+
+<h4 id="pkey_alloc--pkey_free--pkey_mprotect">pkey_alloc,  pkey_free,  pkey_mprotect</h4>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="n">pkey_alloc</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">flags</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">access_rights</span><span class="p">);</span>
+<span class="kt">int</span> <span class="n">pkey_free</span><span class="p">(</span><span class="kt">int</span> <span class="n">pkey</span><span class="p">);</span>
+<span class="kt">int</span> <span class="n">pkey_mprotect</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">addr</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">len</span><span class="p">,</span> <span class="kt">int</span> <span class="n">prot</span><span class="p">,</span> <span class="kt">int</span> <span class="n">pkey</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>这个主要是对page权限的改进。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Memory Protection Keys provide a mechanism for changing protections without requiring modification of the page tables on every permission change.
+</code></pre></div></div>
+
+<h4 id="preadv2-pwritev2">preadv2, pwritev2</h4>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">ssize_t</span> <span class="n">preadv</span><span class="p">(</span><span class="kt">int</span> <span class="n">fd</span><span class="p">,</span> <span class="k">const</span> <span class="k">struct</span> <span class="n">iovec</span> <span class="o">*</span><span class="n">iov</span><span class="p">,</span> <span class="kt">int</span> <span class="n">iovcnt</span><span class="p">,</span>
+                      <span class="kt">off_t</span> <span class="n">offset</span><span class="p">);</span>
+
+<span class="kt">ssize_t</span> <span class="n">pwritev</span><span class="p">(</span><span class="kt">int</span> <span class="n">fd</span><span class="p">,</span> <span class="k">const</span> <span class="k">struct</span> <span class="n">iovec</span> <span class="o">*</span><span class="n">iov</span><span class="p">,</span> <span class="kt">int</span> <span class="n">iovcnt</span><span class="p">,</span>
+                       <span class="kt">off_t</span> <span class="n">offset</span><span class="p">);</span>
+
+<span class="kt">ssize_t</span> <span class="n">preadv2</span><span class="p">(</span><span class="kt">int</span> <span class="n">fd</span><span class="p">,</span> <span class="k">const</span> <span class="k">struct</span> <span class="n">iovec</span> <span class="o">*</span><span class="n">iov</span><span class="p">,</span> <span class="kt">int</span> <span class="n">iovcnt</span><span class="p">,</span>
+                       <span class="kt">off_t</span> <span class="n">offset</span><span class="p">,</span> <span class="kt">int</span> <span class="n">flags</span><span class="p">);</span>
+
+<span class="kt">ssize_t</span> <span class="n">pwritev2</span><span class="p">(</span><span class="kt">int</span> <span class="n">fd</span><span class="p">,</span> <span class="k">const</span> <span class="k">struct</span> <span class="n">iovec</span> <span class="o">*</span><span class="n">iov</span><span class="p">,</span> <span class="kt">int</span> <span class="n">iovcnt</span><span class="p">,</span>
+                        <span class="kt">off_t</span> <span class="n">offset</span><span class="p">,</span> <span class="kt">int</span> <span class="n">flags</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>preadv, pwritev的添加了一个flags参数的版本。</p>
+
+<h4 id="statx">statx</h4>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="n">statx</span><span class="p">(</span><span class="kt">int</span> <span class="n">dirfd</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">pathname</span><span class="p">,</span> <span class="kt">int</span> <span class="n">flags</span><span class="p">,</span>
+                 <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">mask</span><span class="p">,</span> <span class="k">struct</span> <span class="n">statx</span> <span class="o">*</span><span class="n">statxbuf</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>stat的强化版本。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>To access a file's status, no permissions are required on the file itself, but in the case of statx() with a pathname, execute (search) permission is required on all of the directories in pathname that lead to the file.
+</code></pre></div></div>
+
+<h4 id="userfaultfd">userfaultfd</h4>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="n">userfaultfd</span><span class="p">(</span><span class="kt">int</span> <span class="n">flags</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>上面的几个都很无聊，这个比较有意思一点，在Linux 4.3 添加。通常情况下，page fault是有kernel处理的，这个syscall通过文件的形式给user space处理page fault提供了一些功能。[2]中有一些说明。</p>
+
+<blockquote>
+
+</blockquote>
+
+<h3 id="new-syscalls-of-linux-3x">New Syscalls of Linux 3.x</h3>
+
+<p>顺便看一下3.x的吧，emmmm。</p>
+
+<h4 id="bpf">bpf</h4>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="n">bpf</span><span class="p">(</span><span class="kt">int</span> <span class="n">cmd</span><span class="p">,</span> <span class="k">union</span> <span class="n">bpf_attr</span> <span class="o">*</span><span class="n">attr</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">size</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>Berkeley Packet Filters相关的一个syscall，挺有用的。</p>
+
+<h4 id="execveat">execveat</h4>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="n">execveat</span><span class="p">(</span><span class="kt">int</span> <span class="n">dirfd</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">pathname</span><span class="p">,</span>
+	<span class="kt">char</span> <span class="o">*</span><span class="k">const</span> <span class="n">argv</span><span class="p">[],</span> <span class="kt">char</span> <span class="o">*</span><span class="k">const</span> <span class="n">envp</span><span class="p">[],</span> <span class="kt">int</span> <span class="n">flags</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>execve(2)的强化版本。</p>
+
+<h4 id="finit_module">finit_module</h4>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="n">finit_module</span><span class="p">(</span><span class="kt">int</span> <span class="n">fd</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">param_values</span><span class="p">,</span> <span class="kt">int</span> <span class="n">flags</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>Load一个ELF image到kernel space，类似init_module。</p>
+
+<h4 id="getrandom">getrandom</h4>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">ssize_t</span> <span class="n">getrandom</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">buf</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">buflen</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">flags</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>借助内核生成随机数，比直接读区/dev/random更加好用。</p>
+
+<h4 id="kcmp">kcmp</h4>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="n">kcmp</span><span class="p">(</span><span class="n">pid_t</span> <span class="n">pid1</span><span class="p">,</span> <span class="n">pid_t</span> <span class="n">pid2</span><span class="p">,</span> <span class="kt">int</span> <span class="n">type</span><span class="p">,</span>
+                <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">idx1</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">idx2</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>检查2个进程的共享资源的信息。</p>
+
+<h4 id="kexec_file_load">kexec_file_load</h4>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">long</span> <span class="n">kexec_file_load</span><span class="p">(</span><span class="kt">int</span> <span class="n">kernel_fd</span><span class="p">,</span> <span class="kt">int</span> <span class="n">initrd_fd</span><span class="p">,</span>
+                           <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">cmdline_len</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">cmdline</span><span class="p">,</span>
+                           <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">flags</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>kexec_file_load用来用于在reboot之后使用新的kernel。</p>
+
+<h4 id="membarrier">membarrier</h4>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="n">membarrier</span><span class="p">(</span><span class="kt">int</span> <span class="n">cmd</span><span class="p">,</span> <span class="kt">int</span> <span class="n">flags</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>提供一个类似内存屏障的功能.</p>
+
+<h4 id="memfd_create">memfd_create</h4>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="n">memfd_create</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">name</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">flags</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>将内存当作文章。</p>
+
+<h4 id="process_vm_readv-process_vm_writev">process_vm_readv, process_vm_writev</h4>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">ssize_t</span> <span class="n">process_vm_readv</span><span class="p">(</span><span class="n">pid_t</span> <span class="n">pid</span><span class="p">,</span>
+                                <span class="k">const</span> <span class="k">struct</span> <span class="n">iovec</span> <span class="o">*</span><span class="n">local_iov</span><span class="p">,</span>
+                                <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">liovcnt</span><span class="p">,</span>
+                                <span class="k">const</span> <span class="k">struct</span> <span class="n">iovec</span> <span class="o">*</span><span class="n">remote_iov</span><span class="p">,</span>
+                                <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">riovcnt</span><span class="p">,</span>
+                                <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">flags</span><span class="p">);</span>
+
+<span class="kt">ssize_t</span> <span class="n">process_vm_writev</span><span class="p">(</span><span class="n">pid_t</span> <span class="n">pid</span><span class="p">,</span>
+                                 <span class="k">const</span> <span class="k">struct</span> <span class="n">iovec</span> <span class="o">*</span><span class="n">local_iov</span><span class="p">,</span>
+                                 <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">liovcnt</span><span class="p">,</span>
+                                 <span class="k">const</span> <span class="k">struct</span> <span class="n">iovec</span> <span class="o">*</span><span class="n">remote_iov</span><span class="p">,</span>
+                                 <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">riovcnt</span><span class="p">,</span>
+                                 <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">flags</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>对vm space做一些操作。</p>
+
+<h4 id="renameat2">renameat2</h4>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="n">renameat2</span><span class="p">(</span><span class="kt">int</span> <span class="n">olddirfd</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">oldpath</span><span class="p">,</span>
+                     <span class="kt">int</span> <span class="n">newdirfd</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">newpath</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">flags</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>renameat添加了flags参数.</p>
+
+<h4 id="sched_setattr-sched_getattr">sched_setattr, sched_getattr</h4>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="n">sched_setattr</span><span class="p">(</span><span class="n">pid_t</span> <span class="n">pid</span><span class="p">,</span> <span class="k">struct</span> <span class="n">sched_attr</span> <span class="o">*</span><span class="n">attr</span><span class="p">,</span>
+                         <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">flags</span><span class="p">);</span>
+
+<span class="kt">int</span> <span class="n">sched_getattr</span><span class="p">(</span><span class="n">pid_t</span> <span class="n">pid</span><span class="p">,</span> <span class="k">struct</span> <span class="n">sched_attr</span> <span class="o">*</span><span class="n">attr</span><span class="p">,</span>
+                         <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">size</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">flags</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>scheduling policy相关的syscalls。</p>
+
+<h4 id="seccomp">seccomp</h4>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="kt">int</span> <span class="n">seccomp</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">operation</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">flags</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">args</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>Secure Computing (seccomp)，终于看到一个有趣的一点的了，这个syscall在一些地方很有用，最大的一个用处就是，终于看到一个有趣的一点的了，这个syscall在一些地方很有用，最大的一个用处就是可以对调用syscall做一些限制。</p>
+
+<h4 id="sendmmsg">sendmmsg</h4>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="kt">int</span> <span class="n">sendmmsg</span><span class="p">(</span><span class="kt">int</span> <span class="n">sockfd</span><span class="p">,</span> <span class="k">struct</span> <span class="n">mmsghdr</span> <span class="o">*</span><span class="n">msgvec</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">vlen</span><span class="p">,</span>
+                    <span class="kt">int</span> <span class="n">flags</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>这个也是一个比较有用的syscall，主要就是将多个syscall合在一起，平摊(amortize)syscall的开支。</p>
+
+<h4 id="setns">setns</h4>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="n">setns</span><span class="p">(</span><span class="kt">int</span> <span class="n">fd</span><span class="p">,</span> <span class="kt">int</span> <span class="n">nstype</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>Linux namespace 直接相关的syscall，Docker之类的都要使用的东西。Linux 3.0的时候就添加了。</p>
+
+<h2 id="参考">参考</h2>
+
+<ol>
+  <li>http://man7.org/linux/man-pages/man2/syscall.2.html</li>
+  <li>http://xiaogr.com/?p=96, Look Into Userfaultfd</li>
+</ol>
+</span></div>
+</div>
+
+
+      </div>
+
+      <div class="tile is-4 is-child">
+        <div class="tile is-parent is-vertical sidebar">
+
+          <div class="tile is-child widget">
+
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Recent Posts
+                </p>
+              </header>
+              <div class="card-content">
+                <div class="content nice-text">
+                  <ul>
+                  
+                  <li><a href="/2018/10/LegoOS.html">
+                    LegoOS -- A Disseminated, Distributed OS for Hardware Resource Disaggregation
+                  </a></li>
+                  
+                  <li><a href="/2018/10/Level-Hashing.html">
+                    Write-Optimized and High-Performance Hashing Index Scheme for Persistent Memory
+                  </a></li>
+                  
+                  <li><a href="/2018/10/Classical-Papers.html">
+                    计算机科学经典论文
+                  </a></li>
+                  
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tile is-child widget">
+
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Sponsored
+                </p>
+              </header>
+              <div class="card-content">
+                <div class="content nice-text">
+                  <img src="/assets/images/Dust_Bunny.jpg"/>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="tile is-child widget">
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Recommended Websites
+                </p>
+              </header>
+              <!-- <div class="card-content">
+                <div class="content nice-text">
+                  <ul>
+                    <li>
+                      <a href="https://xkcd.com">xkcd</a>
+                    </li>
+                    <li>
+                      <a href="http://commitstrip.com">Commit Strip</a>
+                    </li>
+                    <li>
+                      <a href="http://www.smbc-comics.com">SMBC Comics</a>
+                    </li>
+                    <li>
+                      <a href="https://blog.codinghorror.com">Coding Horror</a>
+                    </li>
+                    <li>
+                      <a href="http://waitbutwhy.com">Wait Buy Why</a>
+                    </li>
+                    <li>
+                      <a href="https://simplysoch.wordpress.com/">Simply Soch</a>
+                    </li>
+                  </ul>
+                </div> -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <p>
+        Some rights reserved.
+      </p>
+      <p>
+        Made with <i class="fa fa-heart"></i> and <a href="https://github.com/jgthms/bulma">Bulma</a>, <a href="https://jekyllrb.com/">Jekyll</a>. Hosted on <a href="https://github.com/">Github</a>
+      </p>
+      <p>
+        <a class="icon" href="">
+          <i class="fa fa-github" title="Github"></i>
+        </a>
+        <a class="icon" href="">
+          <i class="fa fa-linkedin" title="Linkedin"></i>
+        </a>
+        <a class="icon" href="">
+          <i class="fa fa-envelope" title="Email"></i>
+        </a>
+      </p>
+    </div>
+  </div>
+</footer>
+
+<!-- js -->
+<script src="/assets/js/custom.js"></script>
+<script src="/assets/js/typewriter.js"></script>
+</body>
+</html>

@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <link rel="stylesheet" href="/assets/css/normalize.css"/>
+  <link rel="stylesheet" href="/assets/css/bulma.css"/>
+  <link rel="stylesheet" href="/assets/css/custom.css"/>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <!-- <link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto" rel="stylesheet"> -->
+
+  <!-- Icons -->
+  <link rel="shortcut icon" href="/assets/images/favicon.ico">
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+
+  <title>
+    
+      NetChain -- Scale-Free Sub-RTT Coordination &middot; Columba M71's Blog
+    
+  </title>
+
+</head>
+
+
+<body>
+
+<section class="hero is-dark">
+  <div class="hero-body">
+    <div class="container">
+        <h1 class="title">
+          <span class="typewrite" data-period="2000" data-type='[ "Columba M71"]'>
+            <span class="wrap"></span>
+          </span>
+        </h1>
+      <h4 class="subtitle" id="quote">
+      </h4>
+    </div>
+  </div>
+</section>
+
+<div class="main-container">
+  <div class="tile is-ancestor is-vertical">
+
+
+    <nav class="nav has-shadow">
+
+      <div class="nav-left">
+
+        <a href="/" class="nav-item">
+          <span class="icon">
+            <i class="fa fa-home" aria-hidden="true" title="Homepage"></i>
+          </span>
+        </a>
+
+        <a href="https://github.com/hnu2013wwj" class="nav-item">
+          <span class="icon">
+            <i class="fa fa-github" aria-hidden="true" title="Github"></i>
+          </span>
+        </a>
+
+        <div class="nav-item" id="searchFieldNav">
+          <div class="field has-addons">
+            <p class="control">
+              <input class="input is-small" type="text" placeholder="Find an article" id="search-text">
+            </p>
+            <p class="control">
+              <a class="button is-dark is-small" onclick="searchHandler();">
+                Search
+              </a>
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="nav-right nav-menu" id='nav-menu'>
+        <a href="/archive" class="nav-item">Archive</a>
+        <a href="/tags" class="nav-item">Tags</a>
+      </div>
+
+      <span class="nav-toggle" id="nav-toggle">
+          <span></span>
+          <span></span>
+          <span></span>
+    </nav>
+
+    <div class="tile is-parent">
+      <div class="tile is-8 is-child main">
+
+        <div class="box">
+    <h1 class="post-title">NetChain -- Scale-Free Sub-RTT Coordination</h1>
+    <hr/>
+    <div class="content"><span class="post-text"><h2 id="netchain-scale-free-sub-rtt-coordination">NetChain: Scale-Free Sub-RTT Coordination</h2>
+
+<h3 id="0x00-引言">0x00 引言</h3>
+
+<p>这篇文章将的是利用可编程交换机做的一个Coordination Service(类似Chubby Zookeeper)，是NetPaxos 和NetCache的后续，想法都是将一些东西使用可编程的交换机来实现。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>We present NetChain, a new approach that leverages the power and flexibility of new-generation programmable switches to provide scale-free sub-RTT coordination. In contrast to server-based solutions, NetChain is an in-network solution that stores data and processes queries entirely within the network data plane. 
+</code></pre></div></div>
+
+<p>.</p>
+
+<h3 id="0x01-netchain-overview">0x01 NetChain Overview</h3>
+
+<p>NetChain可以看作是在可编程交换机上实现一个key-value store，并且将一个交换机的上面存储的东西复制到多个交换机上，然后在此基础上实现其它的功能(Coordination Services)，</p>
+
+<p><img src="/assets/img/netchain-arch.png" alt="netchain-arch" /></p>
+
+<p>为了将key-value store做到多个交换机上，并保证强一致性和容错能力，NetChain这里使用了Vertical Paxos，并使用Chain Replication来做数据的复制。</p>
+
+<p>Vertical Paxos将一个consensus protocol 分为了两部分，一部分是steady state proto-col，另外一部分是reconfiguration protocol，这部分在NetChain中被映射为 network data 和 control planes。第一部分通常是一个primary-backup (PB) protocol，处理读写请求和保持强一致性，f+1个服务器可以容忍f个服务器故障。第二部分的reconfiguration protocol 使用的是一个auxiliary master 处理节点加入和离开等的工作。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>While it seems to move the fault-tolerance problem from the consensus protocol to the auxiliary master, Vertical Paxos is well-suited to NetChain because reconfigurations such as failures (on the order of minutes) are orders of magnitude less frequent than queries (on the order of microseconds). So handling queries and reconfigurations are mapped to data and control planes, respectively.
+</code></pre></div></div>
+
+<p>由于交换机转发的特点，这里使用的复制protocol就是Chain Replication，通常情况下一个Coordination Service的工作过程就像下面一样:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>client → coordination servers → client.
+</code></pre></div></div>
+
+<p>通过NetChain变成了下面这样:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>client→ network switches → client
+</code></pre></div></div>
+
+<p>.</p>
+
+<h3 id="0x02-netchain-data-plane">0x02 NetChain Data Plane</h3>
+
+<h5 id="key-valye-storage">Key-Valye Storage</h5>
+
+<p>Data Plane就是一个in-network的key-valye store，使用Chain Replication来保证强一致性。如何使用在交换机内实现这些东西呢？</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>NetChain provides strong consistency: (i) reads and writes on individual keys are executed in some sequential order, and (ii) the effects of successful writes are reflected in subsequent reads. NetChain assumes trustworthy components; otherwise, malicious components can destroy these consistency guarantees.
+</code></pre></div></div>
+
+<p>NetChain利用前面的NetCache上面做的一些东西，将key-value store做到了可编程交换机的on-chip memory上面，每一个key作为保存到match table中的一项, 而value保存到一个register array中的一个位置中.</p>
+
+<p><img src="/assets/img/netchain-key-valye-storage.png" alt="netchain-key-valye-storage" /></p>
+
+<p>NetChain利用可编程交换机的支持自定义的包格式的功能，在UDP的基础上实现NetChain的包格式(Figure 2(b) )。包里面包含了操作类型，key，value等的字段.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Delete queries invalidate key-value items in the data plane and requires the control plane for garbage collection. Insert queries require the control plane to set up entries in switch tables, and thus are slower than other operations. This is acceptable because Insert is a less frequent operation for the use cases of coordination services.
+</code></pre></div></div>
+
+<p>此外，NetChain还是用将kye-value数据分区存放。</p>
+
+<p>NetChain处理数据包:</p>
+
+<p><img src="/assets/img/netchain-query.png" alt="netchain-query" /></p>
+
+<blockquote>
+
+</blockquote>
+
+<h5 id="netchain-routing">NetChain Routing</h5>
+
+<p>在Chain Replication中，每一个server是需要知道自己的前继和后继的，NetChain这里的使用方式是将这些IP list保存在数据包里面，上面的图有表示。利用一个SC字段来确定下一个节点。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>When a switch receives a packet and the destination IP matches its own address, the switch decodes the query and performs the read or write operation. After this, the switch updates the destination IP to the next chain node, or to the client IP if it is the tail.
+</code></pre></div></div>
+
+<p><img src="/assets/img/netchain-routing.png" alt="netchain-routing" /></p>
+
+<p>写操作和读操作使用IP list的顺序是相反的。</p>
+
+<blockquote>
+
+</blockquote>
+
+<h5 id="in-order-key-value-update">In-Order Key-Value Update</h5>
+
+<p>为了解决数据包转发过程中的乱序的问题，NetChain使用的方式就是一个sequence numbers，使用方式在上面的伪代码的图中有体现。第一个交换机给写操作一个单调递增的se-quence numbers，其它的交换机对于这些操作必须按照这个顺序处理。</p>
+
+<blockquote>
+
+</blockquote>
+
+<h3 id="0x03-netchain-control-plane">0x03 NetChain Control Plane</h3>
+
+<p>Control Plane作为NetChain里面的一个组件只用来处理交换机的switch tables和将交换机的信息注册到NetChain中。</p>
+
+<h5 id="fast-failover">Fast Failover</h5>
+
+<p>当一个交换机出现故障时，这里解决的办法也是类型Chain Replication中的办法。由于NetCain中使用了一致性hash，一个交换机被映射到多个的虚拟结点，这样就可能导致比较多的更新操作。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Since each virtual node is in f +1 chains, a switch failure affects m( f + 1)/n chains in total. This implies that we need to update m( f + 1)/n switches for one switch failure in fast failover. While m( f + 1)/n is fewer than the number of servers, it still incurs consid- erable reconfiguration cost as m/n can be a few tens or hundreds. 
+</code></pre></div></div>
+
+<p>为了减少这类更新结点，这里使用的方法就是在交换机里面添加一条新的规则: 如果目的地址就是失败的结点，那么就将这个数据包直接给失败结点的下一个结点，后者直接通知客户端(根据结点所处的位置)。</p>
+
+<p><img src="/assets/img/netchain-failover.png" alt="netchain-failover" /></p>
+
+<blockquote>
+
+</blockquote>
+
+<h5 id="failure-recovery">Failure Recovery</h5>
+
+<p>对于重新加入NetChain的交换机，主要的是要解决数据同步与一致性的问题。</p>
+
+<p><img src="/assets/img/netchain-recovery.png" alt="netchain-recovery" /></p>
+
+<p>步骤:</p>
+
+<ol>
+  <li>
+    <p>Pre-synchronization，拷贝要添加位置的下一个结点的数据，在新加入的结点上添加规则；</p>
+  </li>
+  <li>
+    <p>Two-phase atomic switching，为了保证一致性，NetChian必须保证any node in the chain has newer values than its next hop，这里也分步骤进行:</p>
+
+    <ol>
+      <li>
+        <p>Stop and synchronization，在数据和规则都准备好时就停止同步，必要的时候要停止写操作：</p>
+
+        <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Since no new queries are forwarded to S2, the state on S2 and S3 would eventually become the same. In this phase, the chain stops serving write queries, but still serves read queries with S2.
+</code></pre></div>        </div>
+      </li>
+      <li>
+        <p>Activation，新加入的结点作为结点开始工作，并必要的时候需要修改规则。</p>
+      </li>
+    </ol>
+  </li>
+</ol>
+
+<p>对于中间的交换机按照上面的步骤进行就可以了，对于head or tail的交换机，想要其它一些额外的工作。对于head结点的重新加入，要处理的就是sequence number的问题，由于必须保证这个sequence number是递增的，这里使用的方式就是一个额外的session number，每次head改变就会递增这个session number 。</p>
+
+<p>当新添加入的结点是tail时，就可以去除上面需要的停止写操作的行为了:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>we only need to copy the state from S0 that are updated before we finish dropping all queries on S1’s neighbor switches, as no new read queries are served. Then in Phase 2, we activate the chain by forwarding the queries to S3.
+</code></pre></div></div>
+
+<p><img src="/assets/img/netchain-recovery-algorithm.png" alt="netchain-recovery-algorithm" /></p>
+
+<blockquote>
+
+</blockquote>
+
+<h3 id="0x04-评估">0x04 评估</h3>
+
+<p><img src="/assets/img/netchain-performance.png" alt="netchain-performance" /></p>
+
+<blockquote>
+
+</blockquote>
+
+<h2 id="参考">参考</h2>
+
+<ol>
+  <li>NetChain: Scale-Free Sub-RTT Coordination, NSDI 2018.</li>
+</ol>
+</span></div>
+</div>
+
+
+      </div>
+
+      <div class="tile is-4 is-child">
+        <div class="tile is-parent is-vertical sidebar">
+
+          <div class="tile is-child widget">
+
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Recent Posts
+                </p>
+              </header>
+              <div class="card-content">
+                <div class="content nice-text">
+                  <ul>
+                  
+                  <li><a href="/2018/10/LegoOS.html">
+                    LegoOS -- A Disseminated, Distributed OS for Hardware Resource Disaggregation
+                  </a></li>
+                  
+                  <li><a href="/2018/10/Level-Hashing.html">
+                    Write-Optimized and High-Performance Hashing Index Scheme for Persistent Memory
+                  </a></li>
+                  
+                  <li><a href="/2018/10/Classical-Papers.html">
+                    计算机科学经典论文
+                  </a></li>
+                  
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tile is-child widget">
+
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Sponsored
+                </p>
+              </header>
+              <div class="card-content">
+                <div class="content nice-text">
+                  <img src="/assets/images/Dust_Bunny.jpg"/>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="tile is-child widget">
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Recommended Websites
+                </p>
+              </header>
+              <!-- <div class="card-content">
+                <div class="content nice-text">
+                  <ul>
+                    <li>
+                      <a href="https://xkcd.com">xkcd</a>
+                    </li>
+                    <li>
+                      <a href="http://commitstrip.com">Commit Strip</a>
+                    </li>
+                    <li>
+                      <a href="http://www.smbc-comics.com">SMBC Comics</a>
+                    </li>
+                    <li>
+                      <a href="https://blog.codinghorror.com">Coding Horror</a>
+                    </li>
+                    <li>
+                      <a href="http://waitbutwhy.com">Wait Buy Why</a>
+                    </li>
+                    <li>
+                      <a href="https://simplysoch.wordpress.com/">Simply Soch</a>
+                    </li>
+                  </ul>
+                </div> -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <p>
+        Some rights reserved.
+      </p>
+      <p>
+        Made with <i class="fa fa-heart"></i> and <a href="https://github.com/jgthms/bulma">Bulma</a>, <a href="https://jekyllrb.com/">Jekyll</a>. Hosted on <a href="https://github.com/">Github</a>
+      </p>
+      <p>
+        <a class="icon" href="">
+          <i class="fa fa-github" title="Github"></i>
+        </a>
+        <a class="icon" href="">
+          <i class="fa fa-linkedin" title="Linkedin"></i>
+        </a>
+        <a class="icon" href="">
+          <i class="fa fa-envelope" title="Email"></i>
+        </a>
+      </p>
+    </div>
+  </div>
+</footer>
+
+<!-- js -->
+<script src="/assets/js/custom.js"></script>
+<script src="/assets/js/typewriter.js"></script>
+</body>
+</html>

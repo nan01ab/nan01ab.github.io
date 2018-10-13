@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <link rel="stylesheet" href="/assets/css/normalize.css"/>
+  <link rel="stylesheet" href="/assets/css/bulma.css"/>
+  <link rel="stylesheet" href="/assets/css/custom.css"/>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <!-- <link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto" rel="stylesheet"> -->
+
+  <!-- Icons -->
+  <link rel="shortcut icon" href="/assets/images/favicon.ico">
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+
+  <title>
+    
+      Read-Log-Update &middot; Columba M71's Blog
+    
+  </title>
+
+</head>
+
+
+<body>
+
+<section class="hero is-dark">
+  <div class="hero-body">
+    <div class="container">
+        <h1 class="title">
+          <span class="typewrite" data-period="2000" data-type='[ "Columba M71"]'>
+            <span class="wrap"></span>
+          </span>
+        </h1>
+      <h4 class="subtitle" id="quote">
+      </h4>
+    </div>
+  </div>
+</section>
+
+<div class="main-container">
+  <div class="tile is-ancestor is-vertical">
+
+
+    <nav class="nav has-shadow">
+
+      <div class="nav-left">
+
+        <a href="/" class="nav-item">
+          <span class="icon">
+            <i class="fa fa-home" aria-hidden="true" title="Homepage"></i>
+          </span>
+        </a>
+
+        <a href="https://github.com/hnu2013wwj" class="nav-item">
+          <span class="icon">
+            <i class="fa fa-github" aria-hidden="true" title="Github"></i>
+          </span>
+        </a>
+
+        <div class="nav-item" id="searchFieldNav">
+          <div class="field has-addons">
+            <p class="control">
+              <input class="input is-small" type="text" placeholder="Find an article" id="search-text">
+            </p>
+            <p class="control">
+              <a class="button is-dark is-small" onclick="searchHandler();">
+                Search
+              </a>
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="nav-right nav-menu" id='nav-menu'>
+        <a href="/archive" class="nav-item">Archive</a>
+        <a href="/tags" class="nav-item">Tags</a>
+      </div>
+
+      <span class="nav-toggle" id="nav-toggle">
+          <span></span>
+          <span></span>
+          <span></span>
+    </nav>
+
+    <div class="tile is-parent">
+      <div class="tile is-8 is-child main">
+
+        <div class="box">
+    <h1 class="post-title">Read-Log-Update</h1>
+    <hr/>
+    <div class="content"><span class="post-text"><h2 id="read-log-update--a-lightweight-synchronization-mechanism-for-concurrent-programming">Read-Log-Update – A Lightweight Synchronization Mechanism for Concurrent Programming</h2>
+
+<h2 id="0x00-引言">0x00 引言</h2>
+
+<p>RLU可以看作是RCU的升级版本。RCU在Linux Kernel 中已经得到广泛的应用了。但是其也存在一些缺点，最大的一个缺点就是很难用，其次就是只适应有很少的write操作的情形，最后就是等待读者完成操作的延时问题(具体看看RCU有关的东西？)。RLU则可以解决RCU存在的一些问题:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>RLU provides support for multiple object updates in a single operation by combining the quiescence mechanism of RCU with a global clock and per thread object-level logs.
+</code></pre></div></div>
+
+<p>.</p>
+
+<blockquote>
+
+</blockquote>
+
+<h3 id="0x01-基本思路">0x01 基本思路</h3>
+
+<p>通过使用综合了结合global clock的RCU的quiescence机制和 thread直接独立的object logs，RLU一个操作支持多个对象更新。RLU有以下的基本思路，这一部分先假设写都是顺序进行的:</p>
+
+<ul>
+  <li>所有操作在开始都要读取global clock(g-clock)到自己线程局部的l-lock中，使用这个lock来对共享的对象解引用；</li>
+  <li>对于更新操作，一个线程先将对象拷贝到自己的log中，在自己的log中操作这个对象，这里要获取object(s)的lock；这里读操作不需要申请任何lock(s)，可以直接访问对象；</li>
+  <li>对于write操作，为了提交这次的更新，这个线程要先递增g-lock，这样就将各个线程的操作分为了两个部分：
+    <ol>
+      <li>在这个递增之前发起的；</li>
+      <li>在这个递增之后发起的；</li>
+    </ol>
+  </li>
+  <li>对于前者，这些操作它们会读取旧的object(s)，对于后者，这些操作会读取更新线程的log中的副本；</li>
+  <li>更新的线程等到在旧object(s)上的读操作都完成之后，更新的线程然后提交更新，释放lock(s)，完成操作。</li>
+</ul>
+
+<p>下面以一个图来一步步解释：</p>
+
+<p><img src="/assets/img/rlu-principle.png" alt="rlu-principle" /></p>
+
+<h5 id="第1部分">第1部分</h5>
+
+<p>T1和T2都先执行读操作。先读取g-clock到自己本地的l-clock之中；然后T1读取O1, T2读取 O1 O2，它什么都是直接读取，不需要lock操作；</p>
+
+<h5 id="第2部分">第2部分</h5>
+
+<p>T2现在想要更新O2 O3，上面说到，更新都是在自己本地的log里面进行的，在此之前，T2要先申请O2 O3上的 RLU shared locks 。</p>
+
+<p>这个时候T1想要读取O2，然后它就会发现被T2 locked了，T1就去查看T2的w-clock，发现无穷大，T1就知道T2还没有提交更新的对象，T1就知道了自己的操作不在这个更新之后才发生的，这样它就应该直接去读取原来的object。</p>
+
+<h5 id="第3部分">第3部分</h5>
+
+<p>T2完成了自己的更新操作，准备提交这次更新。它先递增clock，写到自己的w-clock，然后就是将递增之后的写到g-clock。不过此时T2要等到之前的操作都完成，这里是T1的操作。等到T1完成，T2就可以将对象安全写回，然后释放lock(s)。对于T3，由于它是属于之后的操作，就可以不用管了。</p>
+
+<p>对于T3的读取，如果T2次时没有将更新写回，它就比较T2的w-clock，发现T3的 l-clock &gt;= T2的w-clock，他就可以去T2的log里面读取数据。</p>
+
+<h3 id="0x02-synchronizing-write-operations">0x02 Synchronizing Write Operations</h3>
+
+<p>如果让RLU支持并发写操作呢？这里使用的直接就是细粒度的lock。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Another approach is to use fine-grained locks. In RLU, each object that a writer modifies is logged and locked by the RLU mechanism. Programmers can therefore use this locking process to coordinate write operations. For example, in a linked-list implementation, instead of grabbing a global lock for each writer, a programmer can use RLU to traverse the linked list, and then use the RLU mechanism to lock the target node and its predecessor. If the locking fails, then the operation restarts, otherwise the programmer can proceed and modify the target node (e.g., insertion or removal) and release the locks.
+</code></pre></div></div>
+
+<p>来看看伪代码，enjoy it:</p>
+
+<p><img src="/assets/img/rlu-pseudo-code.png" alt="rlu-pseudo-code" /></p>
+
+<h3 id="0x03-一个优化">0x03 一个优化</h3>
+
+<p>上面的伪代码中，可以发现writer每次提交都要call RLU_SYNCHRONIZE函数(第47行)。目的就是等待其它读者完成旧object(s)上面的操作，这里的一个优化就是尽可能地将这个操作推迟:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>On commit, instead of incrementing the global clock and executing RLU synchronize, the RLU writer simply saves the current write-log and generates a new log for the next writer. In this way, RLU writers execute without blocking on RLU synchronize calls, while aggregating write-logs and locks of objects being modified. 
+</code></pre></div></div>
+
+<p>推迟操作，这里可以复习一下The Scalable Commutativity Rule讲的东西了[2].</p>
+
+<h2 id="参考">参考</h2>
+
+<ol>
+  <li>Read-Log-Update: A Lightweight Synchronization Mechanism for Concurrent Programming, SOSP 2015.</li>
+  <li>Austin T. Clements, M. Frans Kaashoek, Nickolai Zeldovich, Robert T. Morris, and Eddie Kohler. 2015. The scalable commutativity rule: Designing scalable software for multicore processors. ACM Trans. Comput. Syst. 32, 4, Article 10 (January 2015), 47 pages.  DOI: http://dx.doi.org/10.1145/2699681.</li>
+</ol>
+</span></div>
+</div>
+
+
+      </div>
+
+      <div class="tile is-4 is-child">
+        <div class="tile is-parent is-vertical sidebar">
+
+          <div class="tile is-child widget">
+
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Recent Posts
+                </p>
+              </header>
+              <div class="card-content">
+                <div class="content nice-text">
+                  <ul>
+                  
+                  <li><a href="/2018/10/LegoOS.html">
+                    LegoOS -- A Disseminated, Distributed OS for Hardware Resource Disaggregation
+                  </a></li>
+                  
+                  <li><a href="/2018/10/Level-Hashing.html">
+                    Write-Optimized and High-Performance Hashing Index Scheme for Persistent Memory
+                  </a></li>
+                  
+                  <li><a href="/2018/10/Classical-Papers.html">
+                    计算机科学经典论文
+                  </a></li>
+                  
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tile is-child widget">
+
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Sponsored
+                </p>
+              </header>
+              <div class="card-content">
+                <div class="content nice-text">
+                  <img src="/assets/images/Dust_Bunny.jpg"/>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="tile is-child widget">
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Recommended Websites
+                </p>
+              </header>
+              <!-- <div class="card-content">
+                <div class="content nice-text">
+                  <ul>
+                    <li>
+                      <a href="https://xkcd.com">xkcd</a>
+                    </li>
+                    <li>
+                      <a href="http://commitstrip.com">Commit Strip</a>
+                    </li>
+                    <li>
+                      <a href="http://www.smbc-comics.com">SMBC Comics</a>
+                    </li>
+                    <li>
+                      <a href="https://blog.codinghorror.com">Coding Horror</a>
+                    </li>
+                    <li>
+                      <a href="http://waitbutwhy.com">Wait Buy Why</a>
+                    </li>
+                    <li>
+                      <a href="https://simplysoch.wordpress.com/">Simply Soch</a>
+                    </li>
+                  </ul>
+                </div> -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <p>
+        Some rights reserved.
+      </p>
+      <p>
+        Made with <i class="fa fa-heart"></i> and <a href="https://github.com/jgthms/bulma">Bulma</a>, <a href="https://jekyllrb.com/">Jekyll</a>. Hosted on <a href="https://github.com/">Github</a>
+      </p>
+      <p>
+        <a class="icon" href="">
+          <i class="fa fa-github" title="Github"></i>
+        </a>
+        <a class="icon" href="">
+          <i class="fa fa-linkedin" title="Linkedin"></i>
+        </a>
+        <a class="icon" href="">
+          <i class="fa fa-envelope" title="Email"></i>
+        </a>
+      </p>
+    </div>
+  </div>
+</footer>
+
+<!-- js -->
+<script src="/assets/js/custom.js"></script>
+<script src="/assets/js/typewriter.js"></script>
+</body>
+</html>

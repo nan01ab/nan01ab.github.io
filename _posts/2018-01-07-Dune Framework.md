@@ -8,8 +8,6 @@ typora-root-url: ../
 
 
 
-
-
 ## Dune: Safe User-level Access to Privileged CPU Features 
 
 
@@ -74,7 +72,7 @@ Instead, processes must use VMCALL, the hypercall instruction, to make sys- tem 
 Dune completely changes how signal handlers are in- voked. Some signals are obviated by more efficient direct hardware support. For example, hardware page faults largely subsume the role of SIGSEGV. For other signals (e.g., SIGINT), the Dune module injects fake hardware interrupts into the process.
 ```
 
-
+.
 
 ### 实例
 
@@ -92,7 +90,7 @@ Dune completely changes how signal handlers are in- voked. Some signals are obvi
 
 ### 其它
 
-  Dune更加向一个特殊的Unikernel(这么说也不合适，因为Dune也算不上一个kernel)，它只提供虚拟化一些硬件的功能，将很多unikernel要做的工作都将给原来的kernel。与Exokernel想要做的很多东西是相同的，但是Dune比一个Exokernel简单多了。思路非常不错，之后在Dune上的一些研究工作也不少，比如IX，ZygOS等等，这个是一个很好玩的东西。
+  Dune更加像一个特殊的Unikernel(这么说也不合适，因为Dune也算不上一个kernel)，它只提供虚拟化一些硬件的功能，将很多unikernel要做的工作都将给原来的kernel。与Exokernel想要做的很多东西是相同的，但是Dune比一个Exokernel简单多了。思路非常不错，之后在Dune上的一些研究工作也不少，比如IX，ZygOS等等，这个是一个很好玩的东西。
 
 
 

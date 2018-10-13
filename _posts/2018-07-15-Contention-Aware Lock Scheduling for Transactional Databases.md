@@ -57,7 +57,7 @@ Our goal is to find a lock scheduling algorithm under which the expected transac
 ```
 The intuition is that a transaction with more locks is more likely to block other transactions in the system. However, this approach does not account for the popularity of objects in the system. In other words, a transaction might be holding many locks but on unpopular objects, which are unlikely to be requested by other transactions.
 
-简而言之就是一个通过最多的locks决定那个transaction最先，缺点是这个txn locks的不是热点数据。
+简而言之就是一个通过最多的locks决定那个transaction最先，缺点是这个txn locks不一定是热点数据。
 ```
 
 

@@ -88,9 +88,7 @@ On commit, instead of incrementing the global clock and executing RLU synchroniz
 
   推迟操作，这里可以复习一下The Scalable Commutativity Rule讲的东西了[2].
 
-
-
-
+.
 
 ## 参考
 

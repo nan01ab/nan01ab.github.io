@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <link rel="stylesheet" href="/assets/css/normalize.css"/>
+  <link rel="stylesheet" href="/assets/css/bulma.css"/>
+  <link rel="stylesheet" href="/assets/css/custom.css"/>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <!-- <link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto" rel="stylesheet"> -->
+
+  <!-- Icons -->
+  <link rel="shortcut icon" href="/assets/images/favicon.ico">
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+
+  <title>
+    
+      Faster Hash &middot; Columba M71's Blog
+    
+  </title>
+
+</head>
+
+
+<body>
+
+<section class="hero is-dark">
+  <div class="hero-body">
+    <div class="container">
+        <h1 class="title">
+          <span class="typewrite" data-period="2000" data-type='[ "Columba M71"]'>
+            <span class="wrap"></span>
+          </span>
+        </h1>
+      <h4 class="subtitle" id="quote">
+      </h4>
+    </div>
+  </div>
+</section>
+
+<div class="main-container">
+  <div class="tile is-ancestor is-vertical">
+
+
+    <nav class="nav has-shadow">
+
+      <div class="nav-left">
+
+        <a href="/" class="nav-item">
+          <span class="icon">
+            <i class="fa fa-home" aria-hidden="true" title="Homepage"></i>
+          </span>
+        </a>
+
+        <a href="https://github.com/hnu2013wwj" class="nav-item">
+          <span class="icon">
+            <i class="fa fa-github" aria-hidden="true" title="Github"></i>
+          </span>
+        </a>
+
+        <div class="nav-item" id="searchFieldNav">
+          <div class="field has-addons">
+            <p class="control">
+              <input class="input is-small" type="text" placeholder="Find an article" id="search-text">
+            </p>
+            <p class="control">
+              <a class="button is-dark is-small" onclick="searchHandler();">
+                Search
+              </a>
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="nav-right nav-menu" id='nav-menu'>
+        <a href="/archive" class="nav-item">Archive</a>
+        <a href="/tags" class="nav-item">Tags</a>
+      </div>
+
+      <span class="nav-toggle" id="nav-toggle">
+          <span></span>
+          <span></span>
+          <span></span>
+    </nav>
+
+    <div class="tile is-parent">
+      <div class="tile is-8 is-child main">
+
+        <div class="box">
+    <h1 class="post-title">Faster Hash</h1>
+    <hr/>
+    <div class="content"><span class="post-text"><h1 id="faster-hash">Faster Hash</h1>
+<p>Hash算法是被使用的最为广泛的算法之一（这里说的是计算对象（or 结构 etc.）hash值的非加密型的算法，即计算Java hashCode、C# HashCode or C++ std::hash的算法），由于被广泛使用，因此优化这个hash也能获取到比较好的效益。
+  博客文章[7]是写的很好的一篇对一些简单的hash值计算方法总结（大概是byvoid高中的时候写的，不愧是大佬，我高中的时候还只会用IE上网，23333）。评估一个hash的算法主要通过几个方面来衡量：hash尽可能分散，对象微小的差异都能够导致hash很大的差别（雪崩效应）；速度尽可能快；不容易被攻击。近些年也出现了一些比常见的hash计算方法更好的方法，一些更加适应现在的CPU的一些特点，比如缓存、指令并行、乱序执行、SIMD以及专门的一些特殊指令（关于指令[8]是一个比较好的参考）以拥有更高的速度，一些则能计算出更佳理想的hash值，或者二者兼得。这里主要讨论速度的优化。</p>
+
+<h2 id="一些优化基本知识">一些优化基本知识</h2>
+
+<p>熟悉CPU特别是现代CPU的一些实现的原理能指导我们写出更快的程序，相关的知识一般计算机专业的同学在本科阶段都已经学过了。现代CPU的一些特点中，多核是很重要的一方面，但是计算一个对象的hash一般不会使用多线程的方式，利用不上多核，优化的重点在与提高指令并行性，充分发挥CPU流水线，利用好CPU缓存等，还有一些则利用SIMD指令一次性执行多份数据的计算，抑或是可以使用CPU专门的指令提高性能。
+  对于一个比较好的hash算法来说，大部分的时间是花在访问内存之上（没办法，存储器墙摆在那里。如果在计算上都花了很多时间，这就是一个糟糕的算法）。
+  来分析一下一个例子，代码来自[7]：</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">unsigned</span> <span class="kt">int</span> <span class="nf">SDBMHash</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="n">str</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">hash</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="k">while</span> <span class="p">(</span><span class="o">*</span><span class="n">str</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="c1">// equivalent to: hash = 65599*hash + (*str++);</span>
+        <span class="n">hash</span> <span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="n">str</span><span class="o">++</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">hash</span> <span class="o">&lt;&lt;</span> <span class="mi">6</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">hash</span> <span class="o">&lt;&lt;</span> <span class="mi">16</span><span class="p">)</span> <span class="o">-</span> <span class="n">hash</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">hash</span> <span class="o">&amp;</span> <span class="mh">0x7FFFFFFF</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>这个算法中，每次计算一个byte的有一下的操作：1次内存访问，2次位运算，4次加减运算（2次+，1次-，1次++），1次判断。
+在执行这段代码时，2次位运行很容易被CPU并行执行，while判断的时候会导致数据被读取到寄存器，在计算的时候不用访问内存了，对于++，« 运算都是不访问内存的快速计算，+ - 运算的可并行性也很好。对于1次判断，大多数的情况下，while的判断是成立的（只会计算到最后一个byte才为false），对于这样的判断，CPU的分支预测准确率可以达到很高的水平。而1次内存的访问就是主要的性能瓶颈。对于一次内存访问要约100ns而在4GHz处理器简单计算1 2个cycle时间面前是在是太长了，所以这个算法的时间实际和下面这个差不多：</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">size_t</span> <span class="nf">strlen</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">str</span><span class="p">)</span> <span class="p">{</span>
+	<span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">p</span> <span class="o">=</span> <span class="n">str</span><span class="p">;</span>
+	<span class="k">while</span> <span class="p">(</span><span class="o">*</span><span class="n">p</span><span class="p">)</span> <span class="n">p</span><span class="o">++</span><span class="p">;</span>
+	<span class="k">return</span> <span class="n">p</span> <span class="o">-</span> <span class="n">str</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="参考">参考</h2>
+
+<ol>
+  <li>xxhash: http://create.stephan-brumme.com/xxhash/</li>
+  <li>The Hash: http://burtleburtle.net/bob/hash/doobs.html</li>
+  <li>SpookyHash: a 128-bit noncryptographic hash http://www.burtleburtle.net/bob/hash/spooky.html</li>
+  <li>SipHash: a fast short-input PRF: http://131002.net/siphash/</li>
+  <li>SipHash paper: http://131002.net/siphash/siphash.pdf</li>
+  <li>Fast keyed hash/pseudo-random function using SIMD multiply and permute: https://arxiv.org/pdf/1612.06257.pdf</li>
+  <li>https://www.byvoid.com/zhs/blog/string-hash-compare</li>
+  <li>https://software.intel.com/sites/landingpage/IntrinsicsGuide/</li>
+</ol>
+</span></div>
+</div>
+
+
+      </div>
+
+      <div class="tile is-4 is-child">
+        <div class="tile is-parent is-vertical sidebar">
+
+          <div class="tile is-child widget">
+
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Recent Posts
+                </p>
+              </header>
+              <div class="card-content">
+                <div class="content nice-text">
+                  <ul>
+                  
+                  <li><a href="/2018/10/LegoOS.html">
+                    LegoOS -- A Disseminated, Distributed OS for Hardware Resource Disaggregation
+                  </a></li>
+                  
+                  <li><a href="/2018/10/Level-Hashing.html">
+                    Write-Optimized and High-Performance Hashing Index Scheme for Persistent Memory
+                  </a></li>
+                  
+                  <li><a href="/2018/10/Classical-Papers.html">
+                    计算机科学经典论文
+                  </a></li>
+                  
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tile is-child widget">
+
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Sponsored
+                </p>
+              </header>
+              <div class="card-content">
+                <div class="content nice-text">
+                  <img src="/assets/images/Dust_Bunny.jpg"/>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="tile is-child widget">
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Recommended Websites
+                </p>
+              </header>
+              <!-- <div class="card-content">
+                <div class="content nice-text">
+                  <ul>
+                    <li>
+                      <a href="https://xkcd.com">xkcd</a>
+                    </li>
+                    <li>
+                      <a href="http://commitstrip.com">Commit Strip</a>
+                    </li>
+                    <li>
+                      <a href="http://www.smbc-comics.com">SMBC Comics</a>
+                    </li>
+                    <li>
+                      <a href="https://blog.codinghorror.com">Coding Horror</a>
+                    </li>
+                    <li>
+                      <a href="http://waitbutwhy.com">Wait Buy Why</a>
+                    </li>
+                    <li>
+                      <a href="https://simplysoch.wordpress.com/">Simply Soch</a>
+                    </li>
+                  </ul>
+                </div> -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <p>
+        Some rights reserved.
+      </p>
+      <p>
+        Made with <i class="fa fa-heart"></i> and <a href="https://github.com/jgthms/bulma">Bulma</a>, <a href="https://jekyllrb.com/">Jekyll</a>. Hosted on <a href="https://github.com/">Github</a>
+      </p>
+      <p>
+        <a class="icon" href="">
+          <i class="fa fa-github" title="Github"></i>
+        </a>
+        <a class="icon" href="">
+          <i class="fa fa-linkedin" title="Linkedin"></i>
+        </a>
+        <a class="icon" href="">
+          <i class="fa fa-envelope" title="Email"></i>
+        </a>
+      </p>
+    </div>
+  </div>
+</footer>
+
+<!-- js -->
+<script src="/assets/js/custom.js"></script>
+<script src="/assets/js/typewriter.js"></script>
+</body>
+</html>

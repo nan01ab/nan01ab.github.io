@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <link rel="stylesheet" href="/assets/css/normalize.css"/>
+  <link rel="stylesheet" href="/assets/css/bulma.css"/>
+  <link rel="stylesheet" href="/assets/css/custom.css"/>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <!-- <link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto" rel="stylesheet"> -->
+
+  <!-- Icons -->
+  <link rel="shortcut icon" href="/assets/images/favicon.ico">
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+
+  <title>
+    
+      A Fast File System for Unix &middot; Columba M71's Blog
+    
+  </title>
+
+</head>
+
+
+<body>
+
+<section class="hero is-dark">
+  <div class="hero-body">
+    <div class="container">
+        <h1 class="title">
+          <span class="typewrite" data-period="2000" data-type='[ "Columba M71"]'>
+            <span class="wrap"></span>
+          </span>
+        </h1>
+      <h4 class="subtitle" id="quote">
+      </h4>
+    </div>
+  </div>
+</section>
+
+<div class="main-container">
+  <div class="tile is-ancestor is-vertical">
+
+
+    <nav class="nav has-shadow">
+
+      <div class="nav-left">
+
+        <a href="/" class="nav-item">
+          <span class="icon">
+            <i class="fa fa-home" aria-hidden="true" title="Homepage"></i>
+          </span>
+        </a>
+
+        <a href="https://github.com/hnu2013wwj" class="nav-item">
+          <span class="icon">
+            <i class="fa fa-github" aria-hidden="true" title="Github"></i>
+          </span>
+        </a>
+
+        <div class="nav-item" id="searchFieldNav">
+          <div class="field has-addons">
+            <p class="control">
+              <input class="input is-small" type="text" placeholder="Find an article" id="search-text">
+            </p>
+            <p class="control">
+              <a class="button is-dark is-small" onclick="searchHandler();">
+                Search
+              </a>
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="nav-right nav-menu" id='nav-menu'>
+        <a href="/archive" class="nav-item">Archive</a>
+        <a href="/tags" class="nav-item">Tags</a>
+      </div>
+
+      <span class="nav-toggle" id="nav-toggle">
+          <span></span>
+          <span></span>
+          <span></span>
+    </nav>
+
+    <div class="tile is-parent">
+      <div class="tile is-8 is-child main">
+
+        <div class="box">
+    <h1 class="post-title">A Fast File System for Unix</h1>
+    <hr/>
+    <div class="content"><span class="post-text"><h2 id="a-fast-file-system-for-unix">A Fast File System for Unix</h2>
+
+<blockquote>
+
+</blockquote>
+
+<h3 id="0x00-引言">0x00 引言</h3>
+
+<p>Unix FFS是针对HHD的经典文件系统设计，文章发表于1984了，距今已有34年了(比我年龄大上好多)。这篇论文在大三的时候就看过了。FFS的论文里面的思想影响到了现在很多文件系统的设计。</p>
+
+<blockquote>
+
+</blockquote>
+
+<h3 id="0x01-原有解决方案存在的问题">0x01 原有解决方案存在的问题</h3>
+
+<p>​    经典的Unix文件系统布局:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Super Block
+  +------+---------+---------------------------+
+  |      |         |                           |
+  |      |         |         Data              |
+  |      | inodes  |                           |
+  +------+---------+---------------------------+
+</code></pre></div></div>
+
+<p>原有系统的问题就是糟糕的性能表现，大概只能发挥出磁盘2%的带宽，低到可怕。性能低的一个最主要的原因就是远文件系统的设计是把此篇当作是一个随机访问的内存，只不过这个不支持byte-addressable而已，只能按块来访问。系统运行一段时间后碎片导致了文件块发布在此篇的各个地方，操作文件造成了大量的seek操作，严重降低了性能。</p>
+
+<blockquote>
+
+</blockquote>
+
+<p>所以FFS的核心就是[2]:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>How can we organize file system data structures so as to improve per- formance? What types of allocation policies do we need on top of those data structures? How do we make the file system “disk aware”?
+</code></pre></div></div>
+
+<blockquote>
+
+</blockquote>
+
+<h3 id="0x02-基本思路">0x02 基本思路</h3>
+
+<p>问了保持兼容性，针对文件系统的API没有变化，变化的只是内部的实现。</p>
+
+<blockquote>
+
+</blockquote>
+
+<h4 id="关键思路-01-the-cylinder-group">关键思路 01: The Cylinder Group</h4>
+
+<p>FFS第一个思路就是将磁盘的空间分组，主要是安照块在磁盘上的位置，它们有着到磁片中心相同的距离。</p>
+
+<p><img src="/assets/img/ffs-cylinder.png" alt="ffs-cylinder" /></p>
+
+<p>​    [2]中的这一幅图很好的表达了这种思想。</p>
+
+<p>​     值得注意的是现在的磁盘已经获取不到相关的物理信息了，所以现在的一些FS使用的方法是将磁盘分为block group，每一个group是在磁盘上是连续的。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>+--------------------+-------------------+----------------------+
+|                    |                   |                      |
+|      Group 0       |     Group 1       |    Group 2           |
+|                    |                   |                      |
++--------------------+-------------------+----------------------+
+</code></pre></div></div>
+
+<p>磁盘的结构也做了一些变化:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Super Block
+    +-------+---------+------------+--------------------------------+
+    |       |         |            |                                |
+    |       |         |    inodes  |         data                   |
+    |       |         |            |                                |
+    +-------+---------+------------+--------------------------------+
+            inode bitmap
+                data bitmap
+</code></pre></div></div>
+
+<p>Super Block包含了文件系统的基本元数据信息，inode bitmap， data bitmap用于指示后面的indoes，data哪些部分被使用了。后面的两个部分用途和之前系统的一样(这里bitmap，inodes是预先就分配好的，在1984年的时候磁盘比较小，分配死的没有什么问题，后来的磁盘越来越多，现在的很多文件系统针对这个方面有了很多的优化)。这里的要按照cylinder group来方便分配。</p>
+
+<blockquote>
+
+</blockquote>
+
+<h5 id="基本操作">基本操作</h5>
+
+<p>让我们来想想在这个FS中创建一个文件并写入少量数据，它会进行哪些操作呢？</p>
+
+<ol>
+  <li>分配一个新的inode；</li>
+  <li>在inode bitmap中表示这个inode被分配了；</li>
+  <li>分配一个数据块(假如一个就可以了)，这样的话需要写data部分；</li>
+  <li>在data bitmap中标示对应的数据块被分配；</li>
+  <li>这还没有完，文件系统是存在目录结构的，所以对应的目录的元数据也要修改；</li>
+</ol>
+
+<blockquote>
+
+</blockquote>
+
+<h4 id="关键思路-02-把相关的东西放一起">关键思路 02: 把相关的东西放一起</h4>
+
+<p>使用了几种方式把相关的东西放在一起(要考虑到HHD的特点)</p>
+
+<ul>
+  <li>对于目录: 查找有最少数量的目录和最多空闲inodes的cylinder，将目录的inode和数据放在这里。</li>
+  <li>对于文件: 保证inode和数据块在一个group内，将同一个目录下面的文件放在一个group内。</li>
+</ul>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>The FFS policy heuristics are not based on extensive studies of filesystem traffic or anything particularly nuanced; rather, they are based on good old-fashioned common sense (isn’t that what CS stands for after all?)1. Files in a directory are often accessed together: imagine compiling a bunch of files and then linking them into a single executable. Be- cause such namespace-based locality exists, FFS will often improve performance, making sure that seeks between related files are nice and short.
+</code></pre></div></div>
+
+<blockquote>
+
+</blockquote>
+
+<h4 id="关键思路-03-处理大文件">关键思路 03: 处理大文件</h4>
+
+<p>由于大文件会占据一大块的空间，访问后面的文件时会造成比较昂贵的seek操作。FFS会将文件的前面几个block放到文件所在的group，而将后面的数据分成比较大的chunk，保存在其它的group中。虽然这里可能造成一些额外的seek操作，但是由于文件比较大，会被数据的传输时间”掩盖”.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Specifically, if the chunk size is large enough, the file system will spend most of its time transferring data from disk and just a (relatively) little time seeking between chunks of the block. This process of reducing an overhead by doing more work per overhead paid is called amortization and is a common technique in computer systems.
+</code></pre></div></div>
+
+<p>.</p>
+
+<blockquote>
+
+</blockquote>
+
+<h4 id="关键思路-04-block-和-sub-blocks">关键思路 04: Block 和 sub-blocks</h4>
+
+<p>​    FFS将block的大小增大为4k，减小了overhead，提高了性能。更加大的block也使得前面的bitmap结构更加小。带来的缺点就是可能更加多的内部碎片，因为一般情况下小文件总是占了大部分。FFS这里使用的解决方法是将一个block又可以在内部分为4个sub-blocks。好处就是文件都很小的时候能更充分利用空间，减少碎片，缺点就是处理这个使得系统的复杂程度增加了不少，有时候还会造成额外的数据移动。</p>
+
+<blockquote>
+
+</blockquote>
+
+<h3 id="0x03-summary">0x03 Summary</h3>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Certainly all modern systems account for the main lesson of FFS: treat the disk like it’s a disk.
+</code></pre></div></div>
+
+<p>.</p>
+
+<blockquote>
+
+</blockquote>
+
+<h2 id="参考">参考</h2>
+
+<ol>
+  <li>A Fast File System for Unix, TOCS 1984.</li>
+  <li>“Operating Systems: Three Easy Pieces“ (Chapter: Locality and The Fast File System) by Remzi Arpaci-Dusseau and Andrea Arpaci-Dusseau. Arpaci-Dusseau Books, 2014.</li>
+</ol>
+
+</span></div>
+</div>
+
+
+      </div>
+
+      <div class="tile is-4 is-child">
+        <div class="tile is-parent is-vertical sidebar">
+
+          <div class="tile is-child widget">
+
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Recent Posts
+                </p>
+              </header>
+              <div class="card-content">
+                <div class="content nice-text">
+                  <ul>
+                  
+                  <li><a href="/2018/10/LegoOS.html">
+                    LegoOS -- A Disseminated, Distributed OS for Hardware Resource Disaggregation
+                  </a></li>
+                  
+                  <li><a href="/2018/10/Level-Hashing.html">
+                    Write-Optimized and High-Performance Hashing Index Scheme for Persistent Memory
+                  </a></li>
+                  
+                  <li><a href="/2018/10/Classical-Papers.html">
+                    计算机科学经典论文
+                  </a></li>
+                  
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tile is-child widget">
+
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Sponsored
+                </p>
+              </header>
+              <div class="card-content">
+                <div class="content nice-text">
+                  <img src="/assets/images/Dust_Bunny.jpg"/>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="tile is-child widget">
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Recommended Websites
+                </p>
+              </header>
+              <!-- <div class="card-content">
+                <div class="content nice-text">
+                  <ul>
+                    <li>
+                      <a href="https://xkcd.com">xkcd</a>
+                    </li>
+                    <li>
+                      <a href="http://commitstrip.com">Commit Strip</a>
+                    </li>
+                    <li>
+                      <a href="http://www.smbc-comics.com">SMBC Comics</a>
+                    </li>
+                    <li>
+                      <a href="https://blog.codinghorror.com">Coding Horror</a>
+                    </li>
+                    <li>
+                      <a href="http://waitbutwhy.com">Wait Buy Why</a>
+                    </li>
+                    <li>
+                      <a href="https://simplysoch.wordpress.com/">Simply Soch</a>
+                    </li>
+                  </ul>
+                </div> -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <p>
+        Some rights reserved.
+      </p>
+      <p>
+        Made with <i class="fa fa-heart"></i> and <a href="https://github.com/jgthms/bulma">Bulma</a>, <a href="https://jekyllrb.com/">Jekyll</a>. Hosted on <a href="https://github.com/">Github</a>
+      </p>
+      <p>
+        <a class="icon" href="">
+          <i class="fa fa-github" title="Github"></i>
+        </a>
+        <a class="icon" href="">
+          <i class="fa fa-linkedin" title="Linkedin"></i>
+        </a>
+        <a class="icon" href="">
+          <i class="fa fa-envelope" title="Email"></i>
+        </a>
+      </p>
+    </div>
+  </div>
+</footer>
+
+<!-- js -->
+<script src="/assets/js/custom.js"></script>
+<script src="/assets/js/typewriter.js"></script>
+</body>
+</html>

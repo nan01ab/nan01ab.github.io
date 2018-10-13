@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <link rel="stylesheet" href="/assets/css/normalize.css"/>
+  <link rel="stylesheet" href="/assets/css/bulma.css"/>
+  <link rel="stylesheet" href="/assets/css/custom.css"/>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <!-- <link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto" rel="stylesheet"> -->
+
+  <!-- Icons -->
+  <link rel="shortcut icon" href="/assets/images/favicon.ico">
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+
+  <title>
+    
+      Write-Optimized and High-Performance Hashing Index Scheme for Persistent Memory &middot; Columba M71's Blog
+    
+  </title>
+
+</head>
+
+
+<body>
+
+<section class="hero is-dark">
+  <div class="hero-body">
+    <div class="container">
+        <h1 class="title">
+          <span class="typewrite" data-period="2000" data-type='[ "Columba M71"]'>
+            <span class="wrap"></span>
+          </span>
+        </h1>
+      <h4 class="subtitle" id="quote">
+      </h4>
+    </div>
+  </div>
+</section>
+
+<div class="main-container">
+  <div class="tile is-ancestor is-vertical">
+
+
+    <nav class="nav has-shadow">
+
+      <div class="nav-left">
+
+        <a href="/" class="nav-item">
+          <span class="icon">
+            <i class="fa fa-home" aria-hidden="true" title="Homepage"></i>
+          </span>
+        </a>
+
+        <a href="https://github.com/hnu2013wwj" class="nav-item">
+          <span class="icon">
+            <i class="fa fa-github" aria-hidden="true" title="Github"></i>
+          </span>
+        </a>
+
+        <div class="nav-item" id="searchFieldNav">
+          <div class="field has-addons">
+            <p class="control">
+              <input class="input is-small" type="text" placeholder="Find an article" id="search-text">
+            </p>
+            <p class="control">
+              <a class="button is-dark is-small" onclick="searchHandler();">
+                Search
+              </a>
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="nav-right nav-menu" id='nav-menu'>
+        <a href="/archive" class="nav-item">Archive</a>
+        <a href="/tags" class="nav-item">Tags</a>
+      </div>
+
+      <span class="nav-toggle" id="nav-toggle">
+          <span></span>
+          <span></span>
+          <span></span>
+    </nav>
+
+    <div class="tile is-parent">
+      <div class="tile is-8 is-child main">
+
+        <div class="box">
+    <h1 class="post-title">Write-Optimized and High-Performance Hashing Index Scheme for Persistent Memory</h1>
+    <hr/>
+    <div class="content"><span class="post-text"><h2 id="write-optimized-and-high-performance-hashing-index-scheme-for-persistent-memory">Write-Optimized and High-Performance Hashing Index Scheme for Persistent Memory</h2>
+
+<h3 id="0x00-引言">0x00 引言</h3>
+
+<p>这篇OSDI 2018会议(就是今天开的, 2018-10-08)上的一篇关于Persistent Memory上hash index设计的文章[1]，是Path Hashing[2]的后续，也是华科在OSDI上发表的第一篇文章？？？这篇论文讨论了Path Hashing没有解决的问题，其中一个就是resize如何处理。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>To cost-efficiently resize this hash table, level hashing leverages an in- place resizing scheme that only needs to rehash 1/3 of buckets instead of the entire table, thus significantly reducing the number of rehashed buckets and improving the resizing performance. Experimental results demon- strate that level hashing achieves 1.4×−3.0× speedup for insertions, 1.2×−2.1× speedup for updates, and over 4.3× speedup for resizing, while maintaining high search and deletion performance, compared with state- of-the-art hashing schemes.
+</code></pre></div></div>
+
+<p>.</p>
+
+<p>这里关于NVM之类的特点都不提了，可参考相关资料。这里只关注Lelvel Hasing的设计以及如何解决现在的问题。</p>
+
+<blockquote>
+
+</blockquote>
+
+<h3 id="0x01-基本思路">0x01 基本思路</h3>
+
+<p>基本结构:</p>
+
+<p><img src="/assets/img/level-hashing-arch.png" alt="level-hashing-arch" /></p>
+
+<h5 id="multiple-slots-per-bucket">Multiple Slots per Bucket</h5>
+
+<p>每一个Hash table由2层组成，Top Level和Bottom Level，其中Top Level的大小是Bottom Level的2倍。每一个bucket里面有4个slot，这个做法和常见的一个cuckoo hash的设计差不多。</p>
+
+<h5 id="two-hash-locations-for-each-key">Two Hash Locations for Each Key</h5>
+
+<p>使用2个hash函数，这样一个Level里面有两个候选的buckets，加上Bottom里面的，就是4个，不过Bottom Level里面的一个bucket是被Top Level里面的2个bucket共用的。</p>
+
+<h5 id="sharing-based-two-level-structure">Sharing-based Two-level Structure</h5>
+
+<p>Bottom Level里面的一个bucket是被top level里面的2个bucket共用的，这里的思想和Path Hashing里面的是一样的。不够这里的Bottom Level是上次rehash之前的Top Level。</p>
+
+<h5 id="at-most-one-movement-for-each-successful-insertion">At Most One Movement for Each Successful Insertion</h5>
+
+<p>这里选择可用的solt利用了cuckoo hash的思路，但是为了解决cuckoo hash级联的数据驱逐问题。这里最多允许最多移动一个项。选择的步骤如下:</p>
+
+<ol>
+  <li>利用两个hash函数计算出的2个位置，检测使用优空的slot；</li>
+  <li>有，则选择；没有，则检查是否通过移动一个元素就能解决；</li>
+  <li>能，就移动，然后选择空出来的位置；不能，则用同样的方法查看Bottom Level；</li>
+  <li>都不能，进行resize操作；</li>
+</ol>
+
+<p>选择位置的计算方式:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Lt 1 = hash1 (K)%N, Lt 2 = hash2 (K)%N (1) 
+
+Lb 1 = hash1 (K)%(N/2), Lb 2 = hash2 (K)%(N/2) (2)
+</code></pre></div></div>
+
+<p>.</p>
+
+<blockquote>
+
+</blockquote>
+
+<h3 id="0x02--cost-efficient-in-place-resizing">0x02  Cost-efficient In-place Resizing</h3>
+
+<p>相对于读来说，NVM写的成本比较高，为了减少resize中的写操作，这里一个创新的地方就是每次resize就创建一个新的更加大的Top Level，之前的Top Level成为新的Bottom Level，只需要移动旧的Bottom Level里面的数据就可以了，这样只要移动1/3的数据。当resize是减小size时，反过来就可以了。</p>
+
+<p><img src="/assets/img/level-hasing-resize.png" alt="level-hasing-resize" /></p>
+
+<p>Resize这里还有2个优化:</p>
+
+<ol>
+  <li>
+    <p>为了解决2个Level数据发布不均导致的影响负载因子的问题，这里使用了一种叫做bottom-to-top movement (B2T) 的方法。具体方法是在插入操作的时候，如果所有的buckets都是满的，那么就尝试将Bottom Level两个候选的位置里面的项尝试移动到Top Level，只有在这些都不能移动的时候才resize。</p>
+
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>By performing the B2T scheme, the items between top and bottom levels are redistributed, thus improving the maximum load factor. The red line in Figure 4 shows the load factors when the resizings occur via using the B2T scheme. 
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>在resize之后，由于现在的大部分数据在Bottom Level，而查找的时候总是后查找Bottom Level，这样就导致了性能的降低。这里解决方法是dynamic search scheme，通过Top Level和Bottom Level里面的项的数量来决定先查哪一个。</p>
+
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Thus after resizing, the items in the bottom level are more than those in the top level and hence we first probe the bottom level, thus improving the search performance. 
+</code></pre></div>    </div>
+
+    <p>.</p>
+
+    <blockquote>
+
+    </blockquote>
+  </li>
+</ol>
+
+<h3 id="0x03-low-overhead-consistency-guarantee">0x03 Low-overhead Consistency Guarantee</h3>
+
+<p>为了标示一个slot是否为空，这里使用了一个标志位.</p>
+
+<p><img src="/assets/img/level-hashing-bucket.png" alt="level-hashing-bucket" /></p>
+
+<p>为了保证操作的一致性(关于NVM一致性的特点，可用查阅相关资料)，这里提出了一种叫做log-free consistency guarantee schemes和opportunistic log-free guarantee scheme:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>To reduce the overhead of guaranteeing consistency in level hashing, we propose log-free consistency guarantee schemes for deletion, insertion, and resizing operations, and an opportunistic log-free guarantee scheme for update operation, by leveraging the tokens to be performed in the atomic-write manner.
+</code></pre></div></div>
+
+<p>.</p>
+
+<h5 id="log-free-deletion">Log-free Deletion</h5>
+
+<p>只需要改变solt的对应的标志位即可；</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code> since the item becomes valid until the token is set to ‘1’. If a system failure occurs during writing the item, this item may be partially written but invalid since the current token is ‘0’ and this slot is still available. Hence, the hash table is in a consistent state when system failures occur.
+</code></pre></div></div>
+
+<p>.</p>
+
+<h5 id="log-free-insertion">Log-free Insertion</h5>
+
+<p>没有项移动的情况下，先写入数据，然后改变标志位。然后通过MFENCE来保证数据更新到NVM上面了。在有数据项移动的情况下，先拷贝要移动的数据到可选的位置，然后将这个位置(被移动对象目前的位置)的标志位置为 1，然后将原来的位置置为0，然后执行插入操作。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code> If a system failure occurs after changing the token of slot-alt before changing the token of slot-cur, the hash table contains two duplicate key-value items, which however does not impact on the data consistency. It is because when searching this key-value item, the returned value is always correct whichever one of the two items is queried.
+</code></pre></div></div>
+
+<p>.</p>
+
+<h5 id="log-free-resizing">Log-free Resizing</h5>
+
+<p>也是基于标志位的一个操作:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>we first copy the key-value item of slotold into slotnew, and then modifies the token of slotnew from ‘0’ to ‘1’ and finally modifies the token of slotold from ‘1’ to ‘0’. The ordering of the three steps is ensured via MFENCEs. 
+</code></pre></div></div>
+
+<p>这里要处理的一个问题就是在一些crash的情况下，可能导致已经rehash的项没有被标记为删除，这里只需要检查是否已经存在相同的项即可。</p>
+
+<p>.</p>
+
+<h5 id="opportunistic-log-free-update">Opportunistic Log-free Update</h5>
+
+<p>为了避免使用log保证一致性，这里使用了Opportunistic Log-free Update的方式，具体是:</p>
+
+<ol>
+  <li>一个bucket里面是否存在可使用的空slot，就使用类似先插入，然后同时更改标志位即可，因为同一个bucket里面的标志位在一起，可以一起修改；</li>
+  <li>如果没有，就使用log。</li>
+</ol>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>When updating an existing key-value item, if the updated item has two copies in the hash table, we first delete one and then update the other.
+</code></pre></div></div>
+
+<p>.</p>
+
+<blockquote>
+
+</blockquote>
+
+<h3 id="0x04-评估">0x04 评估</h3>
+
+<p>详细数据查看论文.</p>
+
+<p><img src="/assets/img/level-hasing-performance.png" alt="level-hasing-performance" /></p>
+
+<blockquote>
+
+</blockquote>
+
+<h2 id="参考">参考</h2>
+
+<ol>
+  <li>Write-Optimized and High-Performance Hashing Index Scheme for Persistent Memory, OSDI 2018.</li>
+  <li>A Write-Friendly and Cache-Optimized Hashing Scheme for Non-Volatile Memory Systems，TPDS 2018.</li>
+</ol>
+</span></div>
+</div>
+
+
+      </div>
+
+      <div class="tile is-4 is-child">
+        <div class="tile is-parent is-vertical sidebar">
+
+          <div class="tile is-child widget">
+
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Recent Posts
+                </p>
+              </header>
+              <div class="card-content">
+                <div class="content nice-text">
+                  <ul>
+                  
+                  <li><a href="/2018/10/LegoOS.html">
+                    LegoOS -- A Disseminated, Distributed OS for Hardware Resource Disaggregation
+                  </a></li>
+                  
+                  <li><a href="/2018/10/Level-Hashing.html">
+                    Write-Optimized and High-Performance Hashing Index Scheme for Persistent Memory
+                  </a></li>
+                  
+                  <li><a href="/2018/10/Classical-Papers.html">
+                    计算机科学经典论文
+                  </a></li>
+                  
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tile is-child widget">
+
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Sponsored
+                </p>
+              </header>
+              <div class="card-content">
+                <div class="content nice-text">
+                  <img src="/assets/images/Dust_Bunny.jpg"/>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="tile is-child widget">
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Recommended Websites
+                </p>
+              </header>
+              <!-- <div class="card-content">
+                <div class="content nice-text">
+                  <ul>
+                    <li>
+                      <a href="https://xkcd.com">xkcd</a>
+                    </li>
+                    <li>
+                      <a href="http://commitstrip.com">Commit Strip</a>
+                    </li>
+                    <li>
+                      <a href="http://www.smbc-comics.com">SMBC Comics</a>
+                    </li>
+                    <li>
+                      <a href="https://blog.codinghorror.com">Coding Horror</a>
+                    </li>
+                    <li>
+                      <a href="http://waitbutwhy.com">Wait Buy Why</a>
+                    </li>
+                    <li>
+                      <a href="https://simplysoch.wordpress.com/">Simply Soch</a>
+                    </li>
+                  </ul>
+                </div> -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <p>
+        Some rights reserved.
+      </p>
+      <p>
+        Made with <i class="fa fa-heart"></i> and <a href="https://github.com/jgthms/bulma">Bulma</a>, <a href="https://jekyllrb.com/">Jekyll</a>. Hosted on <a href="https://github.com/">Github</a>
+      </p>
+      <p>
+        <a class="icon" href="">
+          <i class="fa fa-github" title="Github"></i>
+        </a>
+        <a class="icon" href="">
+          <i class="fa fa-linkedin" title="Linkedin"></i>
+        </a>
+        <a class="icon" href="">
+          <i class="fa fa-envelope" title="Email"></i>
+        </a>
+      </p>
+    </div>
+  </div>
+</footer>
+
+<!-- js -->
+<script src="/assets/js/custom.js"></script>
+<script src="/assets/js/typewriter.js"></script>
+</body>
+</html>

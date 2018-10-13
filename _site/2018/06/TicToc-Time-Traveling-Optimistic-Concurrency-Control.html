@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <link rel="stylesheet" href="/assets/css/normalize.css"/>
+  <link rel="stylesheet" href="/assets/css/bulma.css"/>
+  <link rel="stylesheet" href="/assets/css/custom.css"/>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <!-- <link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto" rel="stylesheet"> -->
+
+  <!-- Icons -->
+  <link rel="shortcut icon" href="/assets/images/favicon.ico">
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+
+  <title>
+    
+      Time Traveling Optimistic Concurrency Control &middot; Columba M71's Blog
+    
+  </title>
+
+</head>
+
+
+<body>
+
+<section class="hero is-dark">
+  <div class="hero-body">
+    <div class="container">
+        <h1 class="title">
+          <span class="typewrite" data-period="2000" data-type='[ "Columba M71"]'>
+            <span class="wrap"></span>
+          </span>
+        </h1>
+      <h4 class="subtitle" id="quote">
+      </h4>
+    </div>
+  </div>
+</section>
+
+<div class="main-container">
+  <div class="tile is-ancestor is-vertical">
+
+
+    <nav class="nav has-shadow">
+
+      <div class="nav-left">
+
+        <a href="/" class="nav-item">
+          <span class="icon">
+            <i class="fa fa-home" aria-hidden="true" title="Homepage"></i>
+          </span>
+        </a>
+
+        <a href="https://github.com/hnu2013wwj" class="nav-item">
+          <span class="icon">
+            <i class="fa fa-github" aria-hidden="true" title="Github"></i>
+          </span>
+        </a>
+
+        <div class="nav-item" id="searchFieldNav">
+          <div class="field has-addons">
+            <p class="control">
+              <input class="input is-small" type="text" placeholder="Find an article" id="search-text">
+            </p>
+            <p class="control">
+              <a class="button is-dark is-small" onclick="searchHandler();">
+                Search
+              </a>
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="nav-right nav-menu" id='nav-menu'>
+        <a href="/archive" class="nav-item">Archive</a>
+        <a href="/tags" class="nav-item">Tags</a>
+      </div>
+
+      <span class="nav-toggle" id="nav-toggle">
+          <span></span>
+          <span></span>
+          <span></span>
+    </nav>
+
+    <div class="tile is-parent">
+      <div class="tile is-8 is-child main">
+
+        <div class="box">
+    <h1 class="post-title">Time Traveling Optimistic Concurrency Control</h1>
+    <hr/>
+    <div class="content"><span class="post-text"><h2 id="tictoc-time-traveling-optimistic-concurrency-control">TicToc: Time Traveling Optimistic Concurrency Control</h2>
+
+<h2 id="0x00-引言">0x00 引言</h2>
+
+<p>这篇文章是关于内存数据库的Optimistic Concurrency Control优化的一篇paper(对OCC没有了解的可以先看看论文[2])。Timestamp ordering (T/O) concurrency control 是数据库并发控制一种非常重要的方法，一般而言，系统会以事务为粒度分配timestamp，而这种方式存在一个缺点：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code> A common way to implement the allocator is through an atomic add instruction that increments a global counter for each new transaction. This approach, however, is only able to generate less than 5 million instructions per second on a modern multi-core system due to the long latency incurred by the CPU’s cache coherence protocol [11, 35]. As such, most state-of-the-art T/O-based algorithms suffer from the timestamp allocation bottleneck [37].
+</code></pre></div></div>
+
+<p>即使使用一些硬件上的优化，还是存在一些问题[具体参看论文]。</p>
+
+<p>​	TicToc使用的方式是不将timestamp分配给事务，而是分配给数据项。使用每一个数据项的timestamp来检查事务是否可以提交。这样有2个主要的好处：</p>
+
+<ol>
+  <li>不存在同一的时间戳分配，不相关的事务不会相互影响；</li>
+  <li>可以推迟时间戳分配，使用逻辑顺序来达到serializability ，即使这些事务在物理时间上是重叠的。减少了事务的abort；</li>
+</ol>
+
+<h2 id="0x01-基本算法">0x01 基本算法</h2>
+
+<h4 id="lazy-timestamp-management">Lazy Timestamp Management</h4>
+
+<p>对于一下的顺序，一般的OCC可能不能提交A的，但是实际上A提交不影响正确性：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>1. A read(x) 
+2. B write(x) 
+3. B commits 
+4. A write(y)
+</code></pre></div></div>
+
+<p>TicToc就可以解决这个问题，它不是静态的分配timestamp，而是使用x y实际read/write的最新版本计算timestamp，而不是整个database现在的timestamp。这个就可以将A提前到B(逻辑上)，就可以提交。TicToc中的wts和rts的含义如下(值得注意的是它们都是逻辑上的)[3]：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>wts: The logical timestamp of the last committed txn that wrote to the record.
+rts: The logical timestamp of the last txn that read the record.
+</code></pre></div></div>
+
+<p><img src="/assets/img/tic-toc-ts.png" alt="tic-toc-ts" /></p>
+
+<p>TicToc中，一个数据项在wts创建特定的版本在rts之前都是合法的。一个事务是合法的，必须满足以下2点：</p>
+
+<ol>
+  <li>事务的提交的ts必须在事务读取的(所有的)项的wts到rts之间；</li>
+  <li>对于事务写的项，提交的ts必须大于数据项的rts；</li>
+</ol>
+
+<p>TicToc读的方法如下：</p>
+
+<p><img src="/assets/img/tic-toc-read.png" alt="tic-toc-read" /></p>
+
+<p>回到这小节的例子，如果A赋予一个更大的timestamp，传统的OCC是不能提交的，2而如果赋予一个一个更加小的timestamp，那么就可以提交(满足OCC的有效性)。而在tic-toc中就可以推迟到事务提交是才计算出合适的timestamp，而不需要abort事务。</p>
+
+<h4 id="protocol-specification">Protocol Specification</h4>
+
+<p>protocol分为三步：</p>
+
+<ul>
+  <li>Read Phase</li>
+  <li>Validation Phase</li>
+  <li>Write Phase</li>
+</ul>
+
+<p>read的算法如Algorithm1所示。 Validation Phase是最复杂的(注意这里会更改rts)：</p>
+
+<p><img src="/assets/img/tic-toc-alg2.png" alt="tic-toc-alg2" /></p>
+
+<p>在通过了第二步之后，就可以完成写入操作：</p>
+
+<p><img src="/assets/img/tic-toc-alg3.png" alt="tic-toc-alg3" /></p>
+
+<h4 id="举个例子">举个例子</h4>
+
+<p><img src="/assets/img/tic-toc-example.png" alt="tic-toc-example" /></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>step 1: A读x，此时x(wts = 2 and rts = 3)，x保存在A的read set；
+step 2: B写x，在4时刻commit，B提交之后会变成x(wts = 4 and rts = 4)；
+step 3: A写y，此时新的y在A的write set里面，对其它不可见；
+step 4: A进入检验步骤，根据算法2，提交时间戳读数据项最大的wts，写数据项的最大rts+1。x在timestamp 2 and 3是合法的, 可以通过校验，然后提交(timestamp=3)；
+</code></pre></div></div>
+
+<p>.</p>
+
+<h3 id="0x02-正确性证明">0x02 正确性证明</h3>
+
+<p>正确性基于以下三个LEMMA:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>LEMMA 1. Transactions writing to the same tuple must have different commit timestamps.
+	不同的事务写相同的touple时必须是不同的时间戳；
+	
+LEMMA 2. Transactions that commit at the same timestamp and physical time do not conflict with each other.
+	同一时间戳提交的事务不相互影响。这里我们可以知道，lemma1中的情形不可能出现，而read-write，write-read冲突时，写者的提交时间戳总是会更加大。
+
+
+LEMMA 3. A read operation from a committed transaction returns the value of the latest write to the tuple in the serial schedule.
+  已经提交的事务总是会读取最新的数据。
+
+</code></pre></div></div>
+
+<p>.</p>
+
+<h3 id="0x03-优化和评估">0x03 优化和评估</h3>
+
+<p>参考论文[1]。</p>
+
+<h2 id="参考">参考</h2>
+
+<ol>
+  <li>TicToc: Time Traveling Optimistic Concurrency Control, SIGMOD 2016；</li>
+  <li>H. T. Kung and J. T. Robinson. On optimistic methods for concurrency control. ACM Trans. Database Syst., 6(2):213–226, June 1981.</li>
+  <li>CMU Advanced Database 2018课程课件。</li>
+</ol>
+</span></div>
+</div>
+
+
+      </div>
+
+      <div class="tile is-4 is-child">
+        <div class="tile is-parent is-vertical sidebar">
+
+          <div class="tile is-child widget">
+
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Recent Posts
+                </p>
+              </header>
+              <div class="card-content">
+                <div class="content nice-text">
+                  <ul>
+                  
+                  <li><a href="/2018/10/LegoOS.html">
+                    LegoOS -- A Disseminated, Distributed OS for Hardware Resource Disaggregation
+                  </a></li>
+                  
+                  <li><a href="/2018/10/Level-Hashing.html">
+                    Write-Optimized and High-Performance Hashing Index Scheme for Persistent Memory
+                  </a></li>
+                  
+                  <li><a href="/2018/10/Classical-Papers.html">
+                    计算机科学经典论文
+                  </a></li>
+                  
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tile is-child widget">
+
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Sponsored
+                </p>
+              </header>
+              <div class="card-content">
+                <div class="content nice-text">
+                  <img src="/assets/images/Dust_Bunny.jpg"/>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="tile is-child widget">
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Recommended Websites
+                </p>
+              </header>
+              <!-- <div class="card-content">
+                <div class="content nice-text">
+                  <ul>
+                    <li>
+                      <a href="https://xkcd.com">xkcd</a>
+                    </li>
+                    <li>
+                      <a href="http://commitstrip.com">Commit Strip</a>
+                    </li>
+                    <li>
+                      <a href="http://www.smbc-comics.com">SMBC Comics</a>
+                    </li>
+                    <li>
+                      <a href="https://blog.codinghorror.com">Coding Horror</a>
+                    </li>
+                    <li>
+                      <a href="http://waitbutwhy.com">Wait Buy Why</a>
+                    </li>
+                    <li>
+                      <a href="https://simplysoch.wordpress.com/">Simply Soch</a>
+                    </li>
+                  </ul>
+                </div> -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <p>
+        Some rights reserved.
+      </p>
+      <p>
+        Made with <i class="fa fa-heart"></i> and <a href="https://github.com/jgthms/bulma">Bulma</a>, <a href="https://jekyllrb.com/">Jekyll</a>. Hosted on <a href="https://github.com/">Github</a>
+      </p>
+      <p>
+        <a class="icon" href="">
+          <i class="fa fa-github" title="Github"></i>
+        </a>
+        <a class="icon" href="">
+          <i class="fa fa-linkedin" title="Linkedin"></i>
+        </a>
+        <a class="icon" href="">
+          <i class="fa fa-envelope" title="Email"></i>
+        </a>
+      </p>
+    </div>
+  </div>
+</footer>
+
+<!-- js -->
+<script src="/assets/js/custom.js"></script>
+<script src="/assets/js/typewriter.js"></script>
+</body>
+</html>

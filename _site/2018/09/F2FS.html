@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <link rel="stylesheet" href="/assets/css/normalize.css"/>
+  <link rel="stylesheet" href="/assets/css/bulma.css"/>
+  <link rel="stylesheet" href="/assets/css/custom.css"/>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <!-- <link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto" rel="stylesheet"> -->
+
+  <!-- Icons -->
+  <link rel="shortcut icon" href="/assets/images/favicon.ico">
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+
+  <title>
+    
+      F2FS &middot; Columba M71's Blog
+    
+  </title>
+
+</head>
+
+
+<body>
+
+<section class="hero is-dark">
+  <div class="hero-body">
+    <div class="container">
+        <h1 class="title">
+          <span class="typewrite" data-period="2000" data-type='[ "Columba M71"]'>
+            <span class="wrap"></span>
+          </span>
+        </h1>
+      <h4 class="subtitle" id="quote">
+      </h4>
+    </div>
+  </div>
+</section>
+
+<div class="main-container">
+  <div class="tile is-ancestor is-vertical">
+
+
+    <nav class="nav has-shadow">
+
+      <div class="nav-left">
+
+        <a href="/" class="nav-item">
+          <span class="icon">
+            <i class="fa fa-home" aria-hidden="true" title="Homepage"></i>
+          </span>
+        </a>
+
+        <a href="https://github.com/hnu2013wwj" class="nav-item">
+          <span class="icon">
+            <i class="fa fa-github" aria-hidden="true" title="Github"></i>
+          </span>
+        </a>
+
+        <div class="nav-item" id="searchFieldNav">
+          <div class="field has-addons">
+            <p class="control">
+              <input class="input is-small" type="text" placeholder="Find an article" id="search-text">
+            </p>
+            <p class="control">
+              <a class="button is-dark is-small" onclick="searchHandler();">
+                Search
+              </a>
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="nav-right nav-menu" id='nav-menu'>
+        <a href="/archive" class="nav-item">Archive</a>
+        <a href="/tags" class="nav-item">Tags</a>
+      </div>
+
+      <span class="nav-toggle" id="nav-toggle">
+          <span></span>
+          <span></span>
+          <span></span>
+    </nav>
+
+    <div class="tile is-parent">
+      <div class="tile is-8 is-child main">
+
+        <div class="box">
+    <h1 class="post-title">F2FS</h1>
+    <hr/>
+    <div class="content"><span class="post-text"><h2 id="f2fs-a-new-file-system-for-flash-storage">F2FS: A New File System for Flash Storage</h2>
+
+<h3 id="0x00-引言">0x00 引言</h3>
+
+<p>SSD有种它自己的特点。Linux的Ext FS，XFS FS等主要还是为HHD设计，优化的出发点也是HHD的工作方式。而SSD的工作方式和HHD有着本质的不同. F2FS是Linux上的一个为SSD设计的FS，另外F2FS是一个Log Structured的FS(所以先看一下[2,3])，现在在很多的智能手机上已经使用了(苹果也号称它的新的APFS是为SSD优化设计的，不过找不到具体技术细节的东西)。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>The detrimental effects of random writes could be reduced by the log-structured file system (LFS) approach and/or the copy-on-write strategy. For exam- ple, one might anticipate file systems like BTRFS and NILFS2 would perform well on NAND flash SSDs; unfortunately, they do not consider the charac- teristics of flash storage devices and are inevitably suboptimal in terms of performance and device lifetime. 
+</code></pre></div></div>
+
+<p>.</p>
+
+<blockquote>
+
+</blockquote>
+
+<h3 id="0x01-基本思路">0x01 基本思路</h3>
+
+<h5 id="on-disk-layout">On-Disk Layout</h5>
+
+<p>F2FS将SSD分为固定程度的segment，连续的segment组成section，一些section 组成zone。</p>
+
+<p>F2FS分为6个区域:</p>
+
+<ul>
+  <li>
+    <p>Superblock: 初始化之后就不变的，文件系统的元数据；SB</p>
+  </li>
+  <li>
+    <p>Checkpoint：保存了文件系统状态，和LFS中的一样，也是2个轮流使用的；CP</p>
+  </li>
+  <li>
+    <p>Segment Information Table：segmemt相关的信息；  SIT</p>
+  </li>
+  <li>
+    <p>Node Address Table ：Node地址表；NAT</p>
+  </li>
+  <li>
+    <p>Segment Summary Area : 保存Main Area中block的信息； SSA</p>
+  </li>
+  <li>
+    <p>Main Area: 保存数据的地方。MA</p>
+
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code> A node block con- tains inode or indices of data blocks, while a data block contains either directory or user file data.
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<p>结构图，这个图很清晰地表示了F2FS的结构：</p>
+
+<p><img src="/assets/img/f2fs-layout.png" alt="f2fs-layout" /></p>
+
+<p>看一看一个读文件的过程加深理解，假设读取“/dir/file” :</p>
+
+<ol>
+  <li>读取包含root的inode的block，这个位置信息在NAT中；</li>
+  <li>从root inode的块中，找到dir的目录项，得到dir的inode number；</li>
+  <li>通过NAT，根据dir的inode number找到物理位置；</li>
+  <li>读取dir对应的block；</li>
+  <li>在dir的block中找file的inode number，重复3，找到inode；</li>
+  <li>根据inode的信息读取file的数据，数据保存在MA中；</li>
+</ol>
+
+<h5 id="file-structure">File Structure</h5>
+
+<p>​    与LFS中的inode map不同，F2FS使用 “node”结构，每一个node有一个唯一的node id。使用这个id，NAT可以找到node block。node block可以表示inode，direct和direct node。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code> An inode block contains a file’s metadata, such as file name, inode number, file size, atime and dtime. A direct node block contains block addresses of data and an indirect node block has node IDs locating another node blocks.
+</code></pre></div></div>
+
+<p><img src="/assets/img/f2fs-file-structure.png" alt="f2fs-file-structure" /></p>
+
+<p>这里基本结构和常见的没有很多区别。也使用了一些常见的优化方法，比如小文件内联。</p>
+
+<p>这里要注意到与LFS不同的地方，LFS是尽可能的避免随机写，F2FS这里是存在一些随机写的(看上面的结构图),比如更新NAT。由于SSD随机写的性能远高于HHD，这个是合理的。</p>
+
+<h5 id="directory-structure">Directory Structure</h5>
+
+<p>没有什么特别的。可以说就是一个映射关系表而已。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>In F2FS, a 4KB directory entry (“dentry”) block is composed of a bitmap and two arrays of slots and names in pairs. The bitmap tells whether each slot is valid or not. A slot carries a hash value, inode number, length of a file name and file type (e.g., normal file, directory and symbolic link). A directory file constructs multi-level hash tables to manage a large number of dentries efficiently.
+</code></pre></div></div>
+
+<p>.</p>
+
+<blockquote>
+
+</blockquote>
+
+<h3 id="0x02-logging">0x02 Logging</h3>
+
+<h5 id="multi-head-logging">Multi-head Logging</h5>
+
+<p>Logging当然是Log Structured的核心内容啦。与LFS使用”一个“log不同，F2FS使用了”多个”log。根据数据的“冷热”程度分为hot, warm and cold。</p>
+
+<p><img src="/assets/img/f2fs-logging-level.png" alt="f2fs-logging-level" /></p>
+
+<p>F2FS使用了一些方式来判断冷热程度。如上表所示。</p>
+
+<h5 id="cleaning">Cleaning</h5>
+
+<p>Cleaning类似LFS中GC的过程，不够正对SSD做了一些优化。首先，以section粒度来进行cleaning。基本的思路和常见的比如LFS的相似:</p>
+
+<ol>
+  <li>
+    <p>Victim selection。找到需要回收的section；</p>
+  </li>
+  <li>
+    <p>Valid block identification and migration，移动存活的block；</p>
+  </li>
+  <li>
+    <p>Post-cleaning process，只有在一个checkpoint之后，这个被回收的才真正被标记为空，可以被重新使用。</p>
+
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>After all valid blocks are migrated, a victim section is registered as a candidate to become a new free section (called a “pre-free” section in F2FS). After a checkpoint is made, the section finally becomes a free section, to be reallocated. We do this because if a pre-free section is reused before checkpointing, the file system may lose the data referenced by a previous checkpoint when unexpected power outage occurs.
+</code></pre></div>    </div>
+  </li>
+</ol>
+
+<h5 id="adaptive-logging">Adaptive Logging</h5>
+
+<p>在 normal logging和threaded logging 2中logging策略中. 与LFS不同，F2FS根据系统状态选择不同的策略，这里考虑带了SSD相对较高的随机写性能：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>if there are more than k clean sections, where k is a pre-defined threshold, normal logging is ini- tiated. Otherwise, threaded logging is activated. k is set to 5% of total sections by default and can be configured. ...
+There is a chance that threaded logging incurs undesirable random writes when there are scattered holes. Nevertheless, such random writes typically show better spatial locality than those in update-in-place file systems, since all holes in a dirty segment are filled first before F2FS searches for more in other dirty segments.
+</code></pre></div></div>
+
+<p>.</p>
+
+<blockquote>
+
+</blockquote>
+
+<h3 id="0x03-checkpointing-and-recovery">0x03 Checkpointing and Recovery</h3>
+
+<p>这里与CP区域的关系比较大，在CP区域保存一下信息：</p>
+
+<ul>
+  <li>Header and footer，用途类似LFS中的时间戳；</li>
+  <li>NAT and SIT bitmaps，标记目前的NAT，SIT blocks;</li>
+  <li>NAT and SIT journals，保存最近更新的NAT SIT项，避免频繁更新NAT SIT；</li>
+  <li>Summary blocks of active segments，还没有写入SSA区域的SSA blocks；</li>
+  <li>Orphan blocks，如果一个inode在关闭之前被删除，它就被记录为孤儿inode(这个与linux中的文件操作相关，比如两个process同时操作一个文件，一个进程在另外一个关闭之前将这个文件删除了，那么只有到这个进程关闭之前才会将这个文件删除).</li>
+</ul>
+
+<p>恢复:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>After a sudden power-off, F2FS rolls back to the latest consistent checkpoint. In order to keep at least one stable checkpoint pack while creating a new pack, F2FS maintains two checkpoint packs. If a checkpoint pack has identical contents in the header and footer, F2FS considers it valid. Otherwise, it is dropped.
+</code></pre></div></div>
+
+<p>此外，F2FS也使用了常见的Roll-Forward Recovery 方式</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>F2FS implements an efficient roll-forward recovery mechanism to enhance fsync performance. The key idea is to write data blocks and their direct node blocks only, excluding other node or F2FS metadata blocks. In order to find the data blocks selectively after rolling back to the stable checkpoint, F2FS remains a special flag in- side direct node blocks.
+</code></pre></div></div>
+
+<p>.</p>
+
+<blockquote>
+
+</blockquote>
+
+<h2 id="参考">参考</h2>
+
+<ol>
+  <li>F2FS: A New File System for Flash Storage, FAST’15.</li>
+  <li>“Operating Systems: Three Easy Pieces“ (Chapter: Log-structured File Systems) by Remzi Arpaci-Dusseau and Andrea Arpaci-Dusseau. Arpaci-Dusseau Books, 2014.</li>
+  <li>The Design and Implementation of a Log-Structured File System, TOCS 1992.</li>
+</ol>
+</span></div>
+</div>
+
+
+      </div>
+
+      <div class="tile is-4 is-child">
+        <div class="tile is-parent is-vertical sidebar">
+
+          <div class="tile is-child widget">
+
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Recent Posts
+                </p>
+              </header>
+              <div class="card-content">
+                <div class="content nice-text">
+                  <ul>
+                  
+                  <li><a href="/2018/10/LegoOS.html">
+                    LegoOS -- A Disseminated, Distributed OS for Hardware Resource Disaggregation
+                  </a></li>
+                  
+                  <li><a href="/2018/10/Level-Hashing.html">
+                    Write-Optimized and High-Performance Hashing Index Scheme for Persistent Memory
+                  </a></li>
+                  
+                  <li><a href="/2018/10/Classical-Papers.html">
+                    计算机科学经典论文
+                  </a></li>
+                  
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tile is-child widget">
+
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Sponsored
+                </p>
+              </header>
+              <div class="card-content">
+                <div class="content nice-text">
+                  <img src="/assets/images/Dust_Bunny.jpg"/>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="tile is-child widget">
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Recommended Websites
+                </p>
+              </header>
+              <!-- <div class="card-content">
+                <div class="content nice-text">
+                  <ul>
+                    <li>
+                      <a href="https://xkcd.com">xkcd</a>
+                    </li>
+                    <li>
+                      <a href="http://commitstrip.com">Commit Strip</a>
+                    </li>
+                    <li>
+                      <a href="http://www.smbc-comics.com">SMBC Comics</a>
+                    </li>
+                    <li>
+                      <a href="https://blog.codinghorror.com">Coding Horror</a>
+                    </li>
+                    <li>
+                      <a href="http://waitbutwhy.com">Wait Buy Why</a>
+                    </li>
+                    <li>
+                      <a href="https://simplysoch.wordpress.com/">Simply Soch</a>
+                    </li>
+                  </ul>
+                </div> -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <p>
+        Some rights reserved.
+      </p>
+      <p>
+        Made with <i class="fa fa-heart"></i> and <a href="https://github.com/jgthms/bulma">Bulma</a>, <a href="https://jekyllrb.com/">Jekyll</a>. Hosted on <a href="https://github.com/">Github</a>
+      </p>
+      <p>
+        <a class="icon" href="">
+          <i class="fa fa-github" title="Github"></i>
+        </a>
+        <a class="icon" href="">
+          <i class="fa fa-linkedin" title="Linkedin"></i>
+        </a>
+        <a class="icon" href="">
+          <i class="fa fa-envelope" title="Email"></i>
+        </a>
+      </p>
+    </div>
+  </div>
+</footer>
+
+<!-- js -->
+<script src="/assets/js/custom.js"></script>
+<script src="/assets/js/typewriter.js"></script>
+</body>
+</html>

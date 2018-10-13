@@ -52,8 +52,6 @@ When new connections arrive, the network stack wakes up any threads waiting on t
   Affinity-Accept’s connection stealing mechanism consists of two parts: the first is the mechanism for stealing a connection from another core, and the second is the logic for determining when stealing should be done, and determining the core from which the connection should be stolen.
   ```
 
-  
-
 * longer-term load imbalance，可能是不均衡的分配导致的，这里的解决方式是 flow group migration 方式解决。
 
   ```
@@ -62,15 +60,13 @@ When new connections arrive, the network stack wakes up any threads waiting on t
 
 .
 
->
-
 ### 评估
 
 ![conn-local-evolution](/assets/img/conn-local-evolution.png)
 
 
 
-
+.
 
 ## 参考
 

@@ -22,8 +22,6 @@ We present NetChain, a new approach that leverages the power and flexibility of 
 
 .
 
->
-
 ### 0x01 NetChain Overview 
 
   NetChain可以看作是在可编程交换机上实现一个key-value store，并且将一个交换机的上面存储的东西复制到多个交换机上，然后在此基础上实现其它的功能(Coordination Services)，
@@ -55,8 +53,6 @@ client→ network switches → client
 ```
 
 .
-
->
 
 ### 0x02 NetChain Data Plane  
 

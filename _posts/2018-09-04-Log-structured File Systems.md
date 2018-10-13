@@ -16,7 +16,7 @@ typora-root-url: ../
 
   Log是Computer Science中一个非常重要的思想，与存储相关的地方都非常常见。Log-Structured File System(这里是LFS)是不同与常见的Unix FFS的一类文件系统，这篇论文发表于1992年(还是比我年龄要大呀)，比发表于1984年的Unix FFS晚了8年时间。计算机系统随着时间也发生了很多的变化，新的方法也会随之诞生。
 
-   同前面的Unix FFS的paper一样，Log-Structured File System的论文也大概在大三的时候就看过了。《Operating Systems: Three Easy Pieces》的这一章[1]讲的非常好，又重新回顾了一遍。   
+   同前面的Unix FFS的paper一样，Log-Structured File System的论文也大概在大三的时候就看过了，因为某些原因，又重新回顾了一遍。   
 
   Log-Structured 是从文件系统，内存分配起到NVM空间管理，到Log-Structured 的数据结构，SSD的内部等等等，一大堆。可以来一个集合。
 

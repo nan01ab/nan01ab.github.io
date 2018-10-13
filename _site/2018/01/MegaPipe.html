@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <link rel="stylesheet" href="/assets/css/normalize.css"/>
+  <link rel="stylesheet" href="/assets/css/bulma.css"/>
+  <link rel="stylesheet" href="/assets/css/custom.css"/>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <!-- <link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto" rel="stylesheet"> -->
+
+  <!-- Icons -->
+  <link rel="shortcut icon" href="/assets/images/favicon.ico">
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+
+  <title>
+    
+      MegaPipe &middot; Columba M71's Blog
+    
+  </title>
+
+</head>
+
+
+<body>
+
+<section class="hero is-dark">
+  <div class="hero-body">
+    <div class="container">
+        <h1 class="title">
+          <span class="typewrite" data-period="2000" data-type='[ "Columba M71"]'>
+            <span class="wrap"></span>
+          </span>
+        </h1>
+      <h4 class="subtitle" id="quote">
+      </h4>
+    </div>
+  </div>
+</section>
+
+<div class="main-container">
+  <div class="tile is-ancestor is-vertical">
+
+
+    <nav class="nav has-shadow">
+
+      <div class="nav-left">
+
+        <a href="/" class="nav-item">
+          <span class="icon">
+            <i class="fa fa-home" aria-hidden="true" title="Homepage"></i>
+          </span>
+        </a>
+
+        <a href="https://github.com/hnu2013wwj" class="nav-item">
+          <span class="icon">
+            <i class="fa fa-github" aria-hidden="true" title="Github"></i>
+          </span>
+        </a>
+
+        <div class="nav-item" id="searchFieldNav">
+          <div class="field has-addons">
+            <p class="control">
+              <input class="input is-small" type="text" placeholder="Find an article" id="search-text">
+            </p>
+            <p class="control">
+              <a class="button is-dark is-small" onclick="searchHandler();">
+                Search
+              </a>
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="nav-right nav-menu" id='nav-menu'>
+        <a href="/archive" class="nav-item">Archive</a>
+        <a href="/tags" class="nav-item">Tags</a>
+      </div>
+
+      <span class="nav-toggle" id="nav-toggle">
+          <span></span>
+          <span></span>
+          <span></span>
+    </nav>
+
+    <div class="tile is-parent">
+      <div class="tile is-8 is-child main">
+
+        <div class="box">
+    <h1 class="post-title">MegaPipe</h1>
+    <hr/>
+    <div class="content"><span class="post-text"><h2 id="megapipe-a-new-programming-interface-for-scalable-network-io">MegaPipe: A New Programming Interface for Scalable Network I/O</h2>
+
+<h3 id="引言">引言</h3>
+
+<p>网卡性能的提高，自然对kernel的网络栈的性能也提出了更加高的要求。网络栈的一些缺点在这些高性能的网卡中也会体现地更加明显。</p>
+
+<p>目前系统存在的一些问题:</p>
+
+<ol>
+  <li>Contention on Accept Queue（accept队列上的竞争): accept queue只有一个，操作加锁，这样就导致了CPU核心之间的竞争。影响了kernel添加连接和application接受一个新的连接。此外，这样的设计也是缓存不友好的；</li>
+  <li>Lack of Connection Affinity（缺乏连接亲和性): 在Linux中，已经存在了RSS、RPS等机制将接受的数据包分发到每个CPU核心上。一个CPU核心上接受的新连接的数据包可能是另外一个CPU核心接受的。</li>
+  <li>File Descriptors  ：POSIX中一个很差劲的设计，但是可能没想到对以后的系统会有这么大影响。每次分配的fd必须是最小的，这个在实际中是没有这个需要的，标准中确加了进去。(the cost of allocating a single FD is roughly 16% greater when there are 1,000 existing sockets as compared to when there are no existing sockets. )</li>
+  <li>VFS:  UNIX中一切皆为文件的设计思想，将socket和VFS耦合到了一起，每个socket关联了一个file instance, inode, and dentry data structures，只从网络栈的角度来看，这些都是没有必要的。</li>
+  <li>System Calls ，大量的syscall的overhead也不容小视。（linux 新加了系统调用sendmmsg之类的来优化性能)</li>
+</ol>
+
+<h3 id="基本架构">基本架构</h3>
+
+<p>不同于Accept Affinity[2]和Fastsocket[3]，MegaPipe是更加完整的解决方案(虽然它出现的时间早，emmmm，和Accept Affinity一样发表在2012年)，不过缺点就是与现在的系统不兼容。</p>
+
+<p><img src="/assets/img/megapipe-arch.png" alt="megapipe-arch" /></p>
+
+<p>MegaPipe主要通过使用三种方法解决上面提到的问题:</p>
+
+<ul>
+  <li>Partitioned listening sockets，不同于现在的系统的在一个共享的listening socket接受连接，MegaPipe允许应用克隆一个listening socket，将对应的结构分区，减少在共享结构直接的竞争，提高性能。</li>
+  <li>Lightweight sockets，之前的socket和VFS是紧耦合的，这里MegaPipe使用了一种lwsocket，不在于文件相关的结构相关。</li>
+  <li>System Call Batching，将异步IO的syscall批量处理，然后通知通过channel通知处理的情况(有点Windows上面的IO Completed Port 的味道)，平摊syscall的开支(Linux最近的一些优化也是添加了类似的syscall，比如sendmmsg的syscall，可以将多次sendmsg组合在一次发送)。</li>
+</ul>
+
+<p>.</p>
+
+<h4 id="listening-socket-partitioning">Listening Socket Partitioning</h4>
+
+<p>这里是[1,2,3]都讨论要优化的地方，这里MegaPipe的解决方案和Accept Affinity的有些不同。Accept Affinity使用的方式是每个core一个accept queue，应用线程优先在本地的core上的accept queue来处理连接。MegaPipe使用的方式是一个应用线程在创建了一个listening socket并将其与一个channel关联之后，MegaPipe会产生一个性的listening socket，这个新的socket有自己的accept queue，而且只处理特定的被显示指定的CPU上面的连接请求。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>After a shared listening socket is registered to MegaPipe channels with disjoint cpu_mask parameters, all channels (and thus cores) have completely partitioned backlog queues. Upon receipt of an incoming TCP handshaking packet, which is distributed across cores either by RSS or RPS , the kernel finds a “local” accept queue among the partitioned set, whose cpu_mask includes the current core.
+</code></pre></div></div>
+
+<p>对于一个应用线程来说，它就处理自己本地的accept queue，避免的竞争。</p>
+
+<p>这里和Accept Affinity最大的一个不同点在于，Accept Affinity的分区处理是透明的，而MegaPipe要应用来显式的处理这个问题。两种方式个有利弊。此外Accept Affinity处理了负载均衡的问题，MegaPipe在论文中暂时没有处理。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>The downside is that legacy applications do not benefit. However, explicit partitioning provides more flexibility for user applications (e.g., to forgo partitioning for single-thread appli- cations, to establish one accept queue for each physical core in SMT systems, etc.) 
+</code></pre></div></div>
+
+<p>.</p>
+
+<h4 id="lwsocket-lightweight-socket">lwsocket: Lightweight Socket</h4>
+
+<p>这里简而言之就是想办法将socket和VFS分离开，当然也不会有必须是最小的整数的要求。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>we propose lightweight sockets – lwsocket. Unlike regular files, a lwsocket is iden- tified by an arbitrary integer within the channel, not the lowest possible integer within the process. The lwsocket is a common-case optimization for network connections; it does not create a corresponding file instance, inode, or dentry, but provides a straight shortcut to the TCB in the kernel. A lwsocket is only locally visible within the associated MegaPipe channel, which avoids global synchronization between cores.
+</code></pre></div></div>
+
+<p>.</p>
+
+<h4 id="system-call-batching">System Call Batching</h4>
+
+<p>大量的syscalls也会带来不小的开支，批量处理是一个常见的策略，MegaPipe这里的的方式就是将一些请求打包在一起，发送给内核空间，然后在完成请求的时候通知。应用不用显式的处理，这个由user-level的库处理的。所以这里要有一个什么时候将这些积累的请求发送给那个的机制:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code> When i) the number of accumulated requests reaches the batching threshold, ii) there are not any more pending completion events from the kernel, or iii) the application explicitly asks to flush, then the collected requests are flushed to the kernel in a batch through the channel. 
+</code></pre></div></div>
+
+<p>.</p>
+
+<h3 id="api">API</h3>
+
+<p>MegaPipe最大的一个缺点就是与现在的API不兼容，这也就导致了MegaPipe不太可能得到实际的应用(不过作为研究还是非常不错的，里面的解决方案也可用来改进现在的系统)</p>
+
+<p><img src="/assets/img/megapipe-api.png" alt="megapipe-api" /></p>
+
+<p>其它部分参看论文。</p>
+
+<h2 id="参考">参考</h2>
+
+<ol>
+  <li>MegaPipe: A New Programming Interface for Scalable Network I/O, OSDI 2012.</li>
+  <li>Improving Network Connection Locality on Multicore Systems, EuroSys’12.</li>
+  <li>Scalable Kernel TCP Design and Implementation for Short-Lived Connections, ASPLOS ’16.</li>
+</ol>
+</span></div>
+</div>
+
+
+      </div>
+
+      <div class="tile is-4 is-child">
+        <div class="tile is-parent is-vertical sidebar">
+
+          <div class="tile is-child widget">
+
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Recent Posts
+                </p>
+              </header>
+              <div class="card-content">
+                <div class="content nice-text">
+                  <ul>
+                  
+                  <li><a href="/2018/10/LegoOS.html">
+                    LegoOS -- A Disseminated, Distributed OS for Hardware Resource Disaggregation
+                  </a></li>
+                  
+                  <li><a href="/2018/10/Level-Hashing.html">
+                    Write-Optimized and High-Performance Hashing Index Scheme for Persistent Memory
+                  </a></li>
+                  
+                  <li><a href="/2018/10/Classical-Papers.html">
+                    计算机科学经典论文
+                  </a></li>
+                  
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tile is-child widget">
+
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Sponsored
+                </p>
+              </header>
+              <div class="card-content">
+                <div class="content nice-text">
+                  <img src="/assets/images/Dust_Bunny.jpg"/>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="tile is-child widget">
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Recommended Websites
+                </p>
+              </header>
+              <!-- <div class="card-content">
+                <div class="content nice-text">
+                  <ul>
+                    <li>
+                      <a href="https://xkcd.com">xkcd</a>
+                    </li>
+                    <li>
+                      <a href="http://commitstrip.com">Commit Strip</a>
+                    </li>
+                    <li>
+                      <a href="http://www.smbc-comics.com">SMBC Comics</a>
+                    </li>
+                    <li>
+                      <a href="https://blog.codinghorror.com">Coding Horror</a>
+                    </li>
+                    <li>
+                      <a href="http://waitbutwhy.com">Wait Buy Why</a>
+                    </li>
+                    <li>
+                      <a href="https://simplysoch.wordpress.com/">Simply Soch</a>
+                    </li>
+                  </ul>
+                </div> -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <p>
+        Some rights reserved.
+      </p>
+      <p>
+        Made with <i class="fa fa-heart"></i> and <a href="https://github.com/jgthms/bulma">Bulma</a>, <a href="https://jekyllrb.com/">Jekyll</a>. Hosted on <a href="https://github.com/">Github</a>
+      </p>
+      <p>
+        <a class="icon" href="">
+          <i class="fa fa-github" title="Github"></i>
+        </a>
+        <a class="icon" href="">
+          <i class="fa fa-linkedin" title="Linkedin"></i>
+        </a>
+        <a class="icon" href="">
+          <i class="fa fa-envelope" title="Email"></i>
+        </a>
+      </p>
+    </div>
+  </div>
+</footer>
+
+<!-- js -->
+<script src="/assets/js/custom.js"></script>
+<script src="/assets/js/typewriter.js"></script>
+</body>
+</html>

@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <link rel="stylesheet" href="/assets/css/normalize.css"/>
+  <link rel="stylesheet" href="/assets/css/bulma.css"/>
+  <link rel="stylesheet" href="/assets/css/custom.css"/>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <!-- <link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto" rel="stylesheet"> -->
+
+  <!-- Icons -->
+  <link rel="shortcut icon" href="/assets/images/favicon.ico">
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+
+  <title>
+    
+      Log-structured Memory for DRAM-based Storage &middot; Columba M71's Blog
+    
+  </title>
+
+</head>
+
+
+<body>
+
+<section class="hero is-dark">
+  <div class="hero-body">
+    <div class="container">
+        <h1 class="title">
+          <span class="typewrite" data-period="2000" data-type='[ "Columba M71"]'>
+            <span class="wrap"></span>
+          </span>
+        </h1>
+      <h4 class="subtitle" id="quote">
+      </h4>
+    </div>
+  </div>
+</section>
+
+<div class="main-container">
+  <div class="tile is-ancestor is-vertical">
+
+
+    <nav class="nav has-shadow">
+
+      <div class="nav-left">
+
+        <a href="/" class="nav-item">
+          <span class="icon">
+            <i class="fa fa-home" aria-hidden="true" title="Homepage"></i>
+          </span>
+        </a>
+
+        <a href="https://github.com/hnu2013wwj" class="nav-item">
+          <span class="icon">
+            <i class="fa fa-github" aria-hidden="true" title="Github"></i>
+          </span>
+        </a>
+
+        <div class="nav-item" id="searchFieldNav">
+          <div class="field has-addons">
+            <p class="control">
+              <input class="input is-small" type="text" placeholder="Find an article" id="search-text">
+            </p>
+            <p class="control">
+              <a class="button is-dark is-small" onclick="searchHandler();">
+                Search
+              </a>
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="nav-right nav-menu" id='nav-menu'>
+        <a href="/archive" class="nav-item">Archive</a>
+        <a href="/tags" class="nav-item">Tags</a>
+      </div>
+
+      <span class="nav-toggle" id="nav-toggle">
+          <span></span>
+          <span></span>
+          <span></span>
+    </nav>
+
+    <div class="tile is-parent">
+      <div class="tile is-8 is-child main">
+
+        <div class="box">
+    <h1 class="post-title">Log-structured Memory for DRAM-based Storage</h1>
+    <hr/>
+    <div class="content"><span class="post-text"><h2 id="log-structured-memory-for-dram-based-storage">Log-structured Memory for DRAM-based Storage</h2>
+
+<h3 id="引言">引言</h3>
+
+<p>Log-structured的文件系统是很有名的一类文件系统了，其Log-structured设计的主要目的就是讲写入转化为顺序写来提高性能。而这篇文章在Main-Memory的存储系统是讨论了Log-structured的内存分配，主要目的是提高内存利用率，此外就是提高性能。这个是RAMCloud系统的一部分。</p>
+
+<h3 id="动机">动机</h3>
+
+<p>通用的使用malloc(or类似方式)的内存管理方式的一个缺点就是低的内存利用率:</p>
+
+<p><img src="/assets/img/lsm-memory-utilization.png" alt="lsm-memory-utilization" /></p>
+
+<p>从这个图标来看，各个的利用率都很不好看。</p>
+
+<h3 id="基本设计">基本设计</h3>
+
+<p>在看这里之前需要对Log-Structured File System有些了家，如果没有，可以看看论文[2]。这里的allocator时为RAMCloud设计的，这里就可以把它看作是一个Key-Value Service。基本情况如下:</p>
+
+<p><img src="/assets/img/lsm-arch.png" alt="lsm-arch" /></p>
+
+<blockquote>
+
+</blockquote>
+
+<p>LFS中log包含了很多额外的索引的信息，为的是方便读取。由于DRAM的特点以及这个allocator不会存在文件系统那样的结构，所以log的结构上会简单很多。每一个object必须包含了以下的数据(paper中还讨论了很多关于从持久化的存储中recovery的内容，这里只关注这个内存分配器的设计，RAMCloud关于recovery有另外的论文):</p>
+
+<ol>
+  <li>the table identifier，</li>
+  <li>key, and</li>
+  <li>version number for the object in addition to its value 。</li>
+</ol>
+
+<blockquote>
+
+</blockquote>
+
+<p>每个segment包含了整个log的信息摘要。</p>
+
+<p>删除一个object时候，是在log的后面添加一个tombstone记录，tombstone 包含了 table identifier, key,和 被删除object的version number。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Tombstones have proven to be a mixed blessing in RAMCloud: they provide a simple mechanism to prevent object resurrection, but they introduce additional prob- lems of their own. One problem is tombstone garbage collection. Tombstones must eventually be removed from the log, but this is only safe if the corresponding objects have been cleaned (so they will never be seen during crash recovery). To enable tombstone deletion, each tombstone includes the identifier of the segment containing the obsolete object. When the cleaner encounters a tombstone in the log, it checks the segment referenced in the tombstone. If that segment is no longer part of the log, then it must have been cleaned, so the old object no longer exists and the tombstone can be deleted. If the segment still exists in the log, then the tombstone must be preserved.
+</code></pre></div></div>
+
+<blockquote>
+
+</blockquote>
+
+<h3 id="two-level-cleaning">Two-level Cleaning</h3>
+
+<p>这里把内存分配出去比较简单，难点在于回收操作。 所以这里关于分配的就直接忽略了。回收操作这里就会遇到这样一些问题:</p>
+
+<ol>
+  <li>越高的内存利用率意味着越高的回收成本，因为利用率越高，segment里面活着的object越多，每次回收操作能得到的效果越差。这给系统造成了很大的成本。</li>
+  <li>另外一个与RAMCloud自己的特点有关，RAMCloud内存中的数据最终会被备份到持久化的存储单元上的。二在磁盘上做这些操作的成本更加高。</li>
+</ol>
+
+<p>RAMCloud这里使用Two-level的清理方式，将磁盘和内存上的回收彼此分离。第1层的回收称为segment compaction ，只在内存中操作，讲原来的segment里面的存活的object拷贝到新的segment，回收原来的空间。第2层成为combined cleaning ，同时在内存和磁盘中操作。</p>
+
+<h5 id="seglets">Seglets</h5>
+
+<p>Seglets时是为了解决回收之后segment大小不相同的问题(在segment大小固定的情况下)。将segment拆分为seglet，每一个seglet为固定的64K大小。segment是一个seglet的集合，不在是固定的。</p>
+
+<blockquote>
+
+</blockquote>
+
+<h3 id="parallel-cleaning">Parallel Cleaning</h3>
+
+<p>这里主要是要解决回收缓存中的contention的问题：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>There are three points of contention between cleaner threads and service threads handling read and write requests. First, both cleaner and service threads need to add data at the head of the log. Second, the threads may conflict in updates to the hash table. Third, the cleaner must not free segments that are still in use by service threads. These issues and their solutions are discussed in the subsections below.
+</code></pre></div></div>
+
+<ol>
+  <li>cleaner线程和service线程同时使用log的问题；</li>
+  <li>同时更新hash table问题；</li>
+  <li>应该什么时候回收segment；</li>
+</ol>
+
+<p>对于第1个问题，解决办法是cleaner和servic的线程使用不同的log segment；第2个问题就是直接使用lock了。对与第3个问题，实际上和现在的一些同步方法例如RCU，hard pointer之类的方法要解决的问题是相同的RAMCloud使用的方式当最近的请求都处理完成后就可以回收了。</p>
+
+<blockquote>
+
+</blockquote>
+
+<p>此外关于处理磁盘上备份的内容和deadlock避免的问题可以参考原论文。这里的重点就是如何回收内存吧。</p>
+
+<h3 id="评估">评估</h3>
+
+<p>Log-structured的内存分配方式在RAMCloud中可以实现80 - 90%的内存利用率。利用率高是最吸引人的地方吧。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>• RAMCloud supports memory utilizations of 80-90% without significant loss in performance.
+• At high memory utilizations, two-level cleaning im- proves client throughput up to 6x over a single-level approach.
+• Log-structured memory also makes sense for other DRAM-based storage systems, such as memcached.
+</code></pre></div></div>
+
+<blockquote>
+
+</blockquote>
+
+<h2 id="参考">参考</h2>
+
+<ol>
+  <li>Log-structured Memory for DRAM-based Storage. FAST 2014.</li>
+  <li>The Design and Implementation of a Log-Structured File System, TOCS 1992.</li>
+</ol>
+</span></div>
+</div>
+
+
+      </div>
+
+      <div class="tile is-4 is-child">
+        <div class="tile is-parent is-vertical sidebar">
+
+          <div class="tile is-child widget">
+
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Recent Posts
+                </p>
+              </header>
+              <div class="card-content">
+                <div class="content nice-text">
+                  <ul>
+                  
+                  <li><a href="/2018/10/LegoOS.html">
+                    LegoOS -- A Disseminated, Distributed OS for Hardware Resource Disaggregation
+                  </a></li>
+                  
+                  <li><a href="/2018/10/Level-Hashing.html">
+                    Write-Optimized and High-Performance Hashing Index Scheme for Persistent Memory
+                  </a></li>
+                  
+                  <li><a href="/2018/10/Classical-Papers.html">
+                    计算机科学经典论文
+                  </a></li>
+                  
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tile is-child widget">
+
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Sponsored
+                </p>
+              </header>
+              <div class="card-content">
+                <div class="content nice-text">
+                  <img src="/assets/images/Dust_Bunny.jpg"/>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="tile is-child widget">
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Recommended Websites
+                </p>
+              </header>
+              <!-- <div class="card-content">
+                <div class="content nice-text">
+                  <ul>
+                    <li>
+                      <a href="https://xkcd.com">xkcd</a>
+                    </li>
+                    <li>
+                      <a href="http://commitstrip.com">Commit Strip</a>
+                    </li>
+                    <li>
+                      <a href="http://www.smbc-comics.com">SMBC Comics</a>
+                    </li>
+                    <li>
+                      <a href="https://blog.codinghorror.com">Coding Horror</a>
+                    </li>
+                    <li>
+                      <a href="http://waitbutwhy.com">Wait Buy Why</a>
+                    </li>
+                    <li>
+                      <a href="https://simplysoch.wordpress.com/">Simply Soch</a>
+                    </li>
+                  </ul>
+                </div> -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <p>
+        Some rights reserved.
+      </p>
+      <p>
+        Made with <i class="fa fa-heart"></i> and <a href="https://github.com/jgthms/bulma">Bulma</a>, <a href="https://jekyllrb.com/">Jekyll</a>. Hosted on <a href="https://github.com/">Github</a>
+      </p>
+      <p>
+        <a class="icon" href="">
+          <i class="fa fa-github" title="Github"></i>
+        </a>
+        <a class="icon" href="">
+          <i class="fa fa-linkedin" title="Linkedin"></i>
+        </a>
+        <a class="icon" href="">
+          <i class="fa fa-envelope" title="Email"></i>
+        </a>
+      </p>
+    </div>
+  </div>
+</footer>
+
+<!-- js -->
+<script src="/assets/js/custom.js"></script>
+<script src="/assets/js/typewriter.js"></script>
+</body>
+</html>

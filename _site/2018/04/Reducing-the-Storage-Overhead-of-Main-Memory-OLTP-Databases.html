@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <link rel="stylesheet" href="/assets/css/normalize.css"/>
+  <link rel="stylesheet" href="/assets/css/bulma.css"/>
+  <link rel="stylesheet" href="/assets/css/custom.css"/>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <!-- <link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto" rel="stylesheet"> -->
+
+  <!-- Icons -->
+  <link rel="shortcut icon" href="/assets/images/favicon.ico">
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+
+  <title>
+    
+      Reducing the Storage Overhead of Main-Memory OLTP Databases &middot; Columba M71's Blog
+    
+  </title>
+
+</head>
+
+
+<body>
+
+<section class="hero is-dark">
+  <div class="hero-body">
+    <div class="container">
+        <h1 class="title">
+          <span class="typewrite" data-period="2000" data-type='[ "Columba M71"]'>
+            <span class="wrap"></span>
+          </span>
+        </h1>
+      <h4 class="subtitle" id="quote">
+      </h4>
+    </div>
+  </div>
+</section>
+
+<div class="main-container">
+  <div class="tile is-ancestor is-vertical">
+
+
+    <nav class="nav has-shadow">
+
+      <div class="nav-left">
+
+        <a href="/" class="nav-item">
+          <span class="icon">
+            <i class="fa fa-home" aria-hidden="true" title="Homepage"></i>
+          </span>
+        </a>
+
+        <a href="https://github.com/hnu2013wwj" class="nav-item">
+          <span class="icon">
+            <i class="fa fa-github" aria-hidden="true" title="Github"></i>
+          </span>
+        </a>
+
+        <div class="nav-item" id="searchFieldNav">
+          <div class="field has-addons">
+            <p class="control">
+              <input class="input is-small" type="text" placeholder="Find an article" id="search-text">
+            </p>
+            <p class="control">
+              <a class="button is-dark is-small" onclick="searchHandler();">
+                Search
+              </a>
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="nav-right nav-menu" id='nav-menu'>
+        <a href="/archive" class="nav-item">Archive</a>
+        <a href="/tags" class="nav-item">Tags</a>
+      </div>
+
+      <span class="nav-toggle" id="nav-toggle">
+          <span></span>
+          <span></span>
+          <span></span>
+    </nav>
+
+    <div class="tile is-parent">
+      <div class="tile is-8 is-child main">
+
+        <div class="box">
+    <h1 class="post-title">Reducing the Storage Overhead of Main-Memory OLTP Databases</h1>
+    <hr/>
+    <div class="content"><span class="post-text"><h2 id="reducing-the-storage-overhead-of-main-memory-oltp-databases-with-hybrid-indexes">Reducing the Storage Overhead of Main-Memory OLTP Databases with Hybrid Indexes</h2>
+
+<h3 id="0x00-引言">0x00 引言</h3>
+
+<p>​    这篇文章的idea也是very excellent，paper的主要目的是减少内存数据库中内存的使用。通过讲结构分为两个部分，一个部分负责读取写入，另外一个只负责读取，通过对后一个的优化减少了大量的内存使用：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>The dual-stage architecture maintains a small dynamic “hot” store to absorb writes and a more compact, but read-only store to hold the bulk of index entries. Merge between the stages is triggered peri- odically and can be performed efficiently. Unlike prior work [20, 35, 39, 47, 53], our design offers low latency and high throughput for the point queries and short-range scans that typify the OLTP workloads used with main-memory databases [34, 50].
+....
+we find that hybrid indexes meet the goals, achieving performance comparable to the original indexes while reducing index memory consumption by up to 70% (Section 6). Also, by using hybrid in- dexes, H-Store is able to sustain higher throughput for OLTP work- loads for more transactions and with fewer performance interrup- tions due to memory limitations (Section 7).
+</code></pre></div></div>
+
+<h3 id="0x01-基本设计">0x01 基本设计</h3>
+
+<p>先给一幅图，基本说明了这个idea的设计思路：</p>
+
+<p><img src="/assets/img/hybrid-index-arch.png" alt="hybrid-index-arch" /></p>
+
+<p>新的数据已开始加入到Dynamic Stage中，此stage只保存少量的数据项，就好比普通的一个数据结构。随着数据的增长，Dynamic Stage增长到一定程度的时候，将变旧的数据批量的迁移到Static Stage。由于这里是只读，这样就可以做很多的优化，之后会提到。</p>
+
+<p>此外，对于delete，在Dynamic Stage中的时候和普通的删除没有差别，在Static Stage的时候，先标记为deleted，下一次merge的时候会将其真正的删除。</p>
+
+<p>这个设计支持多种的数据结构，讲一个传统的数据结构变为这种Daul-Stage的策略只需要4步：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>• Step 1: Select an order-preserving index structure (X) that supports dynamic operations efficiently for the dynamic stage. • Step 2: Design a compact, read-optimized version of X for the
+static stage.
+• Step 3: Provide a merge routine that can efficiently migrate
+entries from X to compact X.
+• Step 4: Place X and compact X in the dual-stage architecture
+as shown in Figure 1.
+</code></pre></div></div>
+
+<h3 id="0x02-动态到静态的规则">0x02 动态到静态的规则</h3>
+
+<p>这样先来一幅paper的图，很好的解释了思路：</p>
+
+<p><img src="/assets/img/hybrid-index-rules.png" alt="hybrid-index-rules" /></p>
+
+<p>​	由于是只读的，一般节点中都会为后来要添加的数据预留了空间，这也是造成内存浪费的一个主要原因。这里就可以直接将其去除了。此外，由于结构不会被更新，是固定的，就可以去除很多的冗余的结构，让结构更加紧凑。此外，还可以对数据进行压缩:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+• Rule #1: Compaction – Remove duplicated entries and make every allocated memory block 100% full.
+• Rule #2:StructuralReduction–Removepointersandstruc- tures that are unnecessary for efficient read-only operations.
+• Rule #3: Compression – Compress parts of the data structure
+using a general purpose compression algorithm.
+</code></pre></div></div>
+
+<p>Paper中具体讨论对B+tree,Masstree,SkipList,ART的修改。</p>
+
+<h3 id="0x03-merge">0x03 Merge</h3>
+
+<p>​    具体的Merge方法和具体使用的数据结构有关系，这里就不具体讨论了。主要看的是Merge那些数据和什么时候Merge。</p>
+
+<h5 id="what-to-merge">What to Merge</h5>
+
+<ol>
+  <li>Merge-all，一次将Dynamic Stage中所有的数据都merge到Static Stage中去，这个方法最简单直观，但是缺点是merge的时候会有不小的压力，也会将热点的数据merge过去，这有时候不是一个很好的选择。</li>
+  <li>Merge-cold，只merge较cold的数据，优点是hot数据可以保存在Dynamic Stage中，缺点是merge操作会更加频繁，而且需要确定哪些数据是cold的，会造成额外的操作。</li>
+</ol>
+
+<p>根据OLTP的特点，paper选取了前者：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Although merge-cold may work better in some cases, given the insert-intensive workload patterns of OLTP applications, we con- sider merge-all to be the more general and more suitable approach. We compensate for the disadvantage of merge-all (i.e., some older yet hot tuples reside in the static stage and accessing them requires searching both stages in order) by adding a Bloom filter atop the dynamic stage as described in Section 3.
+</code></pre></div></div>
+
+<h5 id="when-to-merge">When to Merge</h5>
+
+<p>这里采用的方法是根据Dynamic和Static数据的比例来决定是否merge的，思路比较简单：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>The advantage of a ratio-based trigger is that it automatically ad- justs the merge frequency according to the index size. This strategy prevents write-intensive workloads from merging too frequently. Although each merge becomes more costly as the index grows, merges happen less often. One can show that the merge overhead over time is constant. The side effect is that the average size of the dynamic stage gets larger over time, resulting in an increasingly longer average search time in the dynamic stage.
+</code></pre></div></div>
+
+<h3 id="0x04-评估">0x04 评估</h3>
+
+<p>这里只关注了内存方面的数据，paper中的数据是很好看的。</p>
+
+<p><img src="/assets/img/hybrid-index-memory.png" alt="hybrid-index-memory" /></p>
+
+<h2 id="参考">参考</h2>
+
+<ol>
+  <li>Reducing the Storage Overhead of Main-Memory OLTP Databases with Hybrid Indexes , SIGMOD2016.</li>
+</ol>
+</span></div>
+</div>
+
+
+      </div>
+
+      <div class="tile is-4 is-child">
+        <div class="tile is-parent is-vertical sidebar">
+
+          <div class="tile is-child widget">
+
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Recent Posts
+                </p>
+              </header>
+              <div class="card-content">
+                <div class="content nice-text">
+                  <ul>
+                  
+                  <li><a href="/2018/10/LegoOS.html">
+                    LegoOS -- A Disseminated, Distributed OS for Hardware Resource Disaggregation
+                  </a></li>
+                  
+                  <li><a href="/2018/10/Level-Hashing.html">
+                    Write-Optimized and High-Performance Hashing Index Scheme for Persistent Memory
+                  </a></li>
+                  
+                  <li><a href="/2018/10/Classical-Papers.html">
+                    计算机科学经典论文
+                  </a></li>
+                  
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tile is-child widget">
+
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Sponsored
+                </p>
+              </header>
+              <div class="card-content">
+                <div class="content nice-text">
+                  <img src="/assets/images/Dust_Bunny.jpg"/>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="tile is-child widget">
+            <div class="card">
+              <header class="card-header">
+                <p class="card-header-title nice-title">
+                  Recommended Websites
+                </p>
+              </header>
+              <!-- <div class="card-content">
+                <div class="content nice-text">
+                  <ul>
+                    <li>
+                      <a href="https://xkcd.com">xkcd</a>
+                    </li>
+                    <li>
+                      <a href="http://commitstrip.com">Commit Strip</a>
+                    </li>
+                    <li>
+                      <a href="http://www.smbc-comics.com">SMBC Comics</a>
+                    </li>
+                    <li>
+                      <a href="https://blog.codinghorror.com">Coding Horror</a>
+                    </li>
+                    <li>
+                      <a href="http://waitbutwhy.com">Wait Buy Why</a>
+                    </li>
+                    <li>
+                      <a href="https://simplysoch.wordpress.com/">Simply Soch</a>
+                    </li>
+                  </ul>
+                </div> -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <p>
+        Some rights reserved.
+      </p>
+      <p>
+        Made with <i class="fa fa-heart"></i> and <a href="https://github.com/jgthms/bulma">Bulma</a>, <a href="https://jekyllrb.com/">Jekyll</a>. Hosted on <a href="https://github.com/">Github</a>
+      </p>
+      <p>
+        <a class="icon" href="">
+          <i class="fa fa-github" title="Github"></i>
+        </a>
+        <a class="icon" href="">
+          <i class="fa fa-linkedin" title="Linkedin"></i>
+        </a>
+        <a class="icon" href="">
+          <i class="fa fa-envelope" title="Email"></i>
+        </a>
+      </p>
+    </div>
+  </div>
+</footer>
+
+<!-- js -->
+<script src="/assets/js/custom.js"></script>
+<script src="/assets/js/typewriter.js"></script>
+</body>
+</html>

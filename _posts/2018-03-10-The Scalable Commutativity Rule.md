@@ -54,7 +54,7 @@ To capture different conflict conditions as well as path conditions, we introduc
 
 ### 0x03 实际例子
 
-   文章中的例子是对于Linux的文件系统(这里的工作被发表在了SOSP 2017，时间证明差了这么久？？).可以看到现在Linux的实现中存在很多的冲突。![scr-linux-fs](/assets/img/scr-linux-fs.png)
+   文章中的例子是对于Linux的文件系统(这里的工作被发表在了SOSP 2017，时间怎么差了这么久？？).可以看到现在Linux的实现中存在很多的冲突。![scr-linux-fs](/assets/img/scr-linux-fs.png)
 
  而ScaleFS中，则消除了这些冲突，这样它就能实现更加好的可拓展新:
 
@@ -97,7 +97,7 @@ To capture different conflict conditions as well as path conditions, we introduc
 
 ### 0x05 总结
 
-  这篇论文的感觉就是很抽象，文章长达47页，这里很是将字数控制在2000以内，当然发表在SOSP上的版本会短很多。重要的是其中的思想吧。
+  这篇论文的感觉就是很抽象，文章长达47页，这里将字数控制在2000以内，当然发表在SOSP上的版本会短很多。重要的是其中的思想吧。
 
  >
 

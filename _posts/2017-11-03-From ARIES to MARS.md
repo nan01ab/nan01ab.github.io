@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Storage&Recovery Methods for NVM DB
+title: From ARIES to MARS
 tags: [New Hardware, Database]
 excerpt_separator: <!--more-->
 typora-root-url: ../
@@ -20,9 +20,7 @@ typora-root-url: ../
 This paper presents a novel WAL scheme, called Modified ARIES Redesigned for SSDs (MARS), optimized for NVM-based storage. The design of MARS reflects an examination of ARIES, a popular WAL-based recovery algorithm for databases, in the context of these new memories. MARS provides the same high-level features for implementing efficient and robust transactions as ARIES, but without any of the disk-based design decisions ARIES incorporates.
 ```
 
-
-
->
+.
 
 ### 基本思路
 
@@ -42,9 +40,9 @@ Once committed, the SSD hardware copies the final values from the log to their t
 
 #### Deconstructing ARIES
 
- 说MARS之前，先来总结ARIES的几个最明显的特点：
+ 说MARS之前，先来回顾一下ARIES的几个最明显的特点：
 
-1. 操作之前先在Log中持久化相关的数据，这些log都是只追加的，从来不会修改；
+1. 事务提交之前先在Log中持久化相关的数据；
 2.  ‘No-Force’ policy，由于有了Log，也就不需要立即就将更新之后的page持久化；
 3. ‘Steal’ policy，没有提交的事务更新的pages也能写入到磁盘上面(这个是为了支持"很大"的事务)，因为有undo log，这也是可以恢复的；
 4. 使用LSN (Log Sequence Numbers)来保证标记log，page是基本的管理单位；
@@ -93,13 +91,13 @@ Instead of an append- only log, EAWs provide a log that can be read and written 
 
 .
 
->
-
 ### Implementation 
 
- TODO
+ 实现上需要软件和硬件相互配合，这也可能是其的一个缺点。
 
->
+TODO
+
+.
 
 ### Results 
 
