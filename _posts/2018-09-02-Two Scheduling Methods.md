@@ -1,6 +1,6 @@
 ---
 layout: page
-title: The Multi-Level Feedback Queue
+title: Two Scheduling Methods
 tags: [Scheduling]
 excerpt_separator: <!--more-->
 typora-root-url: ../
@@ -8,19 +8,19 @@ typora-root-url: ../
 
 
 
-## The Multi-Level Feedback Queue 
+## Two Scheduling Methods 
 
 
 
 ### 0x00 引言
 
-  MLFQ应该OS课程都会将到的一个Scheduling算法吧。《Operating Systems: Three Easy Pieces》中这一章将的真的是非常赞了(强势安利)。就来复习一下几年前学过的内容。
+  MLFQ应该OS课程都会将到的一个Scheduling算法吧。因为某些原因需要复习一下几年前学过的内容。
 
 ```
 The Multi-level Feedback Queue (MLFQ) scheduler was first described by Corbato et al. in 1962 in a system known as the Compatible Time-Sharing System (CTSS), and this work, along with later work on Multics, led the ACM to award Corbato its highest honor, the Turing Award. The scheduler has subsequently been refined throughout the years to the implementations you will encounter in some modern systems.
 ```
 
-
+.
 
 ### 0x01 How To Change Priority
 
@@ -40,7 +40,7 @@ How can we design a scheduler that both minimizes response time for interactive 
 • Rule 2: If Priority(A) = Priority(B), A & B run in RR.
 ```
 
-   
+.   
 
    要改变Priority的一个原因就是根据任务运行的状况观测太是出于哪一种类型的人物，对于交互式的任务(or IO密集型的)，一般的做法就是提高它的Priority，来达到更好的反应时间。交互式任务的一个特点就是等待(想想一个人键盘的输入，从按下空格键到按下回车键对于计算机来说都是一段很长的时间了，对于计算机来说，它等你按回车键等了很久)。所以这里一个基本的思路就是，对于每次运行丢用不完自己时间片的任务，就保持它的Priority，对于能用完自己时间片的任务，更加可能是非交互式的任务，所以就降低它的Priority：
 
@@ -52,7 +52,7 @@ How can we design a scheduler that both minimizes response time for interactive 
 • Rule 4b: If a job gives up the CPU before the time slice is up, it stays at the same priority level.
 ```
 
-
+.
 
 ##### 存在的问题
 
@@ -112,7 +112,11 @@ MLFQ is interesting for the following reason: instead of demanding a priori know
 
 .
 
- >
+### 0x02 Proportional Share 
+
+  除了上面说的Multi-level Feedback Queue之外，proportional-share也是一种设计思想。
+
+
 
 ## 参考
 

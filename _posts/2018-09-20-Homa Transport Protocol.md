@@ -193,7 +193,7 @@ Homa assumes that higher level software will either tolerate redundant execution
 
 ### 0x03 LIMITATIONS 
 
-   Paper还很罕见的讨论了这个协议的缺点(暴露自己缺点的paper很少见啊)，我们从之前的内容中也可以发现，Homa协议是建立在很多的假设上的，这也让我对其实际的可用性造成了很大的怀疑:
+   Paper还很罕见的讨论了这个协议的缺点(暴露自己缺点的paper很少见啊)，我们从之前的内容中也可以发现，Homa协议是建立在很多的假设上的，这也让我对其实际的可用性造成了很大的怀疑，它更加像一个在特定的环境下为特定的应用设计的传输协议，没有通用型可言:
 
 ```
   Homa is designed for use in datacenter networks and capital- izes on the properties of those networks; it is unlikely to work well in wide-area networks.

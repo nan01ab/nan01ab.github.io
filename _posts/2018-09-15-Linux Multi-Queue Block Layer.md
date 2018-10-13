@@ -52,17 +52,17 @@ typora-root-url: ../
 So, on a NUMA system with 4 sockets and 6 cores per socket, the staging area may contain as few as 4 and as many as 24 queues. The variable nature of the request queues decreases the proliferation of locks if contention on a single queue is not a bottleneck. With many CPU architectures offering a large shared L3 cache per socket (typically a NUMA node as well), having just a single queue per proces- sor socket offers a good trade-off between duplicated data structures which are cache unfriendly and lock contention.
 ```
 
-  
+.  
 
 #### Hardware Dispatch Queues 
 
-   Hardware Dispatch Queues利用的是存储设备自己的并行特点，具体的数量设置根据设备的特点决定，可在1 - 2048个之间选择。这里不负责顺序保障，这部分的工作有上面的层级保障。对于NVMe的SSD，一般有对个提交队列以及多个完成队列，这里的设计就显得更加重要。
+   Hardware Dispatch Queues利用的是存储设备自己的并行特点，具体的数量设置根据设备的特点决定，可在1 - 2048个之间选择。这里不负责顺序保障，这部分的工作在上面的层级保障。对于NVMe的SSD，一般有对个提交队列以及多个完成队列，这里的设计就显得更加重要。
 
 ```
 Because IO ordering is not supported within the block layer any software queue may feed any hardware queue without needing to maintain a global ordering. This allows hardware to implement one or more queues that map onto NUMA nodes or CPU’s directly and provide a fast IO path from application to hardware that never has to access remote memory on any other node.
 ```
 
-Software 和 Hardware之间的队列不一定是一一对应的关系。Software Staging Queues可以利用之前block的一些优化策略。
+Software 和 Hardware之间的队列不一定是一一对应的关系。Software Staging Queues可以利用之前block layer的一些优化策略。
 
 
 

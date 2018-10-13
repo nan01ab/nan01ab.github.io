@@ -42,7 +42,7 @@ typora-root-url: ../
 The typical lifetime of a block is currently not well known. Manufac- turers rate MLC-based blocks as having a 10,000 P/E (Program/Erase) cycle lifetime; that is, each block can be erased and programmed 10,000 times before failing. SLC-based chips, because they store only a single bit per transistor, are rated with a longer lifetime, usually 100,000 P/E cycles. However, recent research has shown that lifetimes are much longer than expected.
 ```
 
- 所以，频繁地写入一个地方会导致SSD很快的损失寿命，这个就是SSD主控要解决的问题之一。SSD修改一个page里面的数据时，并不能直接修改，只能独出原来的数据，修改之后写入新的块。这样的话，物理上的块就不能被直接拿来用，直接使用逻辑上的page。这个也是FTL要实现的功能。
+ 所以，频繁地写入一个地方会导致SSD很快的损失寿命，这个就是SSD主控要解决的问题之一。SSD修改一个page里面的数据时，并不能直接修改，只能读出原来的数据，修改之后写入新的块。这样的话，物理上的块就不能被直接拿来用，直接使用逻辑上的page。这个也是FTL要实现的功能。
 
 >
 

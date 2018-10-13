@@ -68,7 +68,7 @@ typora-root-url: ../
 
 4.   D.P.Reed. Naming and Synchronization in a Decentralized Computer System. Ph.D. dissertation, 1978. 
 
-   MVCC.
+​      MVCC.
 
 ### Distributed
 
