@@ -26,12 +26,12 @@ typora-root-url: ../
 	这里要定义一下时钟的正确性。正如我们所知，完全准确的时钟时几乎不可能的，所以：	 时钟正确性（correctness）通常定义为，如果一个硬件时钟H的漂移率在一个已知的范围ρ>0内，那么该时钟是正确的。
 	  1. 这表明度量实际时间t和t’的时间间隔的误差是有界的
 ```
-                     (1- ρ)(t’-t) ≤ H(t’)-H(t) ≤ (1+ ρ)(t’-t)
+(1- ρ)(t’-t) ≤ H(t’)-H(t) ≤ (1+ ρ)(t’-t)
 ```
 	  2. 该条件禁止了硬件时钟值的跳跃，有时，软件也时钟也要求遵循该条件。但是用一个较弱的单调性条件就足够了。
 	  3. 单调性是指一个时钟C前进的条件
 ```
-                 t’>t ==> C(t’) > C(t)
+t’>t ==> C(t’) > C(t)
 ```
 
   现在来看看时钟同步中的一些情况:
@@ -55,8 +55,7 @@ typora-root-url: ../
     1. 一个进程P发送一个请求信号给时间服务器S；
     2. S收到P的请求包之后，在包上面加上当前S的时间，然后回复P；
     3. P收到回复后，将P的当前时间设为T + RTT/2。
-       此外 Cristian Algorithm通过给S发送几个请求，Tround最小值给出最精确的估计。
-         Cristian Algorithm基于RTT的，要求RTT的准确性。此外，Cristian Algorithm存在单点的问题。
+       此外 Cristian Algorithm通过给S发送几个请求，Tround最小值给出最精确的估计。Cristian Algorithm基于RTT的，要求RTT的准确性。此外，Cristian Algorithm存在单点的问题。
 
 
 
@@ -98,13 +97,13 @@ Server B
 ```
  如果B上的时钟相对于A的真正偏移是o，而m和m’实际的传输时间分别为t和t’，那么我们可以得到：
 ```
-          T(i-2) = T(i-3) + t + o
-          T(i) = T(i-1) + t’- o
+T(i-2) = T(i-3) + t + o
+T(i) = T(i-1) + t’- o
 ```
 可以推出：
 ```
-	     d(i) = t + t’ = T(i-2) –T(i-3) + T(i) – T(i-1)
-		  o = o(i) + (t’-t)/2，其中 o(i) = (T(i-2) – T(i-3) + T(i-1) – T(i)) / 2
+d(i) = t + t’ = T(i-2) –T(i-3) + T(i) – T(i-1)
+o = o(i) + (t’-t)/2，其中 o(i) = (T(i-2) – T(i-3) + T(i-1) – T(i)) / 2
 ```
  利用t和t’≥0的事实，有 o(i) - d(i)/2 ≤ o ≤ o(i) + d(i)/2。o(i)是偏移的估计，d(i)是该估计的精确性度量.
 
@@ -121,14 +120,14 @@ Server B
 ### HLC
 
  HLC的设计目标是提供像LC一样的单向因果检测，同时保持时钟的值总是接近物理的时间（这里是NTP的时间）。一个HLC的表述如下：
-  给定一个分布式系统，为每一个事件分配一个时间戳，有：
-
-1. e hb f ⇒ l.e < l.f，e事件happen before f，则有l.e < l.f;   
-   1. Space requirement for l.e is O(1) integers, l.e消耗一个整数的空间；   
-   2. l.e is represented with bounded space, l.在一个有界的空间内比表示；  
-   3. l.e is close to pt.e, i.e., |l.e − pt.e| is bounded. l.e接近pt.e ,|l.e - pt.e|是有界的。
+  给定一个分布式系统，为每一个事件分配一个时间戳，有
+1. e hb f ⇒ l.e < l.f，e事件happen before f，则有l.e < l.f
 
 ```
+   1. Space requirement for l.e is O(1) integers, l.e消耗一个整数的空间；
+   2. l.e is represented with bounded space, l.在一个有界的空间内比表示;
+   3. l.e is close to pt.e, i.e., | l.e − pt.e | is bounded. l.e接近pt.e ,|l.e - pt.e|是有界的。
+
  （pt -> Phiysical Time)。
 ```
 
@@ -147,9 +146,9 @@ Send or local event
   
 Receive event of message m   l.j := max(l.j + 1, l.m + 1, pt.j)  # 接受到时时间戳设置为 l.j+1, 接受到的时间戳+1与物理时间pt.j中的较大值
   Timestamp with l.j 
-```
 
-以上的基本算法时满足1，2的，类似基本的lamport clokc加入了pt的元素。但是这个算法并不能满足4条中的3、4条。|l.e − pt.e|可能会无限的增长。原因在于每一个操作都有可能增大l.e与pt.e的差距。
+以上的基本算法时满足1，2的，类似基本的lamport clokc加入了pt的元素。但是这个算法并不能满足4条中的3、4条。|l.e − pt.e|可能会无限的增长。原因在于每一个操作都有可能增大l.e与pt.e的差距
+```
 
 .
 
@@ -161,13 +160,15 @@ HLC算法的描述如下：
 Initially l.j := 0; c.j := 0 
 
 Send or local event 
-  l′.j := l.j;   l.j := max(l′.j, pt.j); # 相比于最基础的去处了+1   If (l.j = l′.j) then 
+  l′.j := l.j;  l.j := max(l′.j, pt.j); # 相比于最基础的去处了+1
+	If (l.j = l′.j) then 
     c.j := c.j + 1 
   Else 
     c.j := 0; 
   Timestamp with l.j, c.j 
   
-Receive event of message m   l′.j := l.j;   l.j := max(l′.j, l.m, pt.j); # 相比于最基础的去处了+1   If(l.j=l′.j=l.m) then
+Receive event of message m l′.j := l.j;  l.j := max(l′.j, l.m, pt.j); # 相比于最基础的去处了+1  
+  If(l.j=l′.j=l.m) then
     c.j := max(c.j, c.m) + 1 
   Else if (l.j =l′.j) then 
     c.j := c.j + 1 
