@@ -150,6 +150,8 @@ typora-root-url: ../
 
   Quorum的思想在分布式中一个比较基础的思想，也有很多实际的应用，比如在Amazon Dynamo。不过在这个协议之中，使用quorum并没有完全解决分布式系统中提交存在的问题，比如节点可能一致阻塞在termination protocol中，依赖于错误的修复来解决这个问题，所以论文中也只是说这个是一种 "可以快速恢复" 的算法。
 
+
+
 ## 参考
 1. A Quorum-based Commit Protocol: https://ecommons.cornell.edu/bitstream/handle/1813/6323/82-483.pdf?sequence=1
 2. Quorum: https://en.wikipedia.org/wiki/Quorum_%28distributed_computing%29

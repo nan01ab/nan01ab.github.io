@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Optimizing the Block IO Subsystem for Fast Storage Devices
-tags: [Operating System, Storage]
+tags: [Operating System, Storage, New Hardware]
 excerpt_separator: <!--more-->
 typora-root-url: ../
 ---

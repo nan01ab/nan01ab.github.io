@@ -114,11 +114,50 @@ MLFQ is interesting for the following reason: instead of demanding a priori know
 
 ### 0x02 Proportional Share 
 
-  除了上面说的Multi-level Feedback Queue之外，proportional-share也是一种设计思想。
+  除了上面说的Multi-level Feedback Queue之外，proportional-share也是一种设计思想。书中以lottery scheduling调度方法为例子，对于这种思路来说，核心就是:
+
+```
+How can we design a scheduler to share the CPU in a proportional manner? What are the key mechanisms for doing so? How effective are they?
+```
+
+.
+
+#### 最基本的思路
+
+  lottery scheduling使用的一个最基本的概念就是：tickets，凭证。使用tickets来代表了使用分享到的资源，tickets的比例代表了分享到的资源的比例。它使用一种概率性的方法来决定下一个运行的进程，比如下面这个例子，系统必须知道这里一共有多少个tickets(这里就是100)，然后挑选一个随机的ticket，数字是0-99。如果是0-74则运行A，74-99则运行B。
+
+```
+Let’s look at an example. Imagine two processes, A and B, and further that A has 75 tickets while B has only 25. Thus, what we would like is for A to receive 75% of the CPU and B the remaining 25%.
+```
+
+.
+
+#### Ticket机制
+
+   lottery scheduling也提供了一些方式来操作tickets。一个概念就是ticket currency，currency使得用户可以决定以怎么样的比例来运行自己的jobs，系统会自动将这个currency转化为全局的tickets。比如用户A给自己的两个jobs每个500tickets，B用户给自己的一个job 10tickets，则对应到全局的rickets就是A1 50，A2 50，B1 100。这个有点类似于Linux里面的组调度。
+
+  另外的一个概念就是ticket transfer，它使得进程之间可以临时地将自己的tickets转移到另外一个进程，这个在client-server的模式下特别有用。在client给server发送请求之后，client为了加速server的运行，可以将ticket暂时转移。还有一个概念就是 ticket inflation，这个使得进程可以暂时提高自己的tickets.
+
+```
+Rather, *inflation* can be applied in an environment where a group of processes trust one another; in such a case, if any one process knows it needs more CPU time, it can boost its ticket value as a way to reflect that need to the system, all without communicating with any other processes.
+```
+
+.
+
+#### The Linux Completely Fair Scheduler (CFS) 
+
+ 目前linux使用的默认的调度器CFS的思路就和fair-share scheduling 很相似。CFS的基本思路就是尽可能的将CPU平均分配给所有的进程，它使用一个基于计数的机制就是virtual runtime (vruntime)。进程运行的时候就会累积vtime，在一般情况下，进程vtime增加的速度是一样的，与物理上的时间成一定的比例(具体参考更加详细的资料)。
+
+.
+
+  没有调度器是完美的， fair-share schedulers 存在的问题一是这样的方法与IO不怎么协调，频繁使用IO的进程可能得不到它们分到的CPU份额。另外一个问题就是如何赋予进程合适的ticket或者叫优先级。
+
+
 
 
 
 ## 参考
 
 1. “Operating Systems: Three Easy Pieces“ (Chapter: The Multi-Level Feedback Queue) by Remzi Arpaci-Dusseau and Andrea Arpaci-Dusseau. Arpaci-Dusseau Books, 2014. 
+2. “Operating Systems: Three Easy Pieces“ (Chapter: Scheduling: Proportional Share) by Remzi Arpaci-Dusseau and Andrea Arpaci-Dusseau. Arpaci-Dusseau Books, 2014. 
 
