@@ -20,7 +20,7 @@ typora-root-url: ../
 
 
 
-### The Bully Algorithm
+#### The Bully Algorithm
 
   Bully算法是一个出现的比较早比较简单的算法，先通过这个算法来讨论一下分布式选举中需要解决的问题。
 Bully算法假设一下条件:
@@ -58,7 +58,8 @@ Bully算法假设一下条件:
 
 
 
-### A Ring Algorithm 
+#### A Ring Algorithm
+
   这里的基于环的算法不是互斥算法中基于环的算法。在这个算法中，假定进程被排列为环，每个进程都知道另外一个进程的下一个进程(不仅仅是自己的下一个进程)，这个算法也假定消息的发送接收是可靠的。
     1. 当任意进程注意到coordinator不工作时，它发送一个带有自己process number的Election Message给它的下一个进程；
     2. 如果这个进程的下一个进程不工作，则将消息发送到下一个进程的下一个进程，如下一个进程的下一个进程，以此类推往后面的进程发送消息；
@@ -68,29 +69,35 @@ Bully算法假设一下条件:
 
 
 
-### 不稳定系统中的选举
+#### 不稳定系统中的选举
 
 
 
-### 几个例子
+#### 几个例子
 
 
 
-#### Viewstamp Replication
+##### Viewstamp Replication
 
 
 
-#### Paxos
+##### Paxos
 
 
 
-#### Raft
+##### Raft
 
 
 
-#### PacificA
+##### PacificA
 
 在PacificA中，谁是Primary是有Configuration Manager决定的，
+
+
+
+### 租约
+
+
 
 
 
