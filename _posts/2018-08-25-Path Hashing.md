@@ -74,19 +74,11 @@ typora-root-url: ../
 
 ![path-hashing-cache](/assets/img/path-hashing-cache.png)
 
-
-
->
-
->
+.
 
 简单有好玩的新思路，good idea。
 
->
-
->
-
-
+.
 
 ## 参考
 
