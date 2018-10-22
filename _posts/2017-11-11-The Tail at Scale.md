@@ -31,7 +31,7 @@ typora-root-url: ../
 * Garbage collection. 这里不仅仅包括类似JVM的GC，还有SSD这类hardware的内部行为；
 * Energy management. 
 
->
+.
 
 key insights：
 
@@ -50,7 +50,7 @@ using an approach analogous to fault-tolerant computing, tail-tolerant software 
   假设一个系统的一般响应时间是10ms，由于上面的各种这样的元素，导致了系统的TOP 99为1s。看上去平均数据很棒，但是对于现在常见的互联网服务来说，一个用户的请求上去，时间上会调用后面的很多的服务，假设每一个服务的性能指标都想这个一样，如果它实际上引发了100个服务的调用了，就会有超过63%的用户的响应时间超过1s。
 
 ```
- If a user request must collect responses from 100 such servers in parallel, then 63% of user requests will take more than one second. Even for services with only one in 10,000 requests experiencing more than one- second latencies at the single-server level, a service with 2,000 such servers will see almost one in five user requests taking more than one second.
+ If a user request must collect responses from 100 such servers in parallel, then 63% of user requests will take more than one second. Even for services with only one in 10,000 requests experiencing more than one-second latencies at the single-server level, a service with 2,000 such servers will see almost one in five user requests taking more than one second.
 ```
 
   更加可怕的是，即使TOP 99.99的影响时间都很好，各个服务的tail latency加在一起也会把这个响应时间明显放大.
@@ -63,14 +63,14 @@ The 99th-percentile latency for a single random request to finish, measured at t
 
 
 
-### 0x02 Design  Patterns to Enhance Tail Tolerance
+###  Design  Patterns to Enhance Tail Tolerance
 
   这个问题理解起来还是很容易的。重点在与如何解决呢？这个命题太广了，就只看看文章中给了哪些解决这些问题的模式。
 
 * Hedged requests. 简单的说就是不只请求一个，而是同时请求多个，等最快的一个返回就可以了。这个方法简单粗暴，工作中也使用过。缺点就是会消耗很多额外的资源，而且不是使用的服务(or 接口)都能这么用的。
 
   ```
-   For example, in a Google benchmark that reads the val- ues for 1,000 keys stored in a BigTable table distributed across 100 different servers, sending a hedging request after a 10ms delay reduces the 99.9th-percentile latency for retrieving all 1,000 values from 1,800ms to 74ms while sending just 2% more requests.
+   For example, in a Google benchmark that reads the values for 1,000 keys stored in a BigTable table distributed across 100 different servers, sending a hedging request after a 10ms delay reduces the 99.9th-percentile latency for retrieving all 1,000 values from 1,800ms to 74ms while sending just 2% more requests.
   ```
 
 
@@ -124,13 +124,11 @@ The 99th-percentile latency for a single random request to finish, measured at t
 
 .
 
->
-
 上面这些方法都有各自的适应环境(一句废话)。
 
 
 
-### ## 参考
+###  参考
 
 1. The Tail at Scale, Software techniques that tolerate latency variability are vital to building responsive large-scale Web services, BY JEFFREY DEAN AND LUIZ ANDRÉ BARROSO 
 2. https://blog.acolyer.org/2015/01/15/the-tail-at-scale/, the morning paper.
