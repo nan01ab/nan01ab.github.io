@@ -136,7 +136,6 @@ Backup根据一定的规则判断primary故障之后，就会进入view change�
 
 ## 参考
 
-    1. Viewstamped Replication Revisited: http://www.pmg.csail.mit.edu/papers/vr-revisited.pdf
-    2. Viewstamped Replication: A New Primary Copy Method to Support Highly-Available Distributed Systems: http://dl.acm.org/citation.cfm?id=62549
-    3. 一篇讨论了一些这个方面算法的blog：http://blog.kongfy.com/2016/05/分布式共识consensus：viewstamped、raft及paxos/
+1. Viewstamped Replication Revisited: http://www.pmg.csail.mit.edu/papers/vr-revisited.pdf
+2. Viewstamped Replication: A New Primary Copy Method to Support Highly-Available Distributed Systems.
 

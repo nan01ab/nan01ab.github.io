@@ -216,8 +216,7 @@ S: Sometimes Possible
 ## 参考
 
 1. A Critique of ANSI SQL Isolation Levels: http://www.cs.umb.edu/~poneil/iso.pdf
-2. A Critique of ANSI SQL Isolation Levels 论文翻译: https://yq.aliyun.com/articles/77965
-3. A Critique of ANSI SQL Isolation Levels: https://blog.acolyer.org/2016/02/24/a-critique-of-ansi-sql-isolation-levels/
+2.  https://blog.acolyer.org/2016/02/24/a-critique-of-ansi-sql-isolation-levels/，the mornong paper
 
 
 ​			

@@ -157,5 +157,5 @@ typora-root-url: ../
 2. Quorum: https://en.wikipedia.org/wiki/Quorum_%28distributed_computing%29
 3. 2PC: https://en.wikipedia.org/wiki/Two-phase_commit_protocol
 4. 3PC: https://en.wikipedia.org/wiki/Three-phase_commit_protocol
-5. Amazon Dynamo: https://en.wikipedia.org/wiki/Dynamo_(storage_system)
+5. Dynamo: Amazon’s Highly Available Key-value Store, SOSP'07.
 
