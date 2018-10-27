@@ -14,7 +14,7 @@ typora-root-url: ../
 
    2018-10-01，国庆节，祝祖国69岁生日快乐。
 
->
+
 
    计算机科学发展上的经典之作(不是所有方向)。
 
@@ -22,7 +22,7 @@ typora-root-url: ../
 
    还能跟踪一下最新的发展就更加好了。这里大概率会是上个世纪的文章。
 
->
+.
 
 ### Architecture
 
@@ -70,6 +70,8 @@ typora-root-url: ../
 
 ​      MVCC.
 
+
+
 ### Distributed
 
 1. Time, clocks and the ordering of events in a distributed system, L. Lamport, Communications ACM 1978. 
@@ -84,7 +86,6 @@ typora-root-url: ../
 
    TCP拥赛控制和避免.
 
-   
 
 ### Storage
 
@@ -100,7 +101,6 @@ typora-root-url: ../
 
    RAID.
 
-   
 
 ### Algorithm
 

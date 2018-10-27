@@ -38,7 +38,7 @@ hese failures may be spread independently across nodes in each of AZ A, B and C.
 
 
 
-#### SegmentedStorage 
+#### Segmented Storage 
 
  为了出现故障时候能影响到更加少的数据和更快的恢复，Aurora将数据分成段来管理，每一个段的大小为10GB，每6个构成一个Protection Groups (PGs) ，目前支持最大的存储空间为64TB。低层是用的Amazon EC2 的存储。
 
@@ -103,7 +103,7 @@ These are each replicated 6 ways into Protection Groups (PGs) so that each PG co
 
  Aurora不使用2PC之类的提交协议，而是利用了数据库redo log中的LSN来解决一致性的问题。ARIES风格的WAL每一个redo log record都由一个单调递增的LSN标示。由于这里使用的Qurom协议，这样有些结点可能会缺失一部分的数据，这里使用gossip协议补充完整，在读取时需要访问日志完整的结点。如何发现这些缺失的日志呢？在结点出现异常的时候如何决定某些事务是应该提交还是回滚呢？这里先Aurora中几个关键的概念的解释：
 
-1.  Volume Complete LSN(VCL)，这里是存储层可以保证可以提供的redo log的最大的LSN。子啊恢复的过程中，大于这个VCL的redo log都需要被截断(也就是丢弃了)；
+1.  Volume Complete LSN(VCL)，这里是存储层可以保证可以提供的redo log的最大的LSN。在恢复的过程中，大于这个VCL的redo log都需要被截断(也就是丢弃了)；
 2. Consistency Point LSNs(CPLs)，在MySQL之类的数据中，一个事务可能会产生多条的redo log，也就是说一个完整的事务log可能是一组的日志，而前面说到的VCL可能就处于一组日志的中间，这个事务的信息在这里就是不完整的；
 3. 所以这里又定义了the Volume Durable LSN(VDL)，是已经持久化的COLs中LSN最大的，这里很显然满足VDL <= VCL。所以这里大于VDL的日志都需要被截断；
 
@@ -117,7 +117,7 @@ The database can, however, further constrain a subset of points that are allowab
 
 * **写入**，正常情况下，数据库向存储层发送redo log，在达到了指定的Quorum之后标志为持久化。在一个事务的所有redo log都持久化之后，就可以推进VDL。由于在任意的时刻都有可能存在大量的正在执行的事务，每一个事务产生各自的log。未来避免过量的log没有被标记为持久化，这里定义了一个LSN Allocation Limit (LAL)(默认为10m)，表示了目前的LSN和VDL不能超过的最大的差值。
 
-     这里还有一个问题就是Aurora是按段来保存数据的，这样都有可以一个段里面只有一个事务的部分的日志。这里Aurora这每一条log中保存了前一条log的链接信息。这里有引入了另外的一个概念就是Segment Complete LSN(SCL)代表了完整日志的点，通过这个发现缺失的log，使用gossip从其它结点补全，补全之后可以将其向前推进。
+     这里还有一个问题就是Aurora是按段来保存数据的，这样就有可以一个段里面只有一个事务的部分的日志。这里Aurora这每一条log中保存了前一条log的链接信息。这里有引入了另外的一个概念就是Segment Complete LSN(SCL)代表了完整日志的点，通过这个发现缺失的log，使用gossip从其它结点补全，补全之后可以将其向前推进。
 
 * **提交**，Aurora中提交的操作是异步的。一个客户端提交操作的时候，每一个事务Aurora保存一个代表了这个事务的commit LSN。工作线程将这个提交的任务挂载在一个等待提交完成的list上。当VDL大于一个事务的commit LSN之后，就代表了这个事务已经成功提交完毕，这个时候就可以回复客户端。这样的好处就是工作线程可以在提交的时候继续工作，提高了性能。
 
@@ -181,4 +181,4 @@ The storage control plane uses the Amazon DynamoDB database service for persiste
 
 ## 参考
 
-1.Amazon Aurora: Design Considerations for High Throughput Cloud-Native Relational Databases, SIGMOD 2017..
+1. Amazon Aurora: Design Considerations for High Throughput Cloud-Native Relational Databases, SIGMOD 2017.
