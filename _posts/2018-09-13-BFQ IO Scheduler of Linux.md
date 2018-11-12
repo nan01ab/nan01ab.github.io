@@ -57,8 +57,6 @@ To further limit the extent at which random applications may decrease the throug
 
 .
 
-
-
 ### 一些细节和优化
 
 TODO

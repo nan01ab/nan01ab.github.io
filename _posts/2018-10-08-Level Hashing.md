@@ -24,7 +24,7 @@ To cost-efficiently resize this hash table, level hashing leverages an in- place
 
 这里关于NVM之类的特点都不提了，可参考相关资料。这里只关注Lelvel Hasing的设计以及如何解决现在的问题。
 
->
+
 
 ### 0x01 基本思路
 
@@ -69,8 +69,6 @@ Lb 1 = hash1 (K)%(N/2), Lb 2 = hash2 (K)%(N/2) (2)
 
 .
 
->
-
 ### 0x02  Cost-efficient In-place Resizing 
 
   相对于读来说，NVM写的成本比较高，为了减少resize中的写操作，这里一个创新的地方就是每次resize就创建一个新的更加大的Top Level，之前的Top Level成为新的Bottom Level，只需要移动旧的Bottom Level里面的数据就可以了，这样只要移动1/3的数据。当resize是减小size时，反过来就可以了。
@@ -93,7 +91,6 @@ Lb 1 = hash1 (K)%(N/2), Lb 2 = hash2 (K)%(N/2) (2)
 
    .
 
-   >
 
 ### 0x03 Low-overhead Consistency Guarantee 
 
@@ -156,15 +153,13 @@ When updating an existing key-value item, if the updated item has two copies in 
 
 .
 
->
-
 ### 0x04 评估
 
 详细数据查看论文.
 
 ![level-hasing-performance](/assets/img/level-hasing-performance.png)
 
->
+
 
 ## 参考
 

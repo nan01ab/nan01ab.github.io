@@ -12,7 +12,7 @@ typora-root-url: ../
 
 
 
-## 0x00 引言
+### 0x00 引言
 
   RLU可以看作是RCU的升级版本。RCU在Linux Kernel 中已经得到广泛的应用了。但是其也存在一些缺点，最大的一个缺点就是很难用，其次就是只适应有很少的write操作的情形，最后就是等待读者完成操作的延时问题(具体看看RCU有关的东西？)。RLU则可以解决RCU存在的一些问题:
 
@@ -21,8 +21,6 @@ RLU provides support for multiple object updates in a single operation by combin
 ```
 
 .
-
->
 
 ### 0x01 基本思路 
 

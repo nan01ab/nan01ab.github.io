@@ -12,7 +12,7 @@ typora-root-url: ../
 
 
 
-## 0x00 引言
+### 0x00 引言
 
  最近几年为数据中心设计的新的传输协议不少，这篇是SIGCOMM上最新的一篇(截止写这篇论文时)，总而言之，这篇论文做到了:
 
@@ -26,7 +26,7 @@ Our implementation of Homa achieves 99th percentile round trip latencies less th
 
 Homa倾向于为short messages设计。
 
-
+.
 
 ### 0x01 KEY IDEAS 
 
@@ -42,6 +42,8 @@ Homa的设计有4个key design principles ：
 (iv) controlled overcommitment of receiver downlinks.
 ```
 
+.
+
 Homa这么设计出于一下的考虑：
 
 ```
@@ -50,7 +52,7 @@ Homa这么设计出于一下的考虑：
 
  特别在意延时的情况下，schedule带来的延时都不可以接受。所以有了principle 1。
 
-
+.
 
 ```
 2. Buffering is a necessary evil.
@@ -58,7 +60,7 @@ Homa这么设计出于一下的考虑：
 
 没有一个protocol在没有导致buffering的同时实现low latency，讽刺的是，buffering又会带来latency。buffer，latency，throughput，欢喜冤家，emmmmmmm这里是不是可以写一本书了。
 
-
+.
 
 ```
 3. In-network priorities are a must. 
@@ -66,7 +68,7 @@ Homa这么设计出于一下的考虑：
 
 由于上一条，为了减少延时，不同的packet区分处理能获得一些效果。这个方法在很多类似的protocol中都有使用。这样就有了principle 2.
 
-
+.
 
 ```
 4. Making best use of limited priorities requires receiver control.
@@ -74,7 +76,7 @@ Homa这么设计出于一下的考虑：
 
  简而言之就是recevier控制更加好。
 
-
+.
 
 ```
 5. Receivers must allocate priorities dynamically.
@@ -82,7 +84,7 @@ Homa这么设计出于一下的考虑：
 
  Homa 使用Receivers动态分配优先级的方式解决了之前类似协议的一些问题(pHost )，比如large的messag使用高优先级带来的问题，只使用一种优先级可能导致的delay。这样就有了principl 3。
 
-
+.
 
 ```
 6. Receivers must overcommit their downlink in a controlled manner.
@@ -90,7 +92,7 @@ Homa这么设计出于一下的考虑：
 
 为了解决一些情况下链路利用率低的问题，比如一个sender项多个recevier发送数据(注意Homa使用的是receiver控制的传输方式)。为了解决这个问题，一个receiver可以过量使用downlink，比如同时给几个sender发送可以向receiver发送数据的grants。这样可能造成packet queuing ，但是对于提高利用率来说是必要的。
 
-
+.
 
 ```
 7. Senders need SRPT(shortest remaining processing time first) also. 
@@ -117,9 +119,7 @@ it uses no explicit acknowledgments;
 and it implements at-least-once semantics, rather than the more traditional at-most-once semantics.
 ```
 
-
-
-
+.
 
 #### RPCs, not connections 
 
@@ -135,7 +135,7 @@ and it implements at-least-once semantics, rather than the more traditional at-m
 
    Sender也使用了SRPT，当多个message的DATA包同时准备好发送的时候，决定先发送的是有最少剩余数据的message的包。sender 不根据优先级决定那些包先发送(由此可以看出，优先级只对路由器产生作用)。此外，控制类型的包，如GRANT and RESEND包的优先级总是高于DATA包。
 
-
+.
 
 #### Packet priorities 
 
@@ -145,7 +145,7 @@ and it implements at-least-once semantics, rather than the more traditional at-m
 The most novel feature in Homa, and the key to its performance, is its use of priorities. Each receiver determines the priorities for all of its incoming DATA packets in order to approximate the SRPT policy. It uses different mechanisms for unscheduled and scheduled packets. 
 ```
 
-  
+  .
 
   对于unscheduled 的包，receiver提前根据最近的流量模式决定优先级，然后会将顺带地这些信息发送给sender(by piggybacking it on other packets )，sender会报送最近的每一个receiver的相关信息。
 
@@ -171,7 +171,7 @@ corruption in the network, and buffer overflow
  Receivers use a simple timeout-based mechanism to detect lost packets. If a long time period (a few milliseconds) elapses without additional packets arriving for a message, the receiver sends a RESEND packet that identifies the first range of missing bytes; the sender will then retransmit those bytes.
 ```
 
-
+.
 
 #### At-least-once semantics 
 
@@ -183,7 +183,7 @@ Homa assumes that higher level software will either tolerate redundant execution
 
   说白了就是不管，有Application处理。
 
-
+.
 
 #### 其它一些东西
 
@@ -205,8 +205,6 @@ Homa assumes that higher level software will either tolerate redundant execution
 ```
 
   一堆的假设，看不下去了。。。。。
-
-
 
 
 

@@ -68,8 +68,6 @@ With the TCP timestamp option enabled, RTT estimates are calculated based on the
 
 .
 
->
-
 ### 安全否?
 
   其实上面减小RTOmin能带来的效果是很显然的，主要是安全问题？是否会导致大量的假的超时，从而导致重传反而降低了性能呢？Paper的观点当然是很安全啦。

@@ -150,10 +150,6 @@ w = w * (1 - p/2) if p > 0,
 
 ![d2tcp-results](/assets/img/d2tcp-results.png)
 
-
-
-
-
 .
 
 ## 参考

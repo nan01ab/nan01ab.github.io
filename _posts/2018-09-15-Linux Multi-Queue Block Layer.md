@@ -34,7 +34,7 @@ typora-root-url: ../
 * Hardware Interrupts，IOPS达到了几十万甚至更加高的时候，很多的时间就会被消耗在中断处理上了。
 * Remote Memory Accesses，目前的设计会导致CPU核心访问的会是Remote Memory，这个造成了不小的性能损失，特别是在NUMA架构的机器上。对缓存也不友好。
 
->
+.
 
 ### 0x03 基本设计
 
@@ -91,7 +91,7 @@ If fairness is essential, it is possible to design a scheduler that exploits the
 
   对于制造商来说就是驱动的优化了，主要是dispatch queue，submission queue ，IO tag handling 的处理。
 
-> 
+.
 
 ### 0x04 评估
 
@@ -102,8 +102,6 @@ With SQ, the maximum latency reaches 250 milliseconds in the 4 sockets system an
 ```
 
 .
-
->
 
 ## 参考
 

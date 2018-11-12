@@ -16,7 +16,7 @@ typora-root-url: ../
 
   Log是Computer Science中一个非常重要的思想，与存储相关的地方都非常常见。Log-Structured File System(这里是LFS)是不同与常见的Unix FFS的一类文件系统，这篇论文发表于1992年(还是比我年龄要大呀)，比发表于1984年的Unix FFS晚了8年时间。计算机系统随着时间也发生了很多的变化，新的方法也会随之诞生。Log-Structured 是从文件系统，内存分配起到NVM空间管理，到Log-Structured 的数据结构，SSD的内部等等等，一大堆。可以来一个集合。
 
->
+
 
 ### 0x01 动机
 
@@ -27,7 +27,7 @@ typora-root-url: ../
 3. Existing file systems perform poorly on many common workloads;
 4. File systems are not RAID-aware;
 
->
+
 
 所以这里系统设计的核心就是[1]：
 
@@ -35,7 +35,7 @@ typora-root-url: ../
 How can a file system transform all writes into sequential writes? For reads, this task is impossible, as the desired block to be read may be any- where on disk. For writes, however, the file system always has a choice, and it is exactly this choice we hope to exploit.
 ```
 
-
+.
 
 ###  0x02 Writing To Disk Sequentially 
 
@@ -64,7 +64,7 @@ How can a file system transform all writes into sequential writes? For reads, th
          +----------+
 ```
 
->
+.
 
 ##### 问题
 
@@ -73,8 +73,6 @@ How can a file system transform all writes into sequential writes? For reads, th
 ​     解决方案就是write buffering，这个在文件系统中是很常用的方法了。LFS讲一次写入更新的chunk叫做segment。在前面的动机中提到，现在的系统内存越来越大，所以合理利用内存能有效地提升性能。多个在一起之后layout看上去就是这样：
 
 ![lfs-semgent](/assets/img/lfs-semgent.png)
-
->
 
 ### 0x02 The Inode Map  
 
@@ -94,8 +92,6 @@ People often say that the solution to all problems in Computer Science is simply
 
 
 
->
-
 ### 0x03 读操作
 
    到了这里来看看是如何读操作的:
@@ -105,8 +101,6 @@ People often say that the solution to all problems in Computer Science is simply
 3. 根据一个inode读取文件到时候，先根据inode number在inode map中找到inode的位置信息；
 4. 从磁盘中读取inode；
 5. 利用inode的信息读取数据块。
-
->
 
 ### 0x04 目录
 
@@ -128,7 +122,7 @@ People often say that the solution to all problems in Computer Science is simply
 6. 在目录的数据中找到文件的inode number信息；
 7. 重复3,4,5步骤，读取到最终的文件数据；
 
->
+.
 
 ##### 问题
 
@@ -136,7 +130,7 @@ People often say that the solution to all problems in Computer Science is simply
 
  其实LFS在之前的内容中就已经把这个问题解决了，解决方法依然是inode map。inode的问题可能改变了，都是LFS的目录中不保存inode的位置信息，而是保存inode number。而一个文件更新之后inode位置可能变化了，但是inode number是不会变化的。	
 
->
+
 
 ### 0x05 Garbage Collection	
 
@@ -146,7 +140,7 @@ People often say that the solution to all problems in Computer Science is simply
 
   GC在Log Stuctured FS中是一个很重要的内容，可以参看原论文[2]和之后的一些优化的论文,比如[3]。
 
->
+
 
 ### 0x06 Crash Recovery And The Log 
 
