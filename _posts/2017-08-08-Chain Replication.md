@@ -86,5 +86,3 @@ Inprocess Requests Invariant is established and T+ can begin serving as the chai
 ## 参考
 
 1. Chain Replication for Supporting High Throughput and Availability, OSDI 2004.
-
-   

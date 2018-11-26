@@ -82,7 +82,7 @@ O6. using double buffering for I/O requests.
 
  下面就是讨论了一些具体的方法，这里是从一个方法出发解决现有的问题，但方法本身也带来了额外的问题，然后提出改进策略，直到达到一个较好的结果。
 
->
+
 
 ### 0x04 SyncPath: Designing a Synchronous I/O Path
 
@@ -104,8 +104,6 @@ On the contrary, the sequential write throughput drops from 479MB/s to 309MB/s, 
 
 .
 
->
-
 ### 0x05  Extending Device I/O Interface 
 
   SyncPath中表现出了没有合并写请求对顺序写性能的影响。现在Scatter-gather DMA I/O是一种常见的优化方式，这里提出了一种新的device IO接口，Scatter-Scatter I/O (SSIO) Interface。用于将不连续的主机内存里面的数据写入到存储设备不连续的段里面，反之同理。这利用了SSD内部的并行特性，给合并IO请求提供了额外的机会。这种方式也要求对DMA做出一些改进。
@@ -115,8 +113,6 @@ On the contrary, the sequential write throughput drops from 479MB/s to 309MB/s, 
 ```
 
 .
-
->
 
 ### 0x06 STM: Synchronously Merging Discontiguous I/O Requests 
 
@@ -152,7 +148,7 @@ Figure 7 depicts the difference between Spatial Merge and Temporal Merge. When 5
 
   不过STM方式也存在缺点，一个是时间合并的在IO请求较少时难以发挥。第二个是随机读的性能明显低于随机写。
 
->
+
 
 ### 0x07 ATM: Asynchronously Merging Discontiguous I/O Requests 
 
@@ -172,7 +168,7 @@ On the other hand, the sequential and the random read throughput by ATM are lowe
 
   ATM表现出比STM更加好的写性能，然而这里的读性能低于STM，原因在与ATM很好地合并读请求。
 
->
+
 
 ### 0x08 HTM: Hybrid Use of Synchronous and Asynchronous Temporal Merge 
 
@@ -224,7 +220,7 @@ In the case of ext3, the synchronous writes issued by a jour- naling thread prev
 
  这个问题没有完全解决。
 
->
+
 
 ### 0x0B 评估
 
@@ -243,5 +239,3 @@ In the case of ext3, the synchronous writes issued by a jour- naling thread prev
 ## 参考
 
 1. Yu, Y. J., Shin, D. I., Shin, W., Song, N. Y., Choi, J. W., Kim, H. S., Eom, H., Yeom, H. Y. 2014. Optimizing the block I/O subsystem for fast storage devices. ACM Trans. Comput. Syst. 32, 2, Article 6 (June 2014), 48 pages.  DOI:http://dx.doi.org/10.1145/2619092.
-
-   
