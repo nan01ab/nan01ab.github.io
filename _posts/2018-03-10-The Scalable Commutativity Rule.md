@@ -22,7 +22,7 @@ typora-root-url: ../
 This forces the kernel to coordinate file descriptor allocation across all threads, even when many threads are opening files in parallel. This choice simplified the kernel interface during the early days of Unix, but it is now a burden on implementation scalability. It’s an unnecessary burden too: a simple change to allow open to return any available file descriptor would enable the kernel to choose file descriptors scalably.
 ```
 
-
+.
 
 ### 0x01 A Rule for Interface Design 
 
@@ -50,7 +50,7 @@ This forces the kernel to coordinate file descriptor allocation across all threa
 To capture different conflict conditions as well as path conditions, we introduce a new notion called conflict coverage. Conflict coverage exercises all possible access patterns on shared data structures: looking up two distinct items from different operations, looking up the same item, and so forth.
 ```
 
-
+.
 
 ### 0x03 实际例子
 
@@ -84,7 +84,7 @@ To capture different conflict conditions as well as path conditions, we introduc
   For example, writing to a pipe must deliver SIGPIPE immediately if there are no read FDs for that pipe, so pipe writes do not commute with the last close of a read FD. This requires aggressively tracking the number of read FDs; a relaxed specification that promised to eventually deliver the SIGPIPE would allow implementations to use more scalable read FD tracking.
   ```
 
-
+.
 
  4个设计可拓展接口的设计模式:
 
@@ -93,13 +93,13 @@ To capture different conflict conditions as well as path conditions, we introduc
 * Precede pessimism with optimism，先乐观后悲观。和OCC的思想比较相似。
 * Don’t read unless necessary，不要读取不必要的东西。
 
->
+
 
 ### 0x05 总结
 
-  这篇论文的感觉就是很抽象，文章长达47页，这里将字数控制在2000以内，当然发表在SOSP上的版本会短很多。重要的是其中的思想吧。
+  这篇论文的感觉就是很抽象，文章长达47页。
 
- >
+
 
 ## 参考
 

@@ -32,7 +32,7 @@ typora-root-url: ../
 
  如上面的图所示，FD-tree的设计可以说是结合Btree和LSMtree的特点。FDtree有若干层组成。在FDtree的上层一个HeadTree。这个HeadTree实际上就是一棵小的Btree。每一个结点的大小为page的大小(记为B)。其它的处于HeadTreex下面的层，都是一个排序好的联系的pages组成的。每一个HeadTree的非叶子结点都包含指向L1层的指针。其余的层也保护指向下一层的指针，这里的指针不像Btree。
 
-  每一层都一层的容量，即保护entries的个数，记为$|Li|$。相邻层数之间的数量是一个倍数的关系，即$|Li+1| = k · |Li| (0 ≤ i ≤ l − 2), |Li| = ki · |L0|$。HeadTree即为L0，更新操作都是现在这里执行，它的大小达到一定的阈值的时候，会被合并到下面的level中，这里的思路和LSM-tree很相似。根据前面的设计原则，HeadTree的大小被称为` locality area`, 通常情况下为128KB -- 8MB。在FDtree中的level中的entries分为两种类型：
+  每一层都一层的容量，即保护entries的个数，记为|Li|。相邻层数之间的数量是一个倍数的关系，即|Li+1| = k · |Li| (0 ≤ i ≤ l − 2), |Li| = ki · |L0|。HeadTree即为L0，更新操作都是现在这里执行，它的大小达到一定的阈值的时候，会被合并到下面的level中，这里的思路和LSM-tree很相似。根据前面的设计原则，HeadTree的大小被称为` locality area`, 通常情况下为128KB -- 8MB。在FDtree中的level中的entries分为两种类型：
 
 * Index Entry， 包含了三个字段：key；record id(rid)，这个rid是为了找到对应的value；另外就是type字段知名entry的类型。type=filter的时候就代表这个记录已经被删除了，type=normal的时候代表这个就是一个平常的记录。
 
@@ -96,7 +96,7 @@ typora-root-url: ../
 
 ### 0x04 评估
 
-  这条咸鱼认为看起来FD-tree没有特别的长处，还有不少的缺点。具体的评估数据可以参考[1].
+  这条咸鱼认为FD-tree看起来没有特别的长处，还有不少的缺点。具体的评估数据可以参考[1].
 
 
 

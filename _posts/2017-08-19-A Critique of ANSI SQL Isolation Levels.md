@@ -8,30 +8,30 @@ typora-root-url: ../
 
 
 
-# A Critique of ANSI SQL Isolation Levels
+## A Critique of ANSI SQL Isolation Levels
 
 在ANSI SQL-92 [MS, ANSI]（之后简称SQL-92）根据Phenomena（这个类似专有名词，不翻译了，中文意思是‘现象’）定义了SQL的隔离级别：Dirty Reads, Non-Repeatable Reads, and Phantoms。《A Critique of ANSI SQL Isolation Levels》[1]这篇paper阐述了有些Phenomena是无法用SQL-92中定义的一些隔离级别正确表征的，包括了各个基本上锁的实现。该论文讨论了SQL-92中的Phenomena中的定义模糊的地方。除此之外，还介绍了更好表征隔离级别的Phenomena，比如*Snapshot Isolation*。
 
 
 
-## 介绍
+### 介绍
 
 不同的隔离级别定义了不同的在并发、吞吐量之间的取舍。较高的级别更容易正确的处理数据，而吞吐量比较低的隔离级别更低，较低的隔离级别更容易获得更高的吞吐量，却可能导致读取无效的数据和状态。
   SQL-92定义了4个隔离级别：
-    (1) READ UNCOMMITTED, 
-    (2) READ COMMITTED, 
-    (3) REPEATABLE READ, 
-    (4) SERIALIZABLE. 
-它使用了**serializability**的定义，加上3种禁止的操作子序列来定义这些隔离级别，这些子序列被称为**Phenomena**，有以下3种：Dirty Read, Non-repeatable Read, and Phantom（一般被翻译为脏读，不可重复读，幻读，不过个人认为不翻译直接理解更好）。规范只是说明phenomena是可能导致异常（anomalous)的动作序列。
-ANSI的隔离级别与lock schedulers的行为相关。一些lock scheduler允许改变lock的范围和持续的时间（一般是为优化了性能），这就导致了不符合严格的两阶段锁定。由[GLPT]引入了以下3种方式定义的Degrees of Consistency（一致性程度）：
-      1. 锁(locking)；
-      2. 数据流图(data flow graph)；
-      3. 异常(anomalies)。
-        这里通过**Phenomena**(或者叫 anomalies) 来定义隔离级别而不是基于锁。
+​    (1)  READ UNCOMMITTED, 
+​    (2)  READ COMMITTED, 
+​    (3)  REPEATABLE READ, 
+​    (4)  SERIALIZABLE. 
+
+  它使用了**serializability**的定义，加上3种禁止的操作子序列来定义这些隔离级别，这些子序列被称为**Phenomena**，有以下3种：Dirty Read, Non-repeatable Read, and Phantom。规范只是说明phenomena是可能导致异常（anomalous)的动作序列。ANSI的隔离级别与lock schedulers的行为相关。一些lock scheduler允许改变lock的范围和持续的时间（一般是为优化了性能），这就导致了不符合严格的两阶段锁定。由[GLPT]引入了以下3种方式定义的Degrees of Consistency（一致性程度）：
+
+            1. 锁(locking)；
+            2. 数据流图(data flow graph)；
+            3. 异常(anomalies)。通过**Phenomena**(或者叫 anomalies) 来定义隔离级别而不是基于锁。
 
 
 
-## 隔离级别的定义
+### 隔离级别的定义
 
   在进入之前先来说明一种表示方法：
 ```
@@ -42,7 +42,7 @@ ANSI的隔离级别与lock schedulers的行为相关。一些lock scheduler允�
   同理，事务1的提交和中止分别被记为c和a相同的方法表示。
 ```
 
-
+.
 
 ### ANSI
 
@@ -110,9 +110,10 @@ H3: r1[P] w2[insert y to P] r2[z] w2[z] c2 r1[z] c1
 
 
 
-## 其它隔离级别
+### 其它隔离级别
 
-### Cursor Stability(游标稳定)
+#### Cursor Stability(游标稳定)
+
 Cursor Stability旨在解决丢失更新的问题。丢失更新是当T1读取数据项，然后T2(可能基于之前读到的数据)更新数据项，然后T1(可能基于之前读到的数据)更新数据项并提交时，就发生丢失的更新异常，可以表示为:
 ```
 P4: r1[x]...w2[x]...w1[x]...c1
@@ -133,9 +134,9 @@ Cursor Stability隔离级别拓展了RC下对SQL游标的锁行为，游标上�
 P4C: rc1[x]...w2[x]...w1[x]...c1 (Lost Update) 
 ```
 
+.
 
-
-### Snapshot Isolation(快照隔离级别)
+#### Snapshot Isolation(快照隔离级别)
 
 在快照隔离下执行的事务始终从事务**开始时起**的已提交的数据的快照中读取数据。事务开始的时间戳称为Start-Timestamp。当事务运行在快照隔离中时，只要可以维护其开始时间戳对应的快照数据，在就不会阻塞读。事务的写入也将反映在这个快照中，如果事务第二次访问数据，则能再次读到，而这个事务开始时间戳之后的其他事务的更新对于本次事务是不可见的。
 SI隔离级别虽然不在ANSI的隔离级别中，却在实际应用非常广泛。SI是一种MVCC的技术，对于现在常见的数据库，基本都使用了MVCC。对于SI，当T1准备提交时，它将获得一个Commit-Timestamp，该值大于之前的所有时间戳。当T2提交了Commit-Timestamp在T1事务的间隔[Start-Timestamp，Commit-Timestamp]中时，只有在T1, T2数据不重叠情况下，T1事务才成功提交，否则，T1将中止，这叫做First-committer-wins。防止丢失，当T1提交时，其更改对于Start-Timestamp大于T1的Commit-Timestamp的所有事务都可见。
@@ -180,7 +181,7 @@ SI的隔离是高于读以提交的，首先first-committer-wins排除了脏写�
 
 
 
-## Summary and Conclusions 
+### Summary and Conclusions 
 
   总之，原始ANSI SQL隔离级别的定义存在许多的问题。下面是一个总结性的表格:
 ```

@@ -8,12 +8,6 @@ typora-root-url: ../
 
 
 
-# GPU Key-Value
-
-   这篇总结是关于几篇在在GPU上面实现KVS的Paper。
-
-
-
 ## Mega-KV: A Case for GPUs to Maximize the Throughput of In-Memory Key-Value Stores
  Mega-Key的基本思路就是使用GPU来做Key-Value的索引，GPU上面的显存有限，数据不保存在GPU上面。它号称可以,
 

@@ -38,7 +38,7 @@ typora-root-url: ../
 When a transaction inserts a tuple into a table, the engine first checks the table’s pool for an available slot. If the pool is empty, then the engine allocates a new fixed-size block using the allocator interface. The engine also uses the allocator interface to maintain the indexes and stores them in memory.
 ```
 
-
+.
 
 ##### Recovery 
 
@@ -50,8 +50,6 @@ When a transaction inserts a tuple into a table, the engine first checks the tab
 
 .
 
->
-
 #### Copy-on-Write Updates Engine (CoW) 
 
   CoW类型的策略时从来步更新原来的数据，只会在原来的基础上创建一个新的数据。CoW引擎使用directories 的方式访问不同版本的数据，常见的例子就是System R上面的影子页。CoW中存在一个Master记录，用于保存目前的directories的信息，基本的组织方式上面的图有很好的说明：
@@ -62,15 +60,11 @@ the DBMS maintains two look-up directories at all times: (1) the current directo
 
  txn提交的时候，DB原子地将指向原来master版本的改为指向新的版本。为了解决拷贝的成本，可以使用 copy-on-write B+trees。
 
-
-
 ##### Storage 
 
 ​    CoW将directories保存在FS中，可以以一种HDD/SSD优化的给出存储，将所有的字段都内联。这样可以避免昂贵的随机访问操作。每一个数据库(表)都保存在一个单独的文件里面，Master记录总是在文件固定偏移的地方。通过使用映射到主键的方式，CoW支持次级索引。
 
    CoW的缺点就是每次会创建新的数据拷贝，即使只是更新了部分数据。此外，垃圾回收也是一个问题。多次拷贝也带了了写操作放大的问题。
-
-
 
 ##### Recovery 
 
@@ -80,7 +74,7 @@ the DBMS maintains two look-up directories at all times: (1) the current directo
 When the DBMS comes back on-line, the master record points to the current directory that is guaranteed to be consistent. The dirty directory is garbage collected asynchronously, since it only contains the changes of uncommitted transactions.
 ```
 
-
+.
 
 #### Log-structured Updates Engine (Log) 
 
@@ -90,7 +84,7 @@ When the DBMS comes back on-line, the master record points to the current direct
 The design for our Log engine is based on Google’s LevelDB, which implements the log-structured update policy using LSM trees.
 ```
 
-
+.
 
 ##### Storage 
 
@@ -100,7 +94,7 @@ The design for our Log engine is based on Google’s LevelDB, which implements t
 The log-structured update approach performs well for write-intensive workloads as it reduces random writes to durable storage. The downside of the Log engine is that it incurs high read amplification (i.e., the number of reads required to fetch the data is much higher than that actually needed by the application).
 ```
 
-
+.
 
 #### Recovery 
 
@@ -111,8 +105,6 @@ It first replays the log to ensure that the changes made by committed transactio
 ```
 
 .
-
->
 
 ### NVM-Aware Engine
 
@@ -134,7 +126,7 @@ It first replays the log to ensure that the changes made by committed transactio
 Thus, the engine can use the pointer to access the tuple after the system restarts without needing to re-apply changes in the WAL. It also stores indexes as non-volatile B+trees that can be accessed immediately when the system restarts without rebuilding.
 ```
 
-
+.
 
 ##### Storage 
 
@@ -146,8 +138,6 @@ To reclaim the storage space of tuples and non-inlined fields inserted by uncomm
 
  NVM-InP将WAL组成成一个非易失的list，新提交的就直接接到list的尾部。 系统必须在WAL的一项持久化之后才能更改slot的状态。
 
-
-
 ##### Recovery 
 
 ​    NVM-InP只需要处理没有提交的事务就可以了，不用重放Log。由于没有提交的txn并不能保证数据已经被持久化到NVM上面了，所以NVM-InP需要做undo的处理。方法就是使用WAL里面的消息恢复指向以前数据的指针，此外还要释放相关的NVM空间。对于删除操作，只需要修改索引的指针指向原来的数据即可。
@@ -158,7 +148,7 @@ To handle transaction rollbacks and DBMS recovery correctly, the NVM-InP engine 
 
  这里可以看到， NVM-InP revery是没有redo处理过程的。
 
->
+
 
 #### Copy-on-Write Updates Engine (NVM-CoW) 
 
@@ -168,8 +158,6 @@ To handle transaction rollbacks and DBMS recovery correctly, the NVM-InP engine 
 * 直接持久化tuple副本，只在dirty directory保留tuple的指针；
 * 使用一种轻量化的持久化的机制来持久化 copy-on-write B+tree的更改。
 
-
-
 ##### Storage 
 
  类型NVM-InP 的方式，存储空间被分为一些固定长度的blocks，和一些变长的blocks。相关的copy-on-write B+tree也保存在NVM中，不在保存到文件系统里面。
@@ -178,19 +166,17 @@ To handle transaction rollbacks and DBMS recovery correctly, the NVM-InP engine 
 We modified the B+tree from LMDB to handle modifications at finer granularity to exploit NVM’s byte addressability. The engine maintains the master record using the allocator interface to support efficient updates. When the system restarts, the engine can safely access the current directory using the master record because that directory is guaranteed to be in a consistent state.
 ```
 
-
+.
 
 ##### Recovery 
 
   不需要处理Recovery，只需要异步地将没有提交的数据回收即可。这个是最有趣的了。
 
->
+
 
 #### Log-structured Updates Engine (NVM-Log) 
 
  同样，类似前面的，在WAL中只保留指向tuple的指针。MemTable也不用在flush在磁盘上面，只需要标记为不可变然后开启一个新的MemTable就可以了。也优化了compaction的策略，一次性可以合并多个。
-
-
 
 ##### Storage 
 
@@ -202,8 +188,6 @@ Like the NVM-InP engine, this new engine also stores the WAL as a non-volatile l
 
  这里MemTable使用的是non-volatile  B+trees。(思考：这里不可变的memtable可以采用一个比B+tree更加省空间和有利于查找的数据结构，反正它是不可变的).
 
-
-
 ##### Recovery 
 
   只需要处理在MemTable中没有提交事务的数据就可以了，也只会有undo操作。
@@ -214,13 +198,11 @@ During recovery, the NVM-Log engine only needs to undo the effects of uncommitte
 
 .
 
->
-
 ### 评估
 
   具体的性能数据查看论文[1].
 
->
+
 
 ## 参考
 
