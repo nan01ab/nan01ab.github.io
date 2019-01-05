@@ -24,23 +24,13 @@ typora-root-url: ../
 2. 正确处理包以实现主动连接和被动连接的connection locality；
 3. 解决socket和VFS耦合导致的性能问题，同时保证兼容性。
 
-
-
 基本的架构图如下:
 
 ![fastsocket-arch](/assets/img/fastsocket-arch.png)
 
-
-
-
-
 #### Local Listen Table 
 
-  和前面2篇文章的思路一样，这里的做法也是讲listen table之类的共享结构分区处理:
-
-  一个进程创建一个listen socket，这个socket对应的 Listen Table是 global listen table。然后这个进程fork出子进程，子进程继承了这个socket，准备好接受新的连接。
-
-  在fastsocket中，使用local listen() 来告诉内核我想处理的是我绑定的CPU core上面处理的连接。
+  和前面2篇文章的思路一样，这里的做法也是讲listen table之类的共享结构分区处理: 一个进程创建一个listen socket，这个socket对应的 Listen Table是 global listen table。然后这个进程fork出子进程，子进程继承了这个socket，准备好接受新的连接。在fastsocket中，使用local listen() 来告诉内核我想处理的是我绑定的CPU core上面处理的连接。
 
 ```
 We refer to the copied listen socket as the local listen socket and the original listen socket as the global listen socket.
@@ -48,15 +38,13 @@ We refer to the copied listen socket as the local listen socket and the original
 
 ![fastsocket-local-listen-table](/assets/img/fastsocket-local-listen-table.png)
 
-
-
   Fastsocket在添加局部化结构的同时，并没将原来的全局结构完全去除，而是两者都同时存在。Kernel优先处理局部上面的操作，对于一些其它特殊的情况，则使用原来的逻辑处理。这样做提高了系统的robustness和兼容性。
 
 ```
 In Fastsocket,Figure2 shows,when a SYN packetcannot match a local listen socket in the local listen table, the kernel will set up a new connection with the global listen socket in the global listen table (11). When any application process calls accept() (6), the ready connection in the global listen socket will be found since the accept queue of the global listen socket is checked first (7). The kernel can then accept() the connection from the global listen socket to the applica- tion process, just what the legacy TCP stack does (12).
 ```
 
-
+.
 
 #### Local Established Table 
 
@@ -70,7 +58,7 @@ Local Established Table是在内核初始化的时候就准备好的。
 • In NET RX SoftIRQ , the kernel checks the local estab- lished table to match an established socket for any incoming packet.
 ```
 
-
+.
 
 #### Active Connection Locality
 
@@ -85,8 +73,6 @@ When the application running on CPU core c attempts to establish an active conne
 1. 如果收到的包的源端口是小于1024的，就认为是主动去连接而产生的包；
 2. 如果收到的包的目的端口是小与1024的，就认为是被动连接产生的包；
 3. 如果上面的包都不符合规则，就查看这个包使用和一个listen socket对应，如果是，则认为是一个被动连接产生的包，否则就是主动连接产生的包。
-
-
 
 #### Fastsocket-aware VFS
 
@@ -103,7 +89,7 @@ When the application running on CPU core c attempts to establish an active conne
 In short, Fastsocket-aware VFS internally customizes VFS for sockets to improve scalability while externally keeping VFS compatibility for socket applications and system tools.
 ```
 
-
+.
 
 #### 评估
 

@@ -6,9 +6,7 @@ excerpt_separator: <!--more-->
 typora-root-url: ../
 ---
 
-
-
-### Write-Behind Logging 
+## Write-Behind Logging 
 
 
 
@@ -42,7 +40,7 @@ As in the case of WAL, the DBMS uses this information to ensure failure atomicit
 
 ![wal-overview](/assets/img/wal-overview.png)
 
->
+
 
 ### Commit Protocol 
 
@@ -112,7 +110,7 @@ But since WBL’s log records only contain timestamps and not the actual data (e
 
  为了解决这个问题，WBL就必须构建另外一个包含了所有需要信息的记录发送个其它服务器。这里认为瓶颈在于网络，这一步对性能的影响不大。
 
->
+
 
 ### 评估
 

@@ -6,19 +6,11 @@ excerpt_separator: <!--more-->
 typora-root-url: ../
 ---
 
-
-
 ## Dune: Safe User-level Access to Privileged CPU Features 
-
-
 
 ### 引言
 
-  做为一个计算机系统的常识，为了保护系统，我们知道，用户进程的权限是很有限的。这样的设计带来一些好处的同时，也屏蔽了一些好处。如java虚拟机，有时候需要控制线程，要经常性地进行GC，这个时候如果能让JVM访问一些kernel feature，就能得到很多好处。
-
-  Dune的一个基本思想是利用虚拟化，将一些之前只能是kernel feautre的功能暴露给应用，同时保证系统的安全性。一个Dune进程做为一个普通的Linux进程，不够使用VMCALL来进行系统调用。
-
-  之前有个的一个类似的系统是Exokernel，不过那个更像是一种类型的kernel，而这个是一个内核上的功能。
+  做为一个计算机系统的常识，为了保护系统，我们知道，用户进程的权限是很有限的。这样的设计带来一些好处的同时，也屏蔽了一些好处。如java虚拟机，有时候需要控制线程，要经常性地进行GC，这个时候如果能让JVM访问一些kernel feature，就能得到很多好处。Dune的一个基本思想是利用虚拟化，将一些之前只能是kernel feautre的功能暴露给应用，同时保证系统的安全性。一个Dune进程做为一个普通的Linux进程，不够使用VMCALL来进行系统调用。之前有个的一个类似的系统是Exokernel，不过那个更像是一种类型的kernel，而这个是一个内核上的功能。
 
 
 
@@ -30,9 +22,7 @@ typora-root-url: ../
 
   
 
-  Dune的基本架构如上图所示，在内核中，添加了一个Dune Module，一个Dune Process，运行在VMX non-root的ring0权限下，再在此之上运行平常的代码。应用不必要一开始在Dune中运行，可以在运行。通过对 /dev/dune/ 进行操作进入Dune状态。不过一旦进入，就不能退出。
-
-Dune不同于VMM的一些地方：
+  Dune的基本架构如上图所示，在内核中，添加了一个Dune Module，一个Dune Process，运行在VMX non-root的ring0权限下，再在此之上运行平常的代码。应用不必要一开始在Dune中运行，可以在运行。通过对 /dev/dune/ 进行操作进入Dune状态。不过一旦进入，就不能退出。Dune不同于VMM的一些地方：
 
 1. Dune不支持运行一个完整的OS；
 2. 与一般的VMMs不同，Dune使用hypercall调用的是一般的linux syscall；
@@ -50,17 +40,13 @@ Dune不同于VMM的一些地方：
 For processes using Dune, a user controlled page table maps guest-virtual addresses to guest-physical. Then the EPT, managed by the kernel, performs an additional translation from guest-physical to host-physical. All memory references made by processes using Dune can only be guest-virtual, allowing for isolation and correctness to be enforced in the EPT while application-specific functionality and optimizations can be applied in the user page table.
 ```
 
- 为了实现这些功能，Dune还做了很多工作，Paper有较详细的描述。
-
-使用VMX的机制是这些变得简单。VMX本身是为虚拟化设计的，提供了访问虚拟化硬件的功能。
+ 为了实现这些功能，Dune还做了很多工作，Paper有较详细的描述。使用VMX的机制是这些变得简单。VMX本身是为虚拟化设计的，提供了访问虚拟化硬件的功能。
 
 ```
 Exceptions and privilege modes are implicitly available in VMX non-root mode and do not require any special configuration. On the other hand, virtual memory requires access to the %CR3 register, which can be granted in the VMCS.
 ```
 
- 同时，用于Dune面向的是进程，它不是一个操作系统，使用它时是以进程为粒度进行控制的。可以理解为一个进程跑在一个单独的Dune环境中。虽然Dune暴露了一些硬件的功能，但是由于一些原因，这个还是做了不少限制。
-
-  对于其它的一些比如system calls，Dune是不能允许Dune 进行直接进行的，要必须经过Dune。
+ 同时，用于Dune面向的是进程，它不是一个操作系统，使用它时是以进程为粒度进行控制的。可以理解为一个进程跑在一个单独的Dune环境中。虽然Dune暴露了一些硬件的功能，但是由于一些原因，这个还是做了不少限制。 对于其它的一些比如system calls，Dune是不能允许Dune 进行直接进行的，要必须经过Dune。
 
 ```
 Instead, processes must use VMCALL, the hypercall instruction, to make sys- tem calls. The Dune module vectors hypercalls through the kernel’s system call table. 
