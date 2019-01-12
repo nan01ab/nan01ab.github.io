@@ -42,7 +42,7 @@ our Actually Fair Queuing sched- uler reduces priority-misallocation by 28×; ou
 
   这个的主要功能就是追踪哪一个进程发出了IO请求，进而可以对这些信息进行统计。
 
-![split-cause](/assets/images/split-cause.png)
+![split-cause](/assets/img/split-cause.png)
 
   上面的图表示了一个例子，其中有两个问题：1. 一个数据page可以被多个进程处理，所以仅仅做一个tag是不够的，这里是一个tags的set，可以认为tag不是一个标量而是一个向量；2. 有些亲戚会被委托给另外的进程处理，这里将这样的进程叫做proxies(代理)，这里的话要记录的tag就不应该是这个代理进程本书，而是看它这个操作是为哪一个进程服务的。
 
@@ -112,7 +112,7 @@ This design allows reads to hit the cache while protecting writes from journal e
 
 到达block层的写入请求就被理解处理。一些测试结果，详细讨论参看[1]，
 
-![split-afq](/assets/images/split-afq.png)
+![split-afq](/assets/img/split-afq.png)
 
 
 
@@ -120,7 +120,7 @@ This design allows reads to hit the cache while protecting writes from journal e
 
  这里详细信息还是参看原论文[1],
 
-![split-app](/assets/images/split-app.png) 
+![split-app](/assets/img/split-app.png) 
 
 
 
