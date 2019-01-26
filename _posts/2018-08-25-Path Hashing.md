@@ -6,11 +6,7 @@ excerpt_separator: <!--more-->
 typora-root-url: ../
 ---
 
-
-
 ## A Write-Friendly and Cache-Optimized Hashing Scheme for Non-Volatile Memory Systems 
-
-
 
 ### 0x00 引言
 
@@ -30,19 +26,13 @@ typora-root-url: ../
 
 ![path-hashing-arch](/assets/img/path-hashing-arch.png)
 
-
-
 #### Position Sharing 
 
   倒置的树形结构，除了最高的一层外，更高的层的standby cell是有多个slot共享的，越低共享的slot就越多。可想而知，越向下数量越少就节约了空间。如果都使用一样的节点数量，达到下面层的数据项是越来越少的，这样就会浪费空间。
 
-
-
 #### Double-Path Hashing 
 
   一盒hash函数的情况下，每一个key可以放置的位置是L+1个(L是高度)，一个基本的思路使用2个hash函数，这样的话可选择的位置就增加了接近2倍。但是实际上这样的方法并不是很好，两个hash有可能有不少的重叠的地方。更加简单更加好的方法就是一个hash函数计算在前半部分的slot，一个计算在后半部分的slot。
-
-
 
 #### Path Shortening 
 
@@ -52,21 +42,13 @@ typora-root-url: ../
 
 ![path-hasing-phy](/assets/img/path-hasing-phy.png)
 
+### 0x02 算法
 
-
-
-
-#### 0x02 算法
-
-   Path hashing的基本算法和普通的hash table没有区别，算法也简单直观，直接就直接给出paper中的描述就可以了:
-
-插入，可以插入的位置都要考虑到。我们这里也发现了path hasing的一个缺点，没有rehash的逻辑。(个人认为这里有一个比较好的解决方法，不知道行不行得通).
+   Path hashing的基本算法和普通的hash table没有区别，算法也简单直观，直接就直接给出paper中的描述就可以了: 插入，可以插入的位置都要考虑到。我们这里也发现了path hasing的一个缺点，没有rehash的逻辑。(个人认为这里有一个比较好的解决方法，不知道行不行得通).
 
 ![pash-hasing-insert](/assets/img/pash-hasing-insert.png)
 
   其它的query，delete操作都比较简单，就不重复了。
-
-
 
 ### 0x03 缓存优化
 
@@ -74,11 +56,7 @@ typora-root-url: ../
 
 ![path-hashing-cache](/assets/img/path-hashing-cache.png)
 
-.
-
 简单有好玩的新思路，good idea。
-
-.
 
 ## 参考
 

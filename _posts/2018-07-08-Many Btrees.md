@@ -104,15 +104,15 @@ Algorithm 3 SplitLeaf(LeafNode Leaf):
 12: clflush(&leaf.entry[u]);
 13: /* Modify and flush the slot array */
 14: for (j=leaf.slot[0]; j≥pos; j - -) do
-15: leaf.slot[j+1]= leaf.slot[j];
+15:   leaf.slot[j+1]= leaf.slot[j];
 16: end for
 17: leaf.slot[pos]=u;
-18: for (j=pos-1; j≥1; j - -) do
-19: leaf.slot[j]= leaf.slot[j];
+18: for (j=pos-1; j≥1; j--) do
+19:   leaf.slot[j]= leaf.slot[j];
 20: end for
 21: leaf.slot[0]=leaf.slot[0]+1;
 22: for (j=0; j≤leaf.slot[0]; j += 8) do
-23: clflush(&leaf.slot[j]);
+23:   clflush(&leaf.slot[j]);
 24: end for
 25: mfence(); /* Ensure new entry and slot array are stable */
 26: /* Enable slot array, new entry and flush bitmap */

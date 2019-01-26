@@ -10,8 +10,6 @@ typora-root-url: ../
 
 ## Globally Synchronized Time via Datacenter Networks
 
-
-
 ### 0x00 引言 
 
  2018年最后一天，时光匆匆，来看几篇关于时间的Papers。这篇Paper是在数据中心内时间同步的一个设计。Paper中认为目前使用NTP 和 PTP都存在一些问题。这篇Paper中提出了一种叫做Datacenter Time Protocol(DTP)的时钟同步协议。在Paper中的测试环境的测试数据表明，在直接连接的情况下可以实现小雨25.6ns的误差，在6跳的时候这个数字是153.6ns,
@@ -43,8 +41,6 @@ typora-root-url: ../
 * 同步频率的问题，一般来说，越频繁的同步精确度越高，倒是overhead也越大。选择什么样的频率是一个权衡的问题。
 
 Paper中还对目前的一些解决方案入NTP、PTP和GPS也做了分析[1]。
-
-
 
 ### 0x02 基本思路
 
@@ -87,9 +83,7 @@ TRANSITION:
      gc ←max(gc + 1, {lci})
   ```
 
-![dtp-device](/assets/img/dtp-device.png)
-
-.
+![dtp-device](/assets/img/dtp-device.png).
 
 #### DTP降低误差的思路
 
@@ -114,13 +108,9 @@ A DTP-enabled device can be implemented with additional logic on top of the DTP-
 
  这里的具体信息可以参看[1].
 
-
-
 ## Exploiting a Natural Network Effect for Scalable, Fine-grained Clock Synchronization
 
-
-
-### 0x00 引言
+### 0x10 引言
 
   这篇Paper提出了同样用于时钟同步的HUYGENS算法，这个算法的目的就是不需要向DTP对硬件进行修改也能完成进度在几十个纳秒级别的时钟同步操作。它的思路存在不同，具体的算法也复杂也很多。这里就了解一下基本的思路，
 
@@ -130,7 +120,7 @@ A NetFPGA-based verification in a 128-server, 2-stage Clos data center network s
 
 .
 
-### 0x01 基本思路
+### 0x11 基本思路
 
  HUYGENS算法的3点的核心思路，这里的第一二条的目的就是为了更加精确地处理测量one-way propagation times，下面第3点是使用设备自身来降低误差，
 
@@ -157,21 +147,13 @@ Finally, HUYGENS exploits a natural network effect—the idea that a group of pa
 
 ![dtp-netword-effect](/assets/img/dtp-netword-effect.png)
 
-
-
-### 0x02 具体算法
+### 0x12 具体算法
 
  这里算法的细节比较多emmmmm，.....TODO[1]
 
-
-
-### 0x03 评估
+### 0x13 评估
 
   这里的具体信息可以参看[1].
-
- 
-
-
 
 ## 参考
 

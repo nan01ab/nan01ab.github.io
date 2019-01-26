@@ -6,11 +6,7 @@ excerpt_separator: <!--more-->
 typora-root-url: ../
 ---
 
-
-
 ## From ARIES to MARS: Transaction Support for Next-Generation Solid State Drives
-
-
 
 ### 引言
 
@@ -36,8 +32,6 @@ Once committed, the SSD hardware copies the final values from the log to their t
 
 ![mars-eaw-api](/assets/img/mars-eaw-api.png)
 
-
-
 #### Deconstructing ARIES
 
  说MARS之前，先来回顾一下ARIES的几个最明显的特点：
@@ -55,7 +49,7 @@ Once committed, the SSD hardware copies the final values from the log to their t
 
   MARS在3个主要的地方不同于ARIES，首先它依赖于存储设备，通过EAW的操作，在提交的时候应用redo log；第二，没有undo log，不过通过EAW保留来undo log能带来的好处；第三，没有transactional pages，直接操作对象。
 
-##### Updatable Log
+#### Updatable Log
 
   上面提到，MARS的log时可以修改的，这里是通过软件和硬件的共同配合来实现的，具体的细节在实现这一章。
 
@@ -65,13 +59,13 @@ MARS uses LogWrite operations for transactional updates to objects (e.g., rows o
 
 .
 
-##### Force
+#### Force
 
  ARIES不行强制将立即就将更新之后的page持久化，只是考虑到HHD的特点，避免随机写操作。但是对应随机写性能很好的NVM来说，这个随机写可以接受。所以MARS是强制的，
 
 .
 
-##### No-Steal
+#### No-Steal
 
   由于在MARS的log中总是保证数据的最新持久化版本，数据只有在Commit的时候才会被更新，所以undo log是没有必要的，所以也就没有什么steal了。
 
