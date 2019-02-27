@@ -1,16 +1,12 @@
 ---
 layout: page
-title: Understanding PCIe performance for end host networking
+title: Understanding PCIe Performance for End Host Networking
 tags: [Hardware, Operating System]
 excerpt_separator: <!--more-->
 typora-root-url: ../
 ---
 
-
-
-## Understanding PCIe performance for end host networking 
-
-
+## Understanding PCIe Performance for End Host Networking 
 
 ### 0x00 引言
 
@@ -32,8 +28,6 @@ typora-root-url: ../
      B_{rx} = \lceil sz / MPS \rceil \cdot CplHdr + sz\\
      其中MRRS,MPS每次最大能传输的量；MRdHdr,CplHdr，头部的大小；
   $$
-
-
 
 上面的一些事基本的情况，另外考虑到诸多的优化技术情况下会更加复杂。
 

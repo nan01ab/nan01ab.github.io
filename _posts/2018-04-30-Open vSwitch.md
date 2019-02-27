@@ -6,11 +6,7 @@ excerpt_separator: <!--more-->
 typora-root-url: ../
 ---
 
-
-
 ## The Design and Implementation of Open vSwitch
-
-
 
 ### 0x00 引言
 
@@ -110,13 +106,9 @@ Open vSwitch的基本架构设计：
 
 * Classifier Partitioning，基本的思路就是跳过不需要的匹配。
 
-
-
 ### 0x04 评估
 
-  这里的具体信息可以参看[1].
-
-
+  这里的具体信息可以参看[1]。
 
 ## 参考
 

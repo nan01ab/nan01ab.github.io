@@ -6,11 +6,7 @@ excerpt_separator: <!--more-->
 typora-root-url: ../
 ---
 
-
-
 ## Two Scheduling Methods 
-
-
 
 ### 0x00 引言
 
@@ -94,8 +90,6 @@ Rule 4: Once a job uses up its time allotment at a given level (regardless of ho
 MLFQ is interesting for the following reason: instead of demanding a priori knowledge of the nature of a job, it observes the execution of a job and prioritizes it accordingly. In this way, it manages to achieve the best of both worlds: it can deliver excellent overall performance (similar to SJF/STCF) for short-running interactive jobs, and is fair and makes progress for long-running CPU-intensive workloads. For this reason, many systems, including BSD UNIX derivatives, Solaris, and Windows NT and subsequent Windows operating systems use a form of MLFQ as their base scheduler.
 ```
 
-
-
   总结一下：
 
 ```
@@ -148,11 +142,7 @@ Rather, *inflation* can be applied in an environment where a group of processes 
 
  目前linux使用的默认的调度器CFS的思路就和fair-share scheduling 很相似。CFS的基本思路就是尽可能的将CPU平均分配给所有的进程，它使用一个基于计数的机制就是virtual runtime (vruntime)。进程运行的时候就会累积vtime，在一般情况下，进程vtime增加的速度是一样的，与物理上的时间成一定的比例(具体参考更加详细的资料)。
 
-.
-
   没有调度器是完美的， fair-share schedulers 存在的问题一是这样的方法与IO不怎么协调，频繁使用IO的进程可能得不到它们分到的CPU份额。另外一个问题就是如何赋予进程合适的ticket或者叫优先级。
-
-
 
 
 

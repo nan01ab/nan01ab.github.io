@@ -6,11 +6,7 @@ excerpt_separator: <!--more-->
 typora-root-url: ../
 ---
 
-
-
 ## Split-Level I/O Scheduling
-
-
 
 ### 0x00 引言
 
@@ -35,8 +31,6 @@ our Actually Fair Queuing sched- uler reduces priority-misallocation by 28×; ou
 ### 0x02 Split Framework Design
 
  传统的IO请求从被发出，然后排队、批处理、然后被正式处理会经过OS的很多的layer，这样的很显然一个只在Block Layer的IO调度器会缺乏很多的优化的空间。 Split-Level I/O Scheduling最主要的就是要解决这个问题，这里使用的方法就是IO请求相关的信息可以通过scheduling hooks获取到，而无论这个操作发生在哪一个layer。这里就主要设计到3个问题：Cause Mapping、accurate cost estimation和reordering。
-
-
 
 #### Cause Mapping
 
@@ -114,15 +108,11 @@ This design allows reads to hit the cache while protecting writes from journal e
 
 ![split-afq](/assets/img/split-afq.png)
 
-
-
 ### 0x05 评估
 
  这里详细信息还是参看原论文[1],
 
 ![split-app](/assets/img/split-app.png) 
-
-
 
 ## 参考
 

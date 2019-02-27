@@ -6,11 +6,7 @@ excerpt_separator: <!--more-->
 typora-root-url: ../
 ---
 
-
-
 ## Remote Core Locking and ffwd
-
-
 
 ### 0x00 引言
 
@@ -49,8 +45,6 @@ typora-root-url: ../
 
 * 客户端: 依次写入lock的地址、context 结构的地址、要执行函数的地址到req-i的第1、2、3个部分，然后等待第3个部分被服务方设置为NULL，代表了服务方已经将请求完成，这里可以使用SSE3 的`monitor/mwait`指令优化。
 * 服务端：轮询这些request结构的数组，当发现req-i的第3个字段不为NULL的时候，先检查lock是否是空闲的，如果是，则获取lock，然后执行函数，执行完成之后，设置第3个字段为NULL，重复以上的过程。
-
-.
 
 关于算法的详细伪代码和评估数据可以参看论文[1].
 
@@ -108,13 +102,9 @@ Consider an idealized system. Assuming no back-to-back acquisitions, the maximum
 
   委托失的执行方式需要一个请求一个响应，使用这里最大的吞吐就是1 / 2*L，着Paper中的系统上面大概就是2.5Mops。
 
-
-
 ##### Interconnect Parallelism: Store Buffers 
 
   经过上面的分析就可以发现，互联的延时是影响性能的主要因素。所以这里想办法优化这里。使用的方法就是同时使用多个请求响应来隐藏延时，这里使用了store buffer。在Broadwell CPU上面，cache-coherent stores最多支持42个执行中的stores，假设一个对应一个的话，就是42 * 2.5 = 105 Mops。
-
-
 
 ##### Demarshalling Overhead 
 
@@ -132,8 +122,6 @@ Consider an idealized system. Assuming no back-to-back acquisitions, the maximum
 基本工作方式示意图:
 
 ![rcl-ffwd](/assets/img/rcl-ffwd.png)
-
-  
 
   ffwd中每一个客户端都有一个128byte的的请求cache line pair，这个pair只能被运行在特定一个硬件线程上面运行的线程使用，只能被服务端读取。当一个客户端线程写入请求cache line pair之后，它就在特定的响应cache line pair上面子旋转。这个响应cache line pair能读和写的对象和请求的相反。服务方也像RCL一样轮询请求，不过它一次性处理一组之后在写回结果。
 
@@ -167,13 +155,9 @@ Consider an idealized system. Assuming no back-to-back acquisitions, the maximum
 
 * No atomic instructions，不使用用原子指令。
 
-.
-
 性能表现:
 
 ![rcl-ffwd-performance](/assets/img/rcl-ffwd-performance.png)
-
-
 
 ## 参考
 

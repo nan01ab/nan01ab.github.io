@@ -6,11 +6,7 @@ excerpt_separator: <!--more-->
 typora-root-url: ../
 ---
 
-
-
 ## Cuckoo Filter: Practically Better Than Bloom
-
-
 
 ### 0x00 引言
 
@@ -32,8 +28,6 @@ the cuckoo filter, a practical data structure that provides four major advantage
 ### 0x02 基本思路
 
    这个类似的思路在SOSP‘11上面的一篇文章就出现了[2]。这里在一般的的cuckoo hash table上面的一些修改就是：只存储fingerprints就可以了，为了支持cuckoo hash多个hash函数的操作，这里使用了`partial-key cuckoo hashing`的方法。
-
-
 
 #### Insert操作
 
@@ -63,8 +57,6 @@ Algorithm 1: Insert(x)
 ```
 
 这里的一个hash值就是直接以一个hash函数计算的，另外一个hash值则是fingerprint和第一个hash值的xor。这里和SILT[1]中在slot中保存另外一个hash值的方法有些区别。
-
-
 
 #### Loopup操作
 
@@ -145,8 +137,6 @@ We conclude that 4^bf must be Ω(n) to avoid a non-trivial probability of failur
 
 说明在实际应用中内存的效率可以很高。
 
-   
-
 #### Optimal Bucket Size
 
   内存的消耗主要就是下面的式子：
@@ -190,8 +180,6 @@ the space-optimal bucket size depends on the target false positive rate ε: when
 
 这里就是使用了2个hash值和每个buckets 4项的配置。
 
-.
-
 #### Semi-sorting Buckets to Save Space
 
   这里使用了一种叫做`semi-sorting buckets`的优化方法。这里使用的方式就是将一个bucket里面的数据排序，因为footprint的顺序对正确性没有影响。因为f = 4 bits and b = 4为例，排序之后值的可能取值只有3876个，这样就可以预先计算出可能的取值，保存在一个数组里面，然后在table里面保存的这个值在数组中的index，就只要12bits，一个bucket就节省了4bits。这里3876计算的方法也显然，不过算起来可能比较麻烦。不过对于学CS的人来说，一个脚本就可以了:
@@ -216,8 +204,6 @@ print(len(s))
 具体的信息参考[1]
 
 ![cuckoo-filter-space](/assets/img/cuckoo-filter-space.png)
-
-
 
 ## 参考
 

@@ -6,8 +6,6 @@ excerpt_separator: <!--more-->
 typora-root-url: ../
 ---
 
-
-
 ## BTRFS: The Linux B-Tree Filesystem 
 
 ### 0x00 引言
@@ -59,13 +57,9 @@ BtrFS几个基本的知识：
 
 * 软件RAID，BtrFS可以在文件系统层面上实现RAID，支持RAID0，1和10。
 
-
-
 ### 0x02 多设备支持
 
   Linux有自己的两个设备管理子系统：device mapper (DM) 和 software RAID subsystem (MD)。但是BtrFS要实现它自己的一些功能，需要自己来管理设备。支持软件的RAID，这个也是Checksum保存在一个单独的Btree上的一个原因。BtrFS将物理的设备划分为chunks，一个经验值就是一个Chunk的大小不要超过设备总容量的10%。BtrFS中，使用一个 chunk tree来保存逻辑的Chunk到物理的Chunk的映射。文件系统其它的部分使用的都是逻辑上的Chunk，extent使用的也是逻辑上的Chunk。这样有一个好处就是可以支持透明的数据迁移。而且一般Chunk的Btree都比较小，可以直接Cache在内存里面。另外BtrFS对于不同的Chunk可以使用不同的分配策略。
-
-
 
 ### 0x03 去碎片化和迁移
 
@@ -81,15 +75,11 @@ BtrFS几个基本的知识：
 
 * 用户可以设置autodefrag选择，BtrFS进行去碎片化的操作。另外BtrFS的Chunk的机制也给这个的实现很大的方便，
 
-
-
 ### 0x04 评估
 
   这里的信息可以参看[1]。在SSD上面的性能对比：
 
 ![btrfs-perf](/assets/img/btrfs-perf.png)
-
-
 
 ## 参考
 

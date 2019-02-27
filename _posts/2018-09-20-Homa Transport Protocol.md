@@ -6,11 +6,7 @@ excerpt_separator: <!--more-->
 typora-root-url: ../
 ---
 
-
-
 ## Homa -- A Receiver-Driven Low-Latency Transport Protocol Using Network Priorities 
-
-
 
 ### 0x00 引言
 
@@ -150,8 +146,6 @@ The most novel feature in Homa, and the key to its performance, is its use of pr
   对于unscheduled 的包，receiver提前根据最近的流量模式决定优先级，然后会将顺带地这些信息发送给sender(by piggybacking it on other packets )，sender会报送最近的每一个receiver的相关信息。
 
 ![homa-unscheduled](/assets/img/homa-unscheduled.png)
-
-
 
   对于scheduled 的包，receiver在GRANT包中给其分配优先级，sender使用这个优先级发送DATA包。这样的好处就是可以实时地适应目前的状况。这些主要是根据SRPT 。
 

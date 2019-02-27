@@ -6,11 +6,7 @@ excerpt_separator: <!--more-->
 typora-root-url: ../
 ---
 
-
-
 ##  Access Path Selection in a Relational Database Management System
-
-
 
 ### 0x00 引言
 

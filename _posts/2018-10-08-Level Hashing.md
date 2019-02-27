@@ -6,21 +6,15 @@ excerpt_separator: <!--more-->
 typora-root-url: ../
 ---
 
-
-
 ## Write-Optimized and High-Performance Hashing Index Scheme for Persistent Memory 
-
-
 
 ### 0x00 引言
 
   这篇OSDI 2018会议(就是今天开的, 2018-10-08)上的一篇关于Persistent Memory上hash index设计的文章[1]，是Path Hashing[2]的后续，也是华科在OSDI上发表的第一篇文章？？？这篇论文讨论了Path Hashing没有解决的问题，其中一个就是resize如何处理。
 
 ```
-To cost-efficiently resize this hash table, level hashing leverages an in- place resizing scheme that only needs to rehash 1/3 of buckets instead of the entire table, thus significantly reducing the number of rehashed buckets and improving the resizing performance. Experimental results demon- strate that level hashing achieves 1.4×−3.0× speedup for insertions, 1.2×−2.1× speedup for updates, and over 4.3× speedup for resizing, while maintaining high search and deletion performance, compared with state- of-the-art hashing schemes.
+To cost-efficiently resize this hash table, level hashing leverages an in- place resizing scheme that only needs to rehash 1/3 of buckets instead of the entire table, thus significantly reducing the number of rehashed buckets and improving the resizing performance. Experimental results demon- strate that level hashing achieves 1.4×−3.0× speedup for insertions, 1.2×−2.1× speedup for updates, and over 4.3× speedup for resizing, while maintaining high search and deletion performance, compared with state-of-the-art hashing schemes.
 ```
-
- .
 
 这里关于NVM之类的特点都不提了，可参考相关资料。这里只关注Lelvel Hasing的设计以及如何解决现在的问题。
 
@@ -36,19 +30,13 @@ To cost-efficiently resize this hash table, level hashing leverages an in- place
 
   每一个Hash table由2层组成，Top Level和Bottom Level，其中Top Level的大小是Bottom Level的2倍。每一个bucket里面有4个slot，这个做法和常见的一个cuckoo hash的设计差不多。
 
-
-
 #####  Two Hash Locations for Each Key 
 
    使用2个hash函数，这样一个Level里面有两个候选的buckets，加上Bottom里面的，就是4个，不过Bottom Level里面的一个bucket是被Top Level里面的2个bucket共用的。
 
-
-
 ##### Sharing-based Two-level Structure 
 
  Bottom Level里面的一个bucket是被top level里面的2个bucket共用的，这里的思想和Path Hashing里面的是一样的。不够这里的Bottom Level是上次rehash之前的Top Level。
-
-
 
 ##### At Most One Movement for Each Successful Insertion 
 
@@ -89,16 +77,14 @@ Lb 1 = hash1 (K)%(N/2), Lb 2 = hash2 (K)%(N/2) (2)
    Thus after resizing, the items in the bottom level are more than those in the top level and hence we first probe the bottom level, thus improving the search performance. 
    ```
 
-   .
 
+.
 
 ### 0x03 Low-overhead Consistency Guarantee 
 
    为了标示一个slot是否为空，这里使用了一个标志位.
 
 ![level-hashing-bucket](/assets/img/level-hashing-bucket.png)
-
-
 
  为了保证操作的一致性(关于NVM一致性的特点，可用查阅相关资料)，这里提出了一种叫做log-free consistency guarantee schemes和opportunistic log-free guarantee scheme:
 
@@ -158,8 +144,6 @@ When updating an existing key-value item, if the updated item has two copies in 
 详细数据查看论文.
 
 ![level-hasing-performance](/assets/img/level-hasing-performance.png)
-
-
 
 ## 参考
 

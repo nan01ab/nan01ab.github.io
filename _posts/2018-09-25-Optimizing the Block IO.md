@@ -6,11 +6,7 @@ excerpt_separator: <!--more-->
 typora-root-url: ../
 ---
 
-
-
 ## Optimizing the Block I/O Subsystem for Fast Storage Devices 
-
-
 
 ### 0x00 引言
 
@@ -20,13 +16,9 @@ typora-root-url: ../
 In this article, we explore six optimizations for the block I/O subsystem: polling I/O completion, eliminating context switches from the I/O path, merging discontiguous requests, reconfiguring an I/O scheduler for an SSD, resolving the read-ahead dilema, and avoiding a lock contention in a request queue. 
 ```
 
-另外，这篇Paper长达48页，所以这里这会总结改进方案的基本原理以及能获取到的好处，和存在的缺点，不具体讨论细节。
-
- Linux内核基本的Block IO处理示意图:
+另外，这篇Paper长达48页，所以这里这会总结改进方案的基本原理以及能获取到的好处，和存在的缺点，不具体讨论细节。 Linux内核基本的Block IO处理示意图:
 
 ![optimizing-io-iopath](/assets/img/optimizing-io-iopath.png)
-
-
 
 ### 0x02 目前存在的问题
 
@@ -38,8 +30,6 @@ In this article, we explore six optimizations for the block I/O subsystem: polli
 
 - 中断，目前一般使用中断的方式通知IO相关操作的消息；
 - Delayed Execution，延迟执行，对HHD中的常见优化；
-
-
 
 ##### Low Random Throughput，低随机操作的带宽
 
@@ -57,8 +47,6 @@ In this article, we explore six optimizations for the block I/O subsystem: polli
 * Reducing per-request latency，减少每个请求的延时； 
 *  Amortizing per-request latency，平摊延时；
 
-
-
 性能相关的值：
 
 * Device bandwidth，设备带宽，这个是有设备本身决定的；
@@ -66,9 +54,7 @@ In this article, we explore six optimizations for the block I/O subsystem: polli
 * Hardware latency，硬件延时，这个也是由设备本身决定的；
 * Software latency，软件延时，从发出IO请求到得到IO请求完成通知的时间。
 
-
-
-优化的6个基本方法:
+优化的6个基本阶段:
 
 ```
 The optimizations are summarized in the following:
@@ -144,9 +130,7 @@ Figure 7 depicts the difference between Spatial Merge and Temporal Merge. When 5
 (7)  (Winner) Update flag variables to notify the Losers of the I/O completions. 
 ```
 
- 利用时间上的局部性很好的提高了顺序写入的性能，解决了之前SyncPath存在的问题的同时了也利用好了SyncPath的优点。
-
-  不过STM方式也存在缺点，一个是时间合并的在IO请求较少时难以发挥。第二个是随机读的性能明显低于随机写。
+ 利用时间上的局部性很好的提高了顺序写入的性能，解决了之前SyncPath存在的问题的同时了也利用好了SyncPath的优点。不过STM方式也存在缺点，一个是时间合并的在IO请求较少时难以发挥。第二个是随机读的性能明显低于随机写。
 
 
 
@@ -155,8 +139,6 @@ Figure 7 depicts the difference between Spatial Merge and Temporal Merge. When 5
   Asynchronous Temporal Merge可以看作是STM的一个改进版本，ATM基于上面的O1 O2和O4。不同于STM，它使用请求队列阻塞机制来积累IO请求。在将IO请求插入到IO调度队列之前，先将IO请求的kernel buffer映射到DMA buffer，这一步叫做queue bouncing。在收到一个unplugging(疏通)事件时，先Temporal Merge，然后一次性地将这些请求发送出去。在检测到IO操作完成的时候，使用每个CPU的软件中断，让之前的阻塞的CPU核心参与之后的工作。
 
 ![optimizing-io-atm](/assets/img/optimizing-io-atm.png)
-
- 
 
  这样是不够的，还需要修改IO调度器的配置，默认的CFQ不能适应这里的情况，这里修改为NOOP之后才能发挥出来。这里涉及到2个参数的设置：unplug thresh 和 unplug delay。
 
@@ -182,15 +164,9 @@ HTM achieves 100% of the device bandwidth under the sequential read and the sequ
 
 ![optimizing-io-htm](/assets/img/optimizing-io-htm.png)
 
-
-
-
-
 ### 0x09 VFS-HTM: Integrating the VFS Layer with HTM 
 
-  在分析了上面随机读和混合读写的性能问题之后，发现问题出在Linux的VFS layer，主要原因在与不合适的预读区处理。将ra_pages(Linux 预读相关的数值,可参考相关资料)设置为0之后，产生的效果就是随机读取性能提高的，但是顺序读取性能下降了。
-
-  为了解决这个问题，这里就将VFS layer和 block I/O子系统集成，用一些策略去除不必要的操作。
+  在分析了上面随机读和混合读写的性能问题之后，发现问题出在Linux的VFS layer，主要原因在与不合适的预读区处理。将ra_pages(Linux 预读相关的数值,可参考相关资料)设置为0之后，产生的效果就是随机读取性能提高的，但是顺序读取性能下降了。 为了解决这个问题，这里就将VFS layer和 block I/O子系统集成，用一些策略去除不必要的操作。
 
 ```
 It clones the I/O path in the VFS layer and directs a system call to execute the new I/O path, not requiring any modification to an OS. VFS-HTM disables the context lookup feature because block prefetching for a single-threaded sequential read workload is sufficient; even without block prefetching, Temporal Merge can build a large I/O request.
@@ -199,10 +175,6 @@ It clones the I/O path in the VFS layer and directs a system call to execute the
 这样就很好地解决了之前的问题。
 
 ![optimizing-io-vfs](/assets/img/optimizing-io-vfs.png)
-
-
-
-
 
 ### 0x0A SQ: Using Double Buffering to Avoid Lock Contention 
 
@@ -228,13 +200,7 @@ In the case of ext3, the synchronous writes issued by a jour- naling thread prev
 
 ![optimizing-io-performance](/assets/img/optimizing-io-performance.png)
 
-
-
- 
-
 论文中还有一大堆的其它的内容。
-
-
 
 ## 参考
 

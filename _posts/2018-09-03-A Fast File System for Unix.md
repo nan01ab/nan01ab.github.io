@@ -6,11 +6,7 @@ excerpt_separator: <!--more-->
 typora-root-url: ../
 ---
 
-
-
 ## A Fast File System for Unix 
-
-
 
 ### 0x00 引言
 
@@ -51,9 +47,7 @@ How can we organize file system data structures so as to improve per- formance? 
 
 ![ffs-cylinder](/assets/img/ffs-cylinder.png)
 
-​    [2]中的这一幅图很好的表达了这种思想。
-
-​     值得注意的是现在的磁盘已经获取不到相关的物理信息了，所以现在的一些FS使用的方法是将磁盘分为block group，每一个group是在磁盘上是连续的。
+​    [2]中的这一幅图很好的表达了这种思想。值得注意的是现在的磁盘已经获取不到相关的物理信息了，所以现在的一些FS使用的方法是将磁盘分为block group，每一个group是在磁盘上是连续的。
 
 ```
 +--------------------+-------------------+----------------------+

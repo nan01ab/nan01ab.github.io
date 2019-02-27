@@ -6,11 +6,7 @@ excerpt_separator: <!--more-->
 typora-root-url: ../
 ---
 
-
-
 ## Amazon Aurora: On Avoiding Distributed Consensus for I/Os, Commits, and Membership Changes 
-
-
 
 ### 0x00 引言
 
@@ -108,10 +104,6 @@ Let us now consider what happens if E also fails while we are replacing F with G
 *  mini-transactions (MTRs)，
 *  Protection Group Minimum Read Point LSN (PGMRPL)，
 * Consistency Point LSNs，
-
-
-
-
 
 ## 参考
 

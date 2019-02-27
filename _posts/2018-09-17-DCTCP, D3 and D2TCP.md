@@ -6,17 +6,11 @@ excerpt_separator: <!--more-->
 typora-root-url: ../
 ---
 
-
-
 ## Datacenter TCP, Deadline Driven Delivery and Deadline-aware Datacenter TCP
-
-
 
 ### 0x00 引言
 
-  这篇总结包含了3篇Paper的内容，一篇是SIGCOMM 2010上的DCTCP，一篇是SIGCOMM 2011上的Deadline Driven Delivery，还有一篇是SIGCOMM 2012上面的D2TCP。前者将的是如何利用**Explicit Congestion Notification** (**ECN**)解决数据中心网络中TCP的一些问题，第二个是如何加入deadline的优化，后者是前2者的优化。
-
-  这里只是简单地介绍。
+  这篇总结包含了3篇Paper的内容，一篇是SIGCOMM 2010上的DCTCP，一篇是SIGCOMM 2011上的Deadline Driven Delivery，还有一篇是SIGCOMM 2012上面的D2TCP。前者将的是如何利用**Explicit Congestion Notification** (**ECN**)解决数据中心网络中TCP的一些问题，第二个是如何加入deadline的优化，后者是前2者的优化。这里只是简单地介绍。
 
 
 
@@ -61,29 +55,19 @@ ECN还有更多的细节，可参考相关资料。
 α ← (1 − g) × α + g × F
 ```
 
-F为最新窗口里面被标记的笔记，g时一个0到1之间的比例值，这个和RTT的时间估计类似。
-
-然后使用:
+F为最新窗口里面被标记的笔记，g时一个0到1之间的比例值，这个和RTT的时间估计类似。然后使用:
 
 ```
 cwnd ← cwnd × (1 − α/2)
 ```
 
-来更新cwnd。
-
-.
-
-效果的部分数据:
+来更新cwnd。效果的部分数据:
 
 ![dctcp-results](/assets/img/dctcp-results.png)
 
-
-
 ### 0x04 Deadline Driven Delivery 
 
-  D3的出现时为了解决DCTCP中的deadline的问题，使用的时带宽分配的方式。每一个RTT内，发送方都计算需要在deadline之前发送完数据的带宽，然后把这个信息放进包里面。交换机在收到了这样的信息之后，使用贪婪的方式分配带宽：
-
- 对于有deadline的流，就在平均共享的带宽上加上发送方需要的带宽的值，没有，则就选择平均分配的带宽:
+  D3的出现时为了解决DCTCP中的deadline的问题，使用的时带宽分配的方式。每一个RTT内，发送方都计算需要在deadline之前发送完数据的带宽，然后把这个信息放进包里面。交换机在收到了这样的信息之后，使用贪婪的方式分配带宽：对于有deadline的流，就在平均共享的带宽上加上发送方需要的带宽的值，没有，则就选择平均分配的带宽:
 
 ```
 • For a deadline flow with desired rate r, a = (r+fs), where fs is the fair share of the spare capacity after satisfying deadline flow requests.
@@ -99,10 +83,6 @@ The rate allocation description above assumes the router has the rate requests f
 结果的部分数据：
 
 ![dctcp-d3-results](/assets/img/dctcp-d3-results.png)
-
-
-
-
 
 ### 0x05 D2TCP
 
@@ -138,9 +118,7 @@ w = w * (1 - p/2) if p > 0,
   = w + 1, if p = 0
 ```
 
- 这里可以看出来，如果没有被标记的包，a = 0，这样p就是0，行为和正常TCP的行为一样，如果a = 1，那么计算处理啊的w就是正常情况下的一半。具体的d如何处理可参加论文。
-
- Famma-correction函数的示意图:
+ 这里可以看出来，如果没有被标记的包，a = 0，这样p就是0，行为和正常TCP的行为一样，如果a = 1，那么计算处理啊的w就是正常情况下的一半。具体的d如何处理可参加论文。Famma-correction函数的示意图:
 
 
 
@@ -149,8 +127,6 @@ w = w * (1 - p/2) if p > 0,
   具体分析这里省略了。结果的部分数据:
 
 ![d2tcp-results](/assets/img/d2tcp-results.png)
-
-.
 
 ## 参考
 

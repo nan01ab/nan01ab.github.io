@@ -6,11 +6,7 @@ excerpt_separator: <!--more-->
 typora-root-url: ../
 ---
 
-
-
 ## Flash-based SSDs 
-
-
 
 ### 0x00 引言
 
@@ -22,8 +18,6 @@ typora-root-url: ../
 
    SSD中分为2级的结构，blocks常见的大小是128KB 256KB，另外一个是Page，最常见的大小是4KB。SSD中更加基本的结构是transistor ，一个transistor 可以存储1 2 3 4bits(目前最多一般只有4个)的信息。一个transistor 里面bit越多，性能越差，寿命越短(相对而言，在同样的技术条件下)。
 
-
-
 ##### 基本操作
 
  Flash的基本操作有3个:
@@ -31,8 +25,6 @@ typora-root-url: ../
 * Read(page):  读取一个page的数据，这个是SSD比HHD的优点之一，随机读的性能远高于HHD；
 * Erase (a block): 很不幸的是，这个是Flash-based SSD的最大最麻烦的一个问题，也极大地影响了SSD和其控制器的设计。在一个page被program之前，SSD必须擦除page所在的整个块。这个是由于SSD存储的原理决定的。
 * Program (a page): 将数据写入到一个已经擦除的page中。
-
-.
 
 ### 0x02 FTL
 
@@ -43,8 +35,6 @@ The typical lifetime of a block is currently not well known. Manufac- turers rat
 ```
 
  所以，频繁地写入一个地方会导致SSD很快的损失寿命，这个就是SSD主控要解决的问题之一。SSD修改一个page里面的数据时，并不能直接修改，只能读出原来的数据，修改之后写入新的块。这样的话，物理上的块就不能被直接拿来用，直接使用逻辑上的page。这个也是FTL要实现的功能。
-
-.
 
 ### 0x03 A Log-Structured FTL 
 
@@ -92,11 +82,7 @@ To remedy this problem, the FTL must periodically read all the live data out of 
 
 ### 0x06 另外一个问题
 
-   这里可以看到SSD内部也是Log-Structured的，对于现在OS的FS来说，大部分都是日志式的文件系统，也适用log来保证cras时的完整性，对于现在的存储系统来说(比如key-value的Level DB, RockDB or常见的数据如MySQL, PostgreQL)，也使用log来保证数据持久化。
-
-  这样一层层的下来，就会做了很多额外的工作。这里就出现了Open Channel SSD，可以在软件层面控制FTL的一些功能，关于这个可以看看[2].
-
-
+   这里可以看到SSD内部也是Log-Structured的，对于现在OS的FS来说，大部分都是日志式的文件系统，也适用log来保证cras时的完整性，对于现在的存储系统来说(比如key-value的Level DB, RockDB or常见的数据如MySQL, PostgreQL)，也使用log来保证数据持久化.  这样一层层的下来，就会做了很多额外的工作。这里就出现了Open Channel SSD，可以在软件层面控制FTL的一些功能，关于这个可以看看[2].
 
 ## 参考
 

@@ -6,11 +6,7 @@ excerpt_separator: <!--more-->
 typora-root-url: ../
 ---
 
-
-
 ## Linux Block IO: Introducing Multi-queue SSD Access on Multi-core Systems 
-
-
 
 ### 0x00 引言
 
@@ -70,9 +66,7 @@ Software 和 Hardware之间的队列不一定是一一对应的关系。Software
 
  现在的IO-Scheduling想尽办法地将随机操作转化为顺序操作，所以要做很多的额外的工作。这里的实现方式不同，在Hardware Dispatch Queues上面的IO请求，使用的是简单的FIFO的策略。
 
-  与此同时，为了在HHD之类的硬件上or保持兼容性等的原因。请求全局的重排序也是可以在Mutil-Queue中实现的，实现的位置在Software Staging Queues。
-
-  对于现在默认的保证公平的IO调度器(就是CFQ IO调度器)，是在IO性能不足下的一种资源分配策略，而如果是高速的存储硬件，IO性能是充足的，也就不需要复杂的调度策略。这里Paper中也没有把问题说死：
+  与此同时，为了在HHD之类的硬件上or保持兼容性等的原因。请求全局的重排序也是可以在Mutil-Queue中实现的，实现的位置在Software Staging Queues。对于现在默认的保证公平的IO调度器(就是CFQ IO调度器)，是在IO性能不足下的一种资源分配策略，而如果是高速的存储硬件，IO性能是充足的，也就不需要复杂的调度策略。这里Paper中也没有把问题说死：
 
 ```
 If fairness is essential, it is possible to design a scheduler that exploits the characteristics of SSDs at coarser granularity to achieve lower performance overhead. Whether the scheduler should reside in the block layer or on the SSD controller is an open issue. If the SSD is responsible for fair IO scheduling, it can leverage internal device parallelism, and lower latency, at the cost of additional interface complexity between disk and OS.
@@ -80,12 +74,10 @@ If fairness is essential, it is possible to design a scheduler that exploits the
 
 .
 
-  为了与前面的两级队列想适应，在其它方面也走出了一些优化。
+  为了与前面的两级队列相适应，在其它方面也走出了一些优化。
 
 1. tag-based completions，一个tag 是一个整数，标示出了一个IO请求在驱动submission queue中的位置。当完成这个标记后(一种指示操作?)，就意味着对应的IO操作以及完成。避免了一些搜索。
 2. 更加细粒度的统计功能，同时考虑了software queues 和 dispatch queues。也方便了blktrace之类的工具对IO的追踪操作。
-
-
 
 #### Multiqueue Impact on Device Manufacturers 
 

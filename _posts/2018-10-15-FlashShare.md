@@ -6,11 +6,7 @@ excerpt_separator: <!--more-->
 typora-root-url: ../
 ---
 
-
-
 ## FlashShare: Punching Through Server Storage Stack from Kernel to Firmware for Ultra-Low Latency SSDs 
-
-
 
 ### 0x00 引言
 
@@ -31,8 +27,6 @@ We also revise the memory controller and I/O bridge model of the framework, and 
 ### 0x01 背景知识
 
  这里的背景知识和Paper内容是强相关的而且内容比较多，所以了解这里相关的一些知识。
-
-
 
 #### 内核存储栈 
 
@@ -94,10 +88,6 @@ With Select-ISR, the CPU core can be released from the NVMe driver through a con
 
  ![fshare-accelerator](/assets/img/fshare-accelerator.png)
 
-  
-
-
-
 ### 0x04 Firmware-Level Enhancement 
 
   前面提到了通过在NVMe控制器中使用2两个SQ并优先处理延时敏感SQ的请求解决了一部分的不同类型之间请求感人的问题。不过在固件层面，这个允许还是存在，前面的背景知识里面说了SSD中是存在DRAM的Cache的，在一些高端的SSD上面这个Cache的大小能达到GB的级别，同样地，这些Cache的使用也会产生相互的影响,
@@ -118,11 +108,7 @@ In addition, the I/O patterns and locality of online applications are typically 
 
 ![fshare-performance](/assets/img/fshare-performance.png)
 
-
-
  更加详细的分析可以参看原论文。
-
-
 
 ## 参考
 

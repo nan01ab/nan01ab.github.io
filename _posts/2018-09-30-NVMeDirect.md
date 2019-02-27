@@ -6,11 +6,7 @@ excerpt_separator: <!--more-->
 typora-root-url: ../
 ---
 
-
-
 ## NVMeDirect: A User-space I/O Framework for Application-specific Optimization on NVMe SSDs
-
-
 
 ### 0x00 引言
 
@@ -31,8 +27,6 @@ SPDK也是一个类似的framework，它的缺点是只支持单一的用户和�
  下面的图基本表示出了NVMeDirect的基本架构。在NVMeDirect中，一个叫做Admin Tool的工具控制，它是拥有root权限的。它管理应用对IO队列的访问。当一个应用请求一个IO队列的时候，在通过了权限检查之后。然后会给这个应用创建一个SQ和一个CQ，在讲其加上doorbell寄存器都映射到应用的内存空间的一个区域。这样，应用就可以通过直接访问这些内存区域来对这些队列进行操作，从而实现在user-space使用IO framwork。
 
  ![nvmed-arch](/assets/img/nvmed-arch.png)
-
-
 
 ### 0x02 一些细节
 
@@ -61,10 +55,6 @@ SPDK也是一个类似的framework，它的缺点是只支持单一的用户和�
 具体参考[1]。
 
 ![nvmed-perf](/assets/img/nvmed-perf.png)
-
-  
-
-
 
 ## 参考
 

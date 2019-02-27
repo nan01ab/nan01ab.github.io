@@ -6,11 +6,7 @@ excerpt_separator: <!--more-->
 typora-root-url: ../
 ---
 
-
-
 ## Barrier-Enabled IO Stack for Flash Storage
-
-
 
 ### 0x00 引言
 
@@ -104,15 +100,11 @@ Within a transaction, JBD needs to ensure that JD is made durable ahead of JC. B
 
   等等，2333.
 
-
-
 ### 0x05 评估
 
  这里具体的信息还是参考[1]。在一些数据库的应用对性能的提升还是非常大的。
 
 ![baio-perf](/assets/img/baio-perf.png)
-
-
 
 ## 参考
 

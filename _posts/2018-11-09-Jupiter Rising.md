@@ -6,11 +6,7 @@ excerpt_separator: <!--more-->
 typora-root-url: ../
 ---
 
-
-
 ## Jupiter Rising: A Decade of Clos Topologies and Centralized Control in Google’s Datacenter Network
-
-
 
 ### 0x00 引言
 
@@ -34,15 +30,11 @@ Google的数据中心网络的发展简而言之就是使用通常的硬件和Cl
 
 ![jupiter-challenges](/assets/img/jupiter-challenges.png)
 
-
-
 ### 0x02 网络演进
 
   Google的数据中心网络的发展到这篇论文发表是一句经历了5代(Jupiter是2012开始部署的，估计到现在Google已经是这个下一代的产品了)，下面是一个总结性的表：
 
 ![jupiter-generations](/assets/img/jupiter-generations.png)
-
-
 
 #### Firehose 1.0 and Firehose 1.1
 
@@ -66,21 +58,15 @@ FH1.1的时候，Google采取了保守的做法。FH1.1和之前使用的网络�
 
 ![jupiter-fh11](/assets/img/jupiter-fh11.png)
 
-
-
 #### Watchtower
 
   在FH1.1获得成功之后，Google发展了第3代的Watchtower。主要就是利用新一代的16x10G的交换机芯片。它还使用了捆绑光纤的技术，得到了诸多的好处，如下图所示。
 
 ![jupiter-watchtower](/assets/img/jupiter-watchtower.png)
 
-
-
 ####  Saturn
 
   第4代的改进也主要是为了利用新的24x10G的交换机芯片。每一个Saturn底盘自持12个卡，这样就能提供288个端口的无阻塞交换。另外还有就是Pluto的单芯片的ToR交换机，它支持4x10G的端口为20台主机平均每台提供2Gbps带宽。对于对带宽要求更加高的情况，ToR交换机可以支持 8x10G向上的接口和16x10G 的接口为每台主机平均提供5Gbps的带宽。另外一个重要的特性就是服务器最大可以获取10Gbps的带宽。
-
-
 
 #### Jupiter
 
@@ -90,11 +76,7 @@ FH1.1的时候，Google采取了保守的做法。FH1.1和之前使用的网络�
 Each ToR chip connects to eight such MBs with dual redundant 10G links. The dual redundancy aids fast reconvergence for the common case of single link failure or maintenance. Each aggregation block exposes 512x40G (full pop) or 256x40G (depop) links towards the spine blocks. Jupiter employs six Centauris in a spine block exposing 128x40G ports towards the aggregation blocks.
 ```
 
-
-
 ![jupiter-jupiter](/assets/img/jupiter-jupiter.png)
-
-
 
 ### 0x03 软件控制
 
@@ -110,8 +92,6 @@ Each ToR chip connects to eight such MBs with dual redundant 10G links. The dual
 
 ![jupiter-firepath](/assets/img/jupiter-firepath.png)
 
-
-
 ### 0x04 一些经验
 
  另外Paper中还总结了几个在发展过程总的几条经验，
@@ -123,8 +103,6 @@ Each ToR chip connects to eight such MBs with dual redundant 10G links. The dual
   ```
 
 * 运行中断(Outages)。这里是发现的导致网络无法正常工作的几个原因: 1. 控制软件太老无法应对这么大的规模；2. 老旧的硬件会出现的未知的问题；3. 人操作配置的一些失误；
-
-
 
 ## 参考
 

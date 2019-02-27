@@ -155,7 +155,93 @@ Finally, HUYGENS exploits a natural network effect—the idea that a group of pa
 
   这里的具体信息可以参看[1].
 
+
+
+## A Scalable Ordering Primitive for Multicore Machines
+
+### 0x20 引言
+
+  这篇Paper处理的问题是多核特别是多处理器机器上面的硬件时钟同步的问题。不少的同步方法例如RLU以及一些数据库，特别是使用MVCC机制的一些数据库特别依赖于时间戳的分配。在一些情况下，这个时间戳的分配也会成为影响性能的一个因素。想TicToc[4]使用了自己的一些方法。这篇Paper提出了一个名为Ordo的解决方式，基本的思路和Spanner的TrueTime的一致的。
+
+```
+Our evaluation shows that there is a possibility that the clocks are not synchronized on two architectures (Intel and ARM) and that Ordo generally improves the efficiency of several algorithms by 1.2–39.7× on various architectures.
+```
+
+.
+
+### 0x21 基本思路
+
+Ordo的基本思路和TrueTime是一样的，也就是说在Ordo里面两个时间戳的大小的比较必须让一个超过or小于另外一个值一个BOUNDARY的值，才能明确它们之间的前后关心。而差值在这个BOUNDARY值之间的时候，只能做不确定的判断。
+
+```python
+def get_time(): # Get timestamp without memory reordering 
+    return hardware_timestamp() # Timestamp instruction
+
+def cmp_time(time_t t1, time_t t2): # Compare two timestamps 
+    if t1 > t2 + ORDO_BOUNDARY: # t1 > t2
+        return 1
+    elif t1 + ORDO_BOUNDARY < t2: # t1 < t2
+        return -1
+    return 0
+
+def new_time(time_t t): # New timestamp after ORDO_BOUNDARY
+    while cmp_time(new_t = get_time(), t) is not 1:
+        continue # pause for a while and retry
+    return new_t # new_t is greater than (t + ORDO_BOUNDARY)
+```
+
+ 这样Ordo要处理的一个主要问题及时这个ORDO_BOUNDARY的测量，Ordo必须保证这个不小于实际时钟之间的偏差。这可以简化为两个核心直接获取的时间戳差值最大的计算，
+
+```python
+runs = 100000 # multiple runs to minimize overheads 
+shared_cacheline = {"clock": 0, "phase": INIT}
+
+def remote_worker(): 
+    # 尝试多次
+    for i in range(runs):
+        while shared_cacheline["phase"] != READY: 
+            read_fence() # flush load buffer     
+        ATOMIC_WRITE(shared_cacheline["clock"], get_time()) 
+        barrier_wait() # synchronize with the local_worker
+    
+def local_worker():
+    min_offset = INFINITY 
+    # 尝试多次
+    for i in range(runs):
+        # 每次测量都会初始化，避免不同次测量的相互影响
+        shared_cacheline["clock"] = 0 
+        shared_cacheline["phase"] = READY 
+        while shared_cacheline["clock"] == 0:
+            read_fence() # flush load buffer
+        # 测量多次取最小的值
+        min_offset = min(min_offset, get_time() - shared_cacheline["clock"])
+        barrier_wait() # synchronize and restart the process
+     return min_offset
+
+def clock_offset(c0, c1):
+    # 下面两个会同时运行
+    run_on_core(remote_worker, c1) 
+    return run_on_core(local_worker, c0)
+
+def get_ordo_boundary(num_cpus):
+    global_offset = 0
+    # 测量不同核心之间的组成，取最大值
+    for c0, c1 in combinations([0 ... num_cpus], 2):
+        global_offset = max(global_offset, max(clock_offset(c0, c1), clock_offset(c1, c0)))
+    return global_offset
+```
+
+利用Ordo的API改造RLU的一个例子，多原有逻辑的改动是很小的，
+
+![ordo-rlu](/assets/img/ordo-rlu.png)
+
+### 0x22 评估
+
+  这里具体的信息可以参看[3]。
+
 ## 参考
 
 1. Globally Synchronized Time via Datacenter Networks, SIGCOMM'16.
 2. Exploiting a Natural Network Effect for Scalable, Fine-grained Clock Synchronization, NSDI'18.
+3. A Scalable Ordering Primitive for Multicore Machines, Eurosys ’18.
+4. TicToc: Time Traveling Optimistic Concurrency Control, SIGMOD 2016.
