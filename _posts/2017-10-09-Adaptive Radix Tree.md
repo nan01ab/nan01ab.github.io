@@ -20,9 +20,7 @@ typora-root-url: ../
 
 ![art-node](/assets/img/art-node.png)
 
-ART可以做到 __With 32 bit keys, for example, a radix tree using s = 1 has 32 levels, while a span of 8 results in only 4 levels.__
-
-内部 Node描述：
+ART可以做到 With 32 bit keys, for example, a radix tree using s = 1 has 32 levels, while a span of 8 results in only 4 levels.内部 Node描述：
 
 ```
 * Node4: The smallest node type can store up to 4 child pointers and uses an array of length 4 for keys and another array of the same length for pointers. The keys and pointers are stored at corresponding positions and the keys are sorted.
@@ -44,9 +42,7 @@ ART可以做到 __With 32 bit keys, for example, a radix tree using s = 1 has 32
 • Combined pointer/value slots: If values fit into point- ers, no separate node types are necessary. Instead, each pointer storage location in an inner node can either store a pointer or a value. Values and pointers can be distinguished using one additional bit per pointer or with pointer tagging.
 ```
 
- 对于inner Node，不仅仅可以表示一个串的一个字符，还可以是一个prefix，这样可以在一些情况下减少树的高度，节约内存，也可以提高缓存友好性。
-
-综合这些之后，基本的搜索算法如下：
+ 对于inner Node，不仅仅可以表示一个串的一个字符，还可以是一个prefix，这样可以在一些情况下减少树的高度，节约内存，也可以提高缓存友好性。综合这些之后，基本的搜索算法如下：
 
 ```
 search (node, key, depth) 

@@ -6,8 +6,6 @@ excerpt_separator: <!--more-->
 typora-root-url: ../
 ---
 
-
-
 ## Viewstamped Replication
 
  Viewstamped Replication(VR)是一个适用于故障-停止的异步系统中的一个关于复制的算法，发布于80年代[2]。
@@ -69,8 +67,6 @@ it is a replication protocol rather than a consensus protocol
         6. 一般情况下primary通过发送下一个PREPARE消息来通知backups确认提交，当primary长时间没有收到client的请求时，primary就会向backup发送一个⟨COMMIT v, k⟩信息来通知确认提交。v: view-number,k: commit-number 注意这里的commit-number = op-number。
         7. 当一个backup收到确认提交的信息之后，如果本地日志中有该请求的信息，则执行commit，然后递增commit-number，再更新本地client请求的结果。如果本地日志中没有，则会等到执行完更早的操作(这种情况下时落后的，有更早的操作没有完成)，backup不会回复client。
 
-
-
 ```
                              |               |              |
                     Request  |    Prepare    |  PrepareOK   |   Reply
@@ -104,8 +100,6 @@ Backup根据一定的规则判断primary故障之后，就会进入view change�
 4. 新的primary开始接受客户端请求。它还执行以前没有提交的操作，更新其client-table，并将答复client。
 5. 当其他副本收到STARTVIEW消息时，将其日志替换为消息中的日志，将op-number设置为日志中最新条目的op-number，将其view-number设置为消息中的view-number，更改状态为normal，并更新client-table中的信息。如果日志中存在非提交操作，则会向主节点发送⟨PREPAREOK v，n，i⟩消息，其中，n: op-number。 然后，它们执行之前没有执行的已知被提交的所有操作，并更新其client-table中的信息。
 
-
-
 ### Recovery 
 
  一个副本Crash之后恢复需要重新加入，对于这种情况，VR使用了Recovery Protocol:
@@ -114,8 +108,6 @@ Backup根据一定的规则判断primary故障之后，就会进入view change�
   3. 恢复中的副本只有在收到啦至少f+1个RECOVERYRESPONSE消息之后且这些消息都包含了之前的x，然后使用primary的消息更新自身，然后设置自身状态为normal，完成recovery。
 
  这个恢复协议的成本很高，因为log可能非常大，论文中说明了一种优化的方法，具体参考论文[1]。
-
-
 
 ### Reconfiguration 
 

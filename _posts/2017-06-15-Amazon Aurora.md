@@ -6,11 +6,7 @@ excerpt_separator: <!--more-->
 typora-root-url: ../
 ---
 
-
-
 ## Amazon Aurora: Design Considerations for High Throughput Cloud-Native Relational Databases 
-
-
 
 ### 引言
 
@@ -36,8 +32,6 @@ hese failures may be spread independently across nodes in each of AZ A, B and C.
 
 使用了这样的副本机制之后，Aurora可以做到：1. 一整个AZ加上另外一结点的故障不会导致数据的丢失，也不会影响到读取的可用性，2.任意2个节点or 一整个AZ的故障不会影响到写入操作。
 
-
-
 #### Segmented Storage 
 
  为了出现故障时候能影响到更加少的数据和更快的恢复，Aurora将数据分成段来管理，每一个段的大小为10GB，每6个构成一个Protection Groups (PGs) ，目前支持最大的存储空间为64TB。低层是用的Amazon EC2 的存储。
@@ -56,9 +50,7 @@ These are each replicated 6 ways into Protection Groups (PGs) so that each PG co
 
 ![aurora-mysql-io](/assets/img/aurora-mysql-io.png)
 
- FRM:  finally the metadata (FRM) files，这个的数据量比较小。
-
-而未来解决这个问题，在Aurora中，把大部分的东西都取消了，只需要写log即可。下面是一个实例图:
+ FRM:  finally the metadata (FRM) files，这个的数据量比较小。而未来解决这个问题，在Aurora中，把大部分的东西都取消了，只需要写log即可。下面是一个实例图:
 
 ![aurora-io](/assets/img/aurora-io.png)
 
@@ -96,8 +88,6 @@ These are each replicated 6 ways into Protection Groups (PGs) so that each PG co
 ### The Log Marches Forward 
 
    这里讨论的就是log的一致性的问题。
-
-  
 
 #### 几个关键的概念 
 
@@ -147,15 +137,13 @@ Once the database has established a read quorum for every PG it can recalculate 
 
 在Aurora中，没有提交事务的undo recovery的工作可以在online进行。
 
-  
+ 
 
 ### Put it All Together
 
 下面的图就表示了Aurora的整体的架构：
 
 ![aurora-view](/assets/img/aurora-view.png)
-
-
 
 这里对MySQL进行了不少的修改(具体可参考论文[1])，计算和存储分离的架构。使用 Amazon Relational Database Service (RDS)作为控制面(control plane)，RDS在每一个结点上面部署了一个agent叫做HM(Host Manager (HM))，负责监控实例的健康状况，决定是否异常，需要被替换。每一个数据实例有一个写入结点和0到多个读取的结点组成，跨AZ部署,
 
@@ -176,8 +164,6 @@ The storage control plane uses the Amazon DynamoDB database service for persiste
 具体的信息可以参考论文[1].
 
 ![aurora-performance](/assets/img/aurora-performance.png)
-
-
 
 ## 参考
 

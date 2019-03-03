@@ -91,8 +91,6 @@ typora-root-url: ../
 
 ![pcie-iommu](/assets/img/pcie-iommu.png)
 
-
-
 几点结论以及问题的可以的解决方案：
 
 ![pcie-notable](/assets/img/pcie-notable.png)

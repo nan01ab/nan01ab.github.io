@@ -6,11 +6,7 @@ excerpt_separator: <!--more-->
 typora-root-url: ../
 ---
 
-
-
 ## Memory Checkpoint
-
-
 
 ### 0x00 引言
 
@@ -146,8 +142,6 @@ end loop
     In one iteration of the checkpointing algorithm, not available maps to “1” and available maps to “0”; in the next not available maps to “0” and available maps to “1”. This allows the system to avoid a full scan to reset the stable status bits, since after the capture phase all the stable status bits are set to available, but at the beginning of the rest phase we want all the stable status bits to be set to not available.
    ```
 
-.
-
 伪代码,
 
 ```
@@ -217,8 +211,6 @@ function RunCheckpointer()
 ### 0x04 评估
 
   这里具体信息可以参看[1,2].
-
-
 
 ## 参考
 

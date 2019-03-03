@@ -6,11 +6,7 @@ excerpt_separator: <!--more-->
 typora-root-url: ../
 ---
 
-
-
 ## Let’s Talk About Storage & Recovery Methods for Non-Volatile Memory Database Systems 
-
-
 
 ### 引言
 
@@ -24,8 +20,6 @@ typora-root-url: ../
 
 ![nvm-sr-types](/assets/img/nvm-sr-types.png)
 
-
-
 #### In-Place Updates Engine(InP)
 
   InP是数据库中常见的存储策略，更新数据时就直接在原来的数据上进行。
@@ -37,8 +31,6 @@ typora-root-url: ../
 ```
 When a transaction inserts a tuple into a table, the engine first checks the table’s pool for an available slot. If the pool is empty, then the engine allocates a new fixed-size block using the allocator interface. The engine also uses the allocator interface to maintain the indexes and stores them in memory.
 ```
-
-.
 
 ##### Recovery 
 
@@ -62,9 +54,7 @@ the DBMS maintains two look-up directories at all times: (1) the current directo
 
 ##### Storage 
 
-​    CoW将directories保存在FS中，可以以一种HDD/SSD优化的给出存储，将所有的字段都内联。这样可以避免昂贵的随机访问操作。每一个数据库(表)都保存在一个单独的文件里面，Master记录总是在文件固定偏移的地方。通过使用映射到主键的方式，CoW支持次级索引。
-
-   CoW的缺点就是每次会创建新的数据拷贝，即使只是更新了部分数据。此外，垃圾回收也是一个问题。多次拷贝也带了了写操作放大的问题。
+​    CoW将directories保存在FS中，可以以一种HDD/SSD优化的给出存储，将所有的字段都内联。这样可以避免昂贵的随机访问操作。每一个数据库(表)都保存在一个单独的文件里面，Master记录总是在文件固定偏移的地方。通过使用映射到主键的方式，CoW支持次级索引。CoW的缺点就是每次会创建新的数据拷贝，即使只是更新了部分数据。此外，垃圾回收也是一个问题。多次拷贝也带了了写操作放大的问题。
 
 ##### Recovery 
 
@@ -84,8 +74,6 @@ When the DBMS comes back on-line, the master record points to the current direct
 The design for our Log engine is based on Google’s LevelDB, which implements the log-structured update policy using LSM trees.
 ```
 
-.
-
 ##### Storage 
 
   数据存储使用了LSM tree，这个就不细说了.
@@ -94,9 +82,7 @@ The design for our Log engine is based on Google’s LevelDB, which implements t
 The log-structured update approach performs well for write-intensive workloads as it reduces random writes to durable storage. The downside of the Log engine is that it incurs high read amplification (i.e., the number of reads required to fetch the data is much higher than that actually needed by the application).
 ```
 
-.
-
-#### Recovery 
+##### Recovery 
 
   Log方式恢复的方法就是从WAL重建MemTable。
 
@@ -108,25 +94,17 @@ It first replays the log to ensure that the changes made by committed transactio
 
 ### NVM-Aware Engine
 
-  上面提到的存储恢复方式都是为了DARM + HHD/SSD的存储层级结构设计的，在NVM上面有应该怎么样优化呢？
-
-一个基本的表示图，注意和上面的图的区别:
+  上面提到的存储恢复方式都是为了DARM + HHD/SSD的存储层级结构设计的，在NVM上面有应该怎么样优化呢？一个基本的表示图，注意和上面的图的区别:
 
 ![nvm-sr-nvm-aware](/assets/img/nvm-sr-nvm-aware.png)
 
-
-
 #### In-Place Updates Engine (NVM-InP) 
 
-  InP存在的一个问题就是数据重复比较多，比如数据被更新一次就会向WAL中写入一次，然后在向table存储区域中写入一次。当然，在原来的系统中这么设计时必须的。但是在NVM中，因为在NVM中，数据一旦写入到table存储区域中，数据就被持久化了，没有之前系统中不保证持久化的问题。
-
-  所以在NVM-InP中，WAL中只会记录指向tuple的指针。
+  InP存在的一个问题就是数据重复比较多，比如数据被更新一次就会向WAL中写入一次，然后在向table存储区域中写入一次。当然，在原来的系统中这么设计时必须的。但是在NVM中，因为在NVM中，数据一旦写入到table存储区域中，数据就被持久化了，没有之前系统中不保证持久化的问题。 所以在NVM-InP中，WAL中只会记录指向tuple的指针。
 
 ```
 Thus, the engine can use the pointer to access the tuple after the system restarts without needing to re-apply changes in the WAL. It also stores indexes as non-volatile B+trees that can be accessed immediately when the system restarts without rebuilding.
 ```
-
-.
 
 ##### Storage 
 
@@ -148,8 +126,6 @@ To handle transaction rollbacks and DBMS recovery correctly, the NVM-InP engine 
 
  这里可以看到， NVM-InP revery是没有redo处理过程的。
 
-
-
 #### Copy-on-Write Updates Engine (NVM-CoW) 
 
   NVM-CoW的优化点在于：
@@ -166,13 +142,9 @@ To handle transaction rollbacks and DBMS recovery correctly, the NVM-InP engine 
 We modified the B+tree from LMDB to handle modifications at finer granularity to exploit NVM’s byte addressability. The engine maintains the master record using the allocator interface to support efficient updates. When the system restarts, the engine can safely access the current directory using the master record because that directory is guaranteed to be in a consistent state.
 ```
 
-.
-
 ##### Recovery 
 
   不需要处理Recovery，只需要异步地将没有提交的数据回收即可。这个是最有趣的了。
-
-
 
 #### Log-structured Updates Engine (NVM-Log) 
 
@@ -201,8 +173,6 @@ During recovery, the NVM-Log engine only needs to undo the effects of uncommitte
 ### 评估
 
   具体的性能数据查看论文[1].
-
-
 
 ## 参考
 

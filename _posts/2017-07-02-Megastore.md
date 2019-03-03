@@ -6,11 +6,7 @@ excerpt_separator: <!--more-->
 typora-root-url: ../
 ---
 
-
-
 ## Megastore: Providing Scalable, Highly Available Storage for Interactive Services 
-
-
 
 ### 引言
 
@@ -19,8 +15,6 @@ typora-root-url: ../
 
 
 ### 高可用性和可拓展性
-
-
 
 #### 分区和局部性
 
@@ -34,11 +28,7 @@ typora-root-url: ../
 Note that we use asynchronous messaging between logically distant entity groups, not physically distant replicas. All network traffic between datacenters is from replicated operations, which are synchronous and consistent.
 ```
 
-
-
 ![megasotre-across](/assets/img/megasotre-across.png)
-
-
 
 #### 复制
 
@@ -50,25 +40,17 @@ Note that we use asynchronous messaging between logically distant entity groups,
 
 ![megastore-arch](/assets/img/megastore-arch.png)
 
-
-
-
-
 ### 概览
 
  #### API设计的哲学
 
-  API设计的哲学直讲影响到了Megastore的设计。这里总结几点如下：1. Megastore强调const透明的API，也就是说API的const要符合开发者的直觉；2. 传统的关系型数据库都很依赖于join操作，这个操作在Megastore上面是不合适的。Join在Megastore这样的基于NoSQL实现的分布式的数据库中实现存在比较多的问题，所以这里是尽量避免使用join操作。为了更好地实现操作不依赖于join，Megastore提供了能更加好控制物理布局、层级layout和声明式的非正规的存储的数据模型和模式语言。
-
-  对于必须使用join的情况，Megastore提供一种针对Megastore优化的mege join的join算法。主要的优化是在merge的阶段，这里的优化应该就是在处理多个查询的时候Entity的顺序的问题，
+  API设计的哲学直讲影响到了Megastore的设计。这里总结几点如下：1. Megastore强调const透明的API，也就是说API的const要符合开发者的直觉；2. 传统的关系型数据库都很依赖于join操作，这个操作在Megastore上面是不合适的。Join在Megastore这样的基于NoSQL实现的分布式的数据库中实现存在比较多的问题，所以这里是尽量避免使用join操作。为了更好地实现操作不依赖于join，Megastore提供了能更加好控制物理布局、层级layout和声明式的非正规的存储的数据模型和模式语言。 对于必须使用join的情况，Megastore提供一种针对Megastore优化的mege join的join算法。主要的优化是在merge的阶段，这里的优化应该就是在处理多个查询的时候Entity的顺序的问题，
 
 ```
 We provide an implementation of the merge phase of the merge join algorithm, in which the user provides multiple queries that return primary keys for the same table in the same order; we then return the intersection of keys for all the provided queries.
 ```
 
  另外一种在查找一个初始的结果之后根据这个结果来进行index查找的情况，Megastore实现了一种可并行查询的outer join的算法，优化了初始查询的结果集比较小而次级索引可以并行的情况很有利于提高性能。
-
-
 
 #### 数据模型
 
@@ -111,8 +93,6 @@ The IN TABLE User directive instructs Megastore to colocate these two tables int
 
  前面就提到了Megastore的索引有Local索引和Global的索引。前者是一个Group里面局部的消息，而且它能保证ACID的语义。Global索引的一致性是弱的，但是是跨越Group的消息。索引也是保存为Bigtable中的表，Row Key为有这个索引相关的字段组织得到的一个值，而Value就是主键。
 
-
-
 #### 事务和并发控制
 
   和一般的数据系统一样，Megastore也使用WAL，做为保证ACID特性的一个手段。和Percolator一样，Megastore也充分利用了Bigtable提供的支持储存多版本的功能，在此的基础之上实现了MVCC。在隔离的级别上面，Megastore提供current, snapshot, 和 inconsistent的读区。一个concurrent的read能够保证在这个read前面提交的写入都已经被应用了，也就是说这个read能够读取到最新的已经提交的数据。对于snapshot read，系统选择一个已经知道的最后的一个被提交了的时间戳做为读取的时间戳。inconsistent reads则直接读取最新的数据，忽略目前的情况。对于一个写入的操作来时，它总是以一个current read开始，来决定目前可以写入的位置，这里也会保证一个事务提交之前，它的变动会被写入到log之中。Log会使用Paxos来复制。一个完整的事务周期：
@@ -141,8 +121,6 @@ Queues provide transactional messaging between entity groups. They can be used f
 
    Megastore是乱序提交的，这样也就可能存在某些日志中是存在空洞的。这样Megastore必须处理这类情况。
 
-
-
 #### 读取
 
   对于一个读取来说，必须有一个副本是“赶上”了最新的数据。缺失的就必须“追赶”上来。流程：
@@ -167,8 +145,6 @@ Queues provide transactional messaging between entity groups. They can be used f
 
 ![megastore-read](/assets/img/megastore-read.png)
 
-
-
 #### 写入
 
   对于写入来说，前面提到了写操作的前面会是一个current read的读取操作。在读取操作完成之后，它基于可以知道这样的一些信息：1. 下一个没有使用的log position，2. 最后一个写入的时间戳，3. 下一次写入的leader副本。流程：
@@ -181,19 +157,13 @@ Queues provide transactional messaging between entity groups. They can be used f
 
 ![megastore-write](/assets/img/megastore-write.png)
 
-  如前文所言，Coordinators会保存数据都是最新的Group，如果没有保持最新，那么就要将其从中移除。为了保证这里写入的正确性，在提交之前必须满足下面两个条件中的一个：1. 这个写入操作被使用的副本接受了；2. 没有接受最新数据得Group从Coordinators中被移除了。
-
-  Coordinators是一个机遇Chubby的实现。这里关于Coordinators可以参考[1].
-
-
+  如前文所言，Coordinators会保存数据都是最新的Group，如果没有保持最新，那么就要将其从中移除。为了保证这里写入的正确性，在提交之前必须满足下面两个条件中的一个：1. 这个写入操作被使用的副本接受了；2. 没有接受最新数据得Group从Coordinators中被移除了。 Coordinators是一个机遇Chubby的实现。这里关于Coordinators可以参考[1].
 
 ### 评估
 
   这里的具体信息可以参考[1]，从下面的图和Spanner的论文中吐槽Megastore来看，它的latency还是比较大的：
 
 ![megastore-latency](/assets/img/megastore-latency.png)
-
-
 
 ## 参考
 

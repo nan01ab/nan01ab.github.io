@@ -6,11 +6,7 @@ excerpt_separator: <!--more-->
 typora-root-url: ../
 ---
 
-
-
 ## VL2: A Scalable and Flexible Data Center Network
-
-
 
 ### 0x00 引言
 
@@ -58,8 +54,6 @@ typora-root-url: ../
 * Embracing End Systems;
 ```
 
-.
-
 #### 横向拓展的拓扑
 
   这里和常见的系统也比较类型。ToR交换机和两个聚合交换机交换机相连。在Paper中的图(也就是下面这幅图)并没有表示出来。下面的图表示的是一个折叠的版本，可以理解为一个对称的图形从中间的对称轴对称之后的样子。但是诸多的中继交换机和聚合交换机的连接使得形成了大量的可行的路径。任何一个中继交换机失效只会损失1/n的双向的带宽。在VL2中，假设聚合交换机有D-A 个端口和中继交换机有DI 个端口,那么每层间的容量是 DI*DA/2 在乘以链路容量。另外，VL2利用了交换机的交换机到交换机的端口快于服务器到交换机的端口的速度，
@@ -79,7 +73,7 @@ Our current design uses 1G server links and 10G switch links, and the next desig
 * 地址解析和包转发，VL2使用两类IP地址，一类是交换机等网络的基础设施设备使用的IP地址，被称为 location-specific IP addresses (LAs)，而主机使用另外类型的IP地址，被称为application-specific IP addresses (AAs)。与论文[2]中的不同，在VL2中，IP地址和主机的位置是没有什么关系的。VL使用目录系统来保存名字和位置之间映射关系。
 
   ```
-  The VL2 agent running on the host intercepts this ARP re- quest and converts it to a unicast query to the VL2 directory system. The directory system answers the query with the LA of the ToR to which packets should be tunneled. The VL2 agent caches this mapping from AA to LA addresses, similar to a host’s ARP cache, such that subsequent communication need not entail a directory lookup.
+  The VL2 agent running on the host intercepts this ARP request and converts it to a unicast query to the VL2 directory system. The directory system answers the query with the LA of the ToR to which packets should be tunneled. The VL2 agent caches this mapping from AA to LA addresses, similar to a host’s ARP cache, such that subsequent communication need not entail a directory lookup.
   ```
 
 * 使用随机的路径。VL2使用Valiant Load Balancing (VLB)和ECMP两种机制来分发流量。基于流而不是包。使用随机的路径到达中继交换机之后，中继交换机使用随机的路径转发包到ToR交换机。
@@ -96,11 +90,7 @@ Our current design uses 1G server links and 10G switch links, and the next desig
 
  具体可以参看[1].
 
-
-
 ## PortLand: A Scalable Fault-Tolerant Layer 2 Data Center Network Fabric
-
-
 
 ### 0x10 引言
 
@@ -120,13 +110,10 @@ Our current design uses 1G server links and 10G switch links, and the next desig
   a 48-bit PMAC of the form pod.position.port.vmid to all directly connected hosts, where pod (16 bits) reflects the pod number of the edge switch, position (8 bits) is its position in the pod, and port (8 bits) is the switch-local view of the port number the host is connected to. We use vmid (16 bits) to multiplex multiple virtual machines on the same physical machine (or physical hosts on the other side of a bridge).
   ```
 
+
   下面的图是一个映射关系的实例。一个建立映射关系的例子如下：1. 当一台如空交换机观察到一个之前没有见过的MAC地址的时候，入口交换机根据规则为其分配一个PMAC地址，并将它的IP、AMAC和PMAC地址的映射关系保存，并且将这些信息发送给Fabric Manager；2. Fabric Manager接受到这些信息，保存起来，用于以后使用。这里需要对交换机的软件进行改动，以便于执行如 PMAC ↔ AMAC之类的动作。PortLand也使用了OpenFlow这样技术。与目的主机直接连接的交换机需要将 PMAC 地址重写为目的主机的 AMAC 地址,这样PMAC的机制对于主机来说就是透明的。当发生虚拟机迁移时，Fabric Manager会更新迁移后的新映射,并向虚拟机的原始连接的交换机发送更新报文。从而实现对虚拟机迁移的支持。
 
 ![portland-pmac](/assets/img/portland-pmac.png)
-
-
-
-
 
 ### 0x12 另外的几个部分
 
@@ -150,17 +137,11 @@ Our current design uses 1G server links and 10G switch links, and the next desig
 
   这里具体可以参看[3].
 
-
-
-
-
 ## ElasticTree: Saving Energy in Data Center Networks
 
 ### 0x20 引言
 
  这篇Paper是在[2]的基础上面的一些优化的工作，主要的优化方向就是节能。[2]中的设计好处就是提供了主机之间大量的可行的线路。但是很多时候是没有必要的。在用不到的时候可以关闭一些交换机可以达到节能的目的，在需要的时候在打开。
-
-
 
 ### 0x21 ElasticTree
 
@@ -189,8 +170,6 @@ ElasticTree本质上还是从FlatTree上面优化而来的，下面是一个Elas
 | Topo-Aware | OK      | High        | Port Counters  | Fat Tree |
 
 * 控制软件；在计算出来了结构之后，控制软件使用的是OpenFlow和NOX。作者使用OpenFlow来验证优化器给出的解决方案, 方法是直接将计算的应用程序级流路由集(application-level flow routes)推送到每个交换机, 然后生成流量,。在实时原型中, OpenFlow 还提供Traffic Matrix 、Port Counters和端口电源控制等的功能。而NOX就是一个控制平台。
-
-
 
 ### 0x22 节能分析和性能
 

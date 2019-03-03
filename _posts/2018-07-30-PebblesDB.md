@@ -6,11 +6,7 @@ excerpt_separator: <!--more-->
 typora-root-url: ../
 ---
 
-
-
 ## PebblesDB: Building Key-Value Stores using Fragmented Log-Structured Merge Trees 
-
-
 
 ### 0x00 引言
 
@@ -21,8 +17,6 @@ We evaluate PebblesDB using micro-benchmarks and show that for write-intensive w
 ```
 
  这篇Paper主要讲了2个方面的内容，一个是FLSM的数据结构，一个是在这个数据结构上面的实现的PebblesDB的Key-Value数据，这里不关心PebblesDB的实现，因为没有什么特别的东西。
-
-
 
 ### 0x01 FLSM基本思路
 
@@ -46,11 +40,7 @@ FLSM的存储布局：
   The FLSM data structure discards this invariant: each level can contain mul- tiple sstables with overlapping key ranges, so that a key may be present in multiple sstables. To quickly find keys in each level, FLSM organizes the sstables into guards (inspired from the Skip-List data structure) 
 ```
 
- FLSM的每一层都包含了多个Guards，对于这一层来说，Guards将数据范围分为了不相交的几个部分。每一个Guard对应一个key，越下层的level的gaurd越多。在更上层出现的Guards，在下面的层中都会出现，这里和Skip List很详细。可以想象一项，如果把这些Guards纵向的连起来，整个的结构就很想一个Skip List。
-
-  如果一个Guard G-i的Key为K-i，G-i+1的Key为K-i+1，那么keys范围在[Ki,K-i+1) 都会attach到G-i上面。Keys小于第一个的Guard的会存在一个特殊的哨兵Gurad下面，最后一个的Gruad的下面保存在是keys >= K-n的一些sstable。第0层是没有Gruad的，因为Key-Value的数量比较少。FLSM的层是部分有序的，Gruad之间的数据范围是没有重叠的，但是一个Gurad下面的多个sstables的数据范围是可以重叠的。
-
-
+ FLSM的每一层都包含了多个Guards，对于这一层来说，Guards将数据范围分为了不相交的几个部分。每一个Guard对应一个key，越下层的level的gaurd越多。在更上层出现的Guards，在下面的层中都会出现，这里和Skip List很详细。可以想象一项，如果把这些Guards纵向的连起来，整个的结构就很想一个Skip List。如果一个Guard G-i的Key为K-i，G-i+1的Key为K-i+1，那么keys范围在[Ki,K-i+1) 都会attach到G-i上面。Keys小于第一个的Guard的会存在一个特殊的哨兵Gurad下面，最后一个的Gruad的下面保存在是keys >= K-n的一些sstable。第0层是没有Gruad的，因为Key-Value的数量比较少。FLSM的层是部分有序的，Gruad之间的数据范围是没有重叠的，但是一个Gurad下面的多个sstables的数据范围是可以重叠的。
 
 #### Selecting Guards 
 
@@ -61,8 +51,6 @@ Much like skip lists, if a key K is selected as a guard in level i, it becomes a
 ```
 
   这里Papper中还讨论了另外的一种选择的部分。现在的部分存在的一个问题就是它没有考虑到compaction的时候分区sstabls的带来的IO成本，这里Paper没有详细讨论，只是说这个是未来的工作。
-
-
 
 #### Inserting and Deleting Guards 
 
@@ -78,11 +66,9 @@ During compaction, guard G is deleted and sstables belonging to guard G will be 
 
 ### 0x03 FLSM Operations 
 
-#### `get()`操作
+#### get()操作
 
   在memtable里面的查找操作和一般的LSM没有区别。在memtable没有查到的话，想要到各层sstables。在下面的任何一层查到了就直接返回。在具体的一层查找的时候，先对Guards进行二分查询，定位到一个Guard下面的sstabls，然后在这个Guard下面的sstables里面查着，注意这里是这个Guard下面所有的sstabls都要查找。
-
-
 
 #### 范围查询
 
@@ -92,19 +78,13 @@ During compaction, guard G is deleted and sstables belonging to guard G will be 
 ...  a binary search is performed on each sstable to identify the smallest key overall in the range. Identifying the next smallest key in the range is similar to the merge procedure in merge sort; however, a full sort does not need to be performed. When the end of range query interval is reached, the operation is complete, and the result is returned to the user. 
 ```
 
-.
-
-#### `put()操作`
+#### put()操作
 
   也是先添加到memtable，在memtable满了之后，先被添加到level 0，需要的时候进行compaction操作。这里FLSM会避免进行合并重写的操作，而是直接attach到下面一层合适的Guard下。
-
-
 
 #### 更新 & 删除  
 
   这里和LSM的操作没有很大的区别，也是添加一个包含新的updated sequence number的数据(update) 后者是一个删除的标志(delete).
-
-
 
 #### Compaction 
 
@@ -126,23 +106,16 @@ During compaction, guard G is deleted and sstables belonging to guard G will be 
 
   FLSM例外的一个优点就是这些compaction操作是很容易并行操作的，因为不同的Guard之间不会产生其它的Guard。
 
-  .
 
 ### 0x04 Limitations & Asymptotic Analysis 
 
-  通过上面的分析很容易看出来，FLSM通过放松数据的有序状态，达到更加好的写入性能。但是鱼与熊掌是不可兼得的，写入性能的提升一般就因为着读性能的降低(这里WiscKey也是同样的问题)，这里在PebblesDB里面使用了一些方法来缓解这个问题。
-
-  关于FLSM各类操作的复杂度分析，原论文有详细的论述，
-
-
+  通过上面的分析很容易看出来，FLSM通过放松数据的有序状态，达到更加好的写入性能。但是鱼与熊掌是不可兼得的，写入性能的提升一般就因为着读性能的降低(这里WiscKey也是同样的问题)，这里在PebblesDB里面使用了一些方法来缓解这个问题。关于FLSM各类操作的复杂度分析，原论文有详细的论述，
 
 ### 0x05 评估
 
 一个基本的性能信息:
 
 ![flsm-performance](/assets/img/flsm-performance.png)
-
-
 
 ## 参考
 

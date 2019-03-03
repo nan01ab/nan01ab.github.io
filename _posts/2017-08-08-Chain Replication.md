@@ -6,27 +6,19 @@ excerpt_separator: <!--more-->
 typora-root-url: ../
 ---
 
-
-
 ## Chain Replication for Supporting High Throughput and Availability 
 
   Chain Replication是一个容易理解的复制方式，primary-backup，N个服务器可以容忍N-1服务器失效。它不处理拜占庭类的错误。
 
 ![chian-replication-chain](/assets/img/chian-replication-chain.png)
 
-   上面这幅图就很容易说明了它的工作方式，更新操作发送给head，随着chain传递到tail，而查询等的操作都发送给tail。
-
-​    在client看来:
+   上面这幅图就很容易说明了它的工作方式，更新操作发送给head，随着chain传递到tail，而查询等的操作都发送给tail。在client看来:
 
 ![chain-replication-client-view](/assets/img/chain-replication-client-view.png)
-
-
 
 ### 错误处理
 
   在这里添加了一个master的服务，它用来探测服务器故障，通知服务器它的pre-decessor 和 successor 更新消息，通知client哪一个服务器是head，哪一个服务器是tail。Master自身使用Paxos来保证可靠性。
-
-
 
 #### head 故障
 
@@ -77,9 +69,7 @@ Inprocess Requests Invariant is established and T+ can begin serving as the chai
 
 ### 其它
 
-​     论文中还讨论了其它很对东西，比如这里还可以不只有一条链，可以有多条。故障之后对处理请求的影响，性能评估等等。
-
-   总的来说Chain Replication是一个比较简单明了的 Replica方式，不过感觉不是很实用。
+​     论文中还讨论了其它很对东西，比如这里还可以不只有一条链，可以有多条。故障之后对处理请求的影响，性能评估等等。总的来说Chain Replication是一个比较简单明了的 Replica方式，不过感觉不是很实用。
 
 
 

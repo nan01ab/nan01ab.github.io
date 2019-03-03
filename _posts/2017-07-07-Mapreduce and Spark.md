@@ -12,8 +12,6 @@ typora-root-url: ../
 
  这两篇Paper好像之前就看过。另外Mapreduce和Spark产生的影响还是很大的，后续的发展也很多，这里就只看看它们原始的论文里面提到的一些东西吧。Mapreduce在分布式系统中确实是一个里程碑性质的作品s，最后面相关的系统研究产生了非常大的影响。
 
-
-
 ### 编程模型
 
   Mapreduce中任务都被抽象位map和reduce两个部分，
@@ -42,8 +40,6 @@ reduce (k2,list(v2)) → list(v2)
 
  这个例子应该是非常出名了。
 
-
-
 ### 实现
 
   Mapreduce执行的方式大致上表示如下图。在Google实现Mapreduce的时候，一般的服务器还是双核的CPU、2到4GB的内存100Mb到1Gb的网卡，和今天的差别还是很大的。一般的一个Mapreduce系统是有几百or几千台的机器组成的。Mapreduce中几个点，
@@ -58,8 +54,6 @@ reduce (k2,list(v2)) → list(v2)
   Master主要负责监控Workers的状态、Map阶段输入的位置以及非空闲的Work机器的标识，通知Reduce Worker处理数据。另外容错是Mapreduce设计中重点考虑的一个部分。这里分为Master出错和Worker出错。对于前者，Mapreduce的处理方式是Master会周期性地将Master中的数据结构写入checkpoint，另外启动一个然后从checkpoint恢复。Paper中认为，Master出现失败的可能性必须低，当时的实现方式就是简单终止运行，客户端可以根据自己的需要重试操作。对于Worker的失败，Master在发现Worker一段时间没有响应之后。完成的Map任务必须重新执行，另外Map的执行的输出在Map机器的本地磁盘。而Reduce阶段的失败则不需要，因为它们的输入保存在一个全局的文件系统(应该就是GFS)。
 
 ![mapreduce-execution](/assets/img/mapreduce-execution.png)
-
-
 
 ### 优化 & 改进
 
@@ -89,13 +83,9 @@ reduce (k2,list(v2)) → list(v2)
 
 * 支持处理的时候跳过一些坏的记录。
 
-
-
 ### 性能
 
   Paper中性能的数据感觉在今天已经没有多大的意义了。
-
-.
 
 ## Resilient Distributed Datasets: A Fault-Tolerant Abstraction for In-Memory Cluster Computing
 
@@ -174,8 +164,6 @@ for (i <- 1 to ITERATIONS) {
  }
 ```
 
-.
-
 ### 实现的一些信息
 
   在论文中Spark版本的实现只用了14000多行的Scala代码。系统运行在Mesos机器管理器之上。Paper中关于Spark实现的一些信息讨论了4点，
@@ -188,15 +176,11 @@ for (i <- 1 to ITERATIONS) {
 * 内存管理，Spark支持三种的RDD存储方式：以一般的Java对象保存在内存中，系列化保存在内存中以及保存在磁盘中。第一种性能最好，但是由于JVM的一些原因这个比较消耗内存。由于内存有限，Spark也可以将RDD保存磁盘上面去，在这里也使用了常用的LRU的淘汰机制；
 * Checkpoint支持，Spark的Linage机制可以容易子在故障之后恢复数据，但是有些时候可能很消耗时间。这里Spark支持检查点的方法，并提供了相应的API。
 
-
-
 ### 评估
 
   这里的具体信息可以参看[1],
 
 ![spark-perf](/assets/img/spark-perf.png)
-
-
 
 ## 参考
 

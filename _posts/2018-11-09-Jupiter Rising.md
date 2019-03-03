@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Jupiter Rising -- A Decade of Clos Topologies and Centralized Control in Google’s Datacenter Network
+title: Jupiter Rising -- A Decade of Clos Topologies and Centralized Control
 tags: [Data Center, Network]
 excerpt_separator: <!--more-->
 typora-root-url: ../
@@ -38,7 +38,7 @@ Google的数据中心网络的发展简而言之就是使用通常的硬件和Cl
 
 #### Firehose 1.0 and Firehose 1.1
 
-Firehose 1.0的基本拓扑如下图。Firehose 1.0的设计目标是为10K级别的机器机器每台提供1Gbps的带宽。它是一个五层的设计，最上层提供8*10G的端口，只会有向下的端口。而机架的交换机TOR是连接主机和上面层的。向下是24x1GE的端口，而向上是 2x10GE的端口。中间的都是4x10G的端口。如下面的图说是，第2、3层的交换机没8台组成一个聚集块(aggregation block)，根据前面的端口的数量，它可以连接16台ToR交换机，每个ToR交换机连接20台主机，这样就是320台机器。第4、5层组成的是骨干块(spine block)，各的交换机的数量为8台和4台。有32个10G的接口接下层，
+  Firehose 1.0的基本拓扑如下图。Firehose 1.0的设计目标是为10K级别的机器机器每台提供1Gbps的带宽。它是一个五层的设计，最上层提供8*10G的端口，只会有向下的端口。而机架的交换机TOR是连接主机和上面层的。向下是24x1GE的端口，而向上是 2x10GE的端口。中间的都是4x10G的端口。如下面的图说是，第2、3层的交换机没8台组成一个聚集块(aggregation block)，根据前面的端口的数量，它可以连接16台ToR交换机，每个ToR交换机连接20台主机，这样就是320台机器。第4、5层组成的是骨干块(spine block)，各的交换机的数量为8台和4台。有32个10G的接口接下层，
 
 ```
 Each aggregation block hosted 16 ToRs (320 machines) and exposed 32x10G ports towards 32 spine blocks. Each spine block had 32x10G towards 32 aggregation blocks resulting in a fabric that scaled to 10K machines at 1G average band- width to any machine in the fabric.

@@ -73,8 +73,6 @@ As shown in the right part of Fig. 4, since all edges required by gathering has 
 
 ![powerlyra-perf](/assets/img/powerlyra-perf.png)
 
-
-
 ## 参考
 
 1. PowerLyra: Differentiated Graph Computation and Partitioning on Skewed Graphs, EuroSys'15.

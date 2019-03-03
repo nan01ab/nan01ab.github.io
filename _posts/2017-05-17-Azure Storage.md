@@ -6,8 +6,6 @@ excerpt_separator: <!--more-->
 typora-root-url: ../
 ---
 
-
-
 ### Windows Azure Storage: A Highly Available Cloud Storage Service with Strong Consistency
 
 
@@ -33,8 +31,6 @@ typora-root-url: ../
 ```
 The LS then updates DNS to allow requests to now route from the name https://AccountName.service.core.windows.net/ to that storage stamp’s virtual IP (VIP, an IP address the storage stamp exposes for external traffic).
 ```
-
-
 
 ![was-architecture](/assets/img/was-architecture.png)
 
@@ -77,8 +73,6 @@ The LS then updates DNS to allow requests to now route from the name https://Acc
 * Extent是Stream Layer中复制的单元，默认在一个Stamp里面复制三份。每一个extent被保存为一个NTFS上面的文件。Extent的目标大小文1GB，保存小文件的时候会在一个Exent保存若干个，而对于超大型的blob，则会被拆分为对个Extent来保存，这里拆分的工作在Partition Layer完成，由它复制保存这个blob和具体存储的一些信息。
 * Streams，它是一个排序的保存extent位置信息的list。每个Stream会有一个有层级的命名空间。对于Partition Layer来说，一个Stream就是一个巨大的文件。一个Stream里面只有只有最后一个extent可以进行添加操作，其余的都是不可变的。
 
-
-
 Stream Layer具体还有个更加复杂的架构，它有Stream Manager (SM)和Extent Node (EN)两个主要部分组成。
 
 ![was-stream-layer-arch](/assets/img/was-stream-layer-arch.png)
@@ -110,8 +104,6 @@ Stream Layer具体还有个更加复杂的架构，它有Stream Manager (SM)和E
 * Extent Nodes (EN)，EN复制保存Stream Manager指定的Extent的副本。它只知道Extents和Blocks的信息，对Stream并不知情。EN将Extent保存为一个文件，除了保存Block和其的chucksum之外，还保存了一个Exent Offset到Block和文件位置的映射关系，一个EN可以知道它自己保存的Exents和Blocks之外，还知道一个Extent的副本的信息。ENs之间的复制是通过复制append的Block来完成的。
 
     添加Block的时候支持一次性原子地添加多个Block。这里和GFS一样会有重复记录得问题，如果一个Client一个请求添加的操作失败的时候，重复该请求，这个时候就可能导致重复的数据Block存在，这里需要应用(这里就是Partition Layer)能够处理这样的情况。这里重复请求或者seal一个Extent的时候，会以commit-length最小的为准。
-
-
 
 #### Stream Layer Intra-Stamp Replication
 
@@ -160,9 +152,7 @@ Once the sealing is done, the commit length of the extent will never be changed.
  (e) transaction ordering and strong consistency for access to objects.
 ```
 
-在这里的一个重要的内部结构就是Object Table (OT)，可能是一个数PB级别的一个巨大的表。这么大的表是必须分区保存的。OT会被动态地划分为RangePartition。Partition Map Table 负责保存RangePartitions到partition server得映射关系，用于路由Front End的请求。
-
- 架构图：
+  在这里的一个重要的内部结构就是Object Table (OT)，可能是一个数PB级别的一个巨大的表。这么大的表是必须分区保存的。OT会被动态地划分为RangePartition。Partition Map Table 负责保存RangePartitions到partition server得映射关系，用于路由Front End的请求。架构图：
 
 ![was-partition-layer](/assets/img/was-partition-layer.png)
 
@@ -176,19 +166,13 @@ Once the sealing is done, the commit length of the extent will never be changed.
 
 * Lock Service，这个是个类似于Chubby的系统，PM的领导选举和PS的服务租约都需要用到这个lock service。这里做的方式也和使用Chubby的没有很大的不同。从上面的图中看，这里是处理Partition Layer之外的，是一个单独的lock service。
 
-
-
  RangePartition也是使用了LSM-tree来持久化保存数据，每一个RangePartition又一组的Stream组成：Metadata Stream，Commit Log Stream，Row Data Stream，Blob Data Stream。内存中的Memtable功能就是LSM-tree中的Memtable，保存最近更新的一些信息。此外还使用Index Cache来Cache index的数据，Row Data Cache缓存的就是行数据。
 
   当一个写入请求到达 RangePartition得时候，操作的信息会先被append到Commit Log 中，然后被添加到Memtable里面。这里时候就可以返回client成功的信息了。当Memtable或者Commit Log Stream达到一定的大小的时候，Memtable就会被持久化保存到row data stream中，这个时候Commit Log Stream也就可以移除了。这里也就相当于一个checkpoint，为了减少checkpo的数量，PS会定期地合并它们。
 
-
-
 ### 评估
 
   这里详细的信息参看[1].
-
-
 
 ## 参考
 

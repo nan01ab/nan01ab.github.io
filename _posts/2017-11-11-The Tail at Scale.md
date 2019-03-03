@@ -6,11 +6,7 @@ excerpt_separator: <!--more-->
 typora-root-url: ../
 ---
 
-
-
 ## The Tail at Scale
-
-
 
 ### 引言
 
@@ -31,8 +27,6 @@ typora-root-url: ../
 * Garbage collection. 这里不仅仅包括类似JVM的GC，还有SSD这类hardware的内部行为；
 * Energy management. 
 
-.
-
 key insights：
 
 ```
@@ -42,8 +36,6 @@ eliminating all sources of latency variability in large-scale systems is impract
 
 using an approach analogous to fault-tolerant computing, tail-tolerant software techniques form a predictable whole out of less-predictable parts.
 ```
-
-
 
 ##### 为什么要关注这个
 
@@ -61,8 +53,6 @@ The 99th-percentile latency for a single random request to finish, measured at t
 
   用概率论的来说这也很容易理解，虽然发生一次的概率比较低，但是重复多次要求它一次都没有发生的概率也是比较低的。
 
-
-
 ###  Design  Patterns to Enhance Tail Tolerance
 
   这个问题理解起来还是很容易的。重点在与如何解决呢？这个命题太广了，就只看看文章中给了哪些解决这些问题的模式。
@@ -73,15 +63,11 @@ The 99th-percentile latency for a single random request to finish, measured at t
    For example, in a Google benchmark that reads the values for 1,000 keys stored in a BigTable table distributed across 100 different servers, sending a hedging request after a 10ms delay reduces the 99.9th-percentile latency for retrieving all 1,000 values from 1,800ms to 74ms while sending just 2% more requests.
   ```
 
-
-
 * Tied requests. 为了解决排队导致的tail latency，这里使用的方式是给多个服务器发送请求并排队在这个服务器的队列里面，服务器之间可以更改对应任务拷贝的状态。简而言之，就是一些服务器都安排任务，谁先做谁做，还可以告诉别人不要做了。
 
   ```
    In it, sending a tied request that does cross-server cancellation to another file system replica following 1ms reduces median latency by 16% and is increasingly effective along the tail of the latency distribution, achieving nearly 40% reduction at the 99.9th-percentile latency. The second scenario is like the first except there is also a large, concurrent sorting job running on the same cluster contending for the same disk resources in the shared file system. 
   ```
-
-
 
 * Micro-partitions. 这样是解决一些负载不均衡的问题，通过使用更多比服务中的机器要多的的分区，然后在这些机器之间移动分区来解决不平衡的问题(看起来比较抽象)。文章中还是bigtable的一个例子：
 
@@ -90,15 +76,11 @@ The 99th-percentile latency for a single random request to finish, measured at t
   The BigTable distributed-storage system stores data in tablets, with each machine managing between 20 and 1,000 tablets at a time. Failure-recovery speed is also improved through micro-partitioning, since many machines pick up one unit of work when a machine failure occurs.
   ```
 
-  
-
 * Selective replication. 可以看作是Micro-partitions完善版本，简而言之就是增加热点分区的副本的数量:
 
   ```
   Google’s main Web search system uses this approach, making additional copies of popular and important documents in multiple micro-partitions. At various times in Google’s Web search system’s evolution, it has also created micro-partitions biased toward particular document languages and adjusted replication of these micro-partitions as the mix of query languages changes through the course of a typical day.
   ```
-
-  
 
 * Latency-induced probation. 这个方法和熔断的方法比较相似，就是发现了反应慢的机器之后，可以考虑应该是它or它依赖的某些东西出来异常，就可以暂时把它从服务的机器中剔除，然后测试什么时候恢复正常在重新加入.
 
@@ -106,15 +88,11 @@ The 99th-percentile latency for a single random request to finish, measured at t
    The source of the slowness is frequently temporary phenomena like interference from unrelated network- ing traffic or a spike in CPU activity for another job on the machine, and the slowness tends to be noticed when the system is under greater load. However, the system continues to issue shadow requests to these excluded servers, col- lecting statistics on their latency so they can be reincorporated into the service when the problem abates. 
   ```
 
-  
-
 * Good enough. 一些情况下，是可以接受那么有点儿不完整的结果的，接受一点不完整有时候能带来latency的降低，提高体验:
 
   ```
   In large IR systems, once a sufficient fraction of all the leaf servers has responded, the user may be best served by being given slightly incomplete (“good-enough”) results in exchange for better end-to-end latency.
   ```
-
-  
 
 * Canary requests. Canary是金丝雀的单词，这里引用的是以前的矿工经常用它来探测有毒气体。这里的含义就是先请求一部分试试看:
 
@@ -122,11 +100,7 @@ The 99th-percentile latency for a single random request to finish, measured at t
   To prevent such correlated crash scenarios, some of Google’s IR systems employ a technique called “canary requests”; rather than initially send a request to thousands of leaf servers, a root server sends it first to one or two leaf servers. The remaining servers are only queried if the root gets a successful response from the canary in a reasonable period of time. 
   ```
 
-.
-
 上面这些方法都有各自的适应环境(一句废话)。
-
-
 
 ###  参考
 

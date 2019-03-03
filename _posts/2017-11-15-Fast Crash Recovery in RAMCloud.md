@@ -6,11 +6,7 @@ excerpt_separator: <!--more-->
 typora-root-url: ../
 ---
 
-
-
 ## Fast Crash Recovery in RAMCloud 
-
-
 
 ### 引言
 
@@ -51,9 +47,7 @@ Thus, the overall approach to recovery in RAMCloud is to com-bine the disk bandw
  The best backup is the one that can read its share of the master’s segment replicas most quickly from disk during recovery. A backup is rejected if it is in the same rack as the master or any other replica for the current segment.  Once a backup has been selected, the master contacts that backup to reserve space for the segment. At this point the backup can reject the request if it is overloaded, in which case the master selects another candidate.
 ```
 
-  RAMCloud的Masters会挑选其中的一个副本为primary replica，在恢复的时候选择这一个副本，如果这个副本不能使用，就只能使用其它的副本了。
-
-  在这里，RAMCloud为提供信息给master立遗嘱使用，这里会保存一些关于资源使用的信息，称之为tablet profiles，
+  RAMCloud的Masters会挑选其中的一个副本为primary replica，在恢复的时候选择这一个副本，如果这个副本不能使用，就只能使用其它的副本了。 在这里，RAMCloud为提供信息给master立遗嘱使用，这里会保存一些关于资源使用的信息，称之为tablet profiles，
 
 ```
 RAMCloud computes wills using tablet profiles. Each tablet pro- file tracks the distribution of resource usage within a single table or tablet in a master. It consists of a collection of buckets, each of which counts the number of log records corresponding to a range of object identifiers, along with the total log space consumed by those records. Tablet profiles are updated as new log records are created and old segments are cleaned, and the master periodically scans its tablet profiles to compute a new will.
@@ -62,8 +56,6 @@ RAMCloud computes wills using tablet profiles. Each tablet pro- file tracks the 
  关于这里时如何处理的，在论文的3.9节。
 
 ![fast-recovery-profile](/assets/img/fast-recovery-profile.png)
-
-
 
 ### Failure Detection 
 
@@ -101,8 +93,6 @@ In either case, server failures are reported to the coordinator. The coordinator
 
 3. 在处理完成之后，开始为这些数据提供服务，并清理crash服务器占用的资源。在recovery master恢复完成这里的数据之后，就通知coordinator可以将原来的master占用的资源清理了。到了这个时间节点，这些recovery master就可以为client提供相关的服务了。
 
-
-
 ### Consistency 
 
   这里的主要的内容不在这篇论文里面，在这篇论文发表之后的另外一篇论文[2]，  这里主要有2点：1. 在被怀疑crash的服务器(sick master)的数据被恢复之前，必须停止服务，因为如果时被误以为失败的话，还在提供服务的话，被恢复的数据就不能保证时最新的。2. 保证在恢复操作的时候，只有一个coordinator可以操作集群的配置。
@@ -123,15 +113,9 @@ Once a backup with a replica of the active segment has been contacted, it will r
 * Multiple Failures，这里处理的方式就是单独处理每一个的失败，这里要处理的问题就是备份服务器的primary也故障了，这里就只能使用其它的备份了。
 * Cold Start，这里处理的问题就是整个集群断电的故障。这一班的情况下，一个备份服务区在crash之后恢复会丢弃它备份的数据，因为前面已经提到了这个时候它的数据已经被其它的副本替代了。但是这里，它必须先向coordinator请求指示。coordinator会来获取它保存的数据的信息。
 
-
-
 ### 评估
 
   这里详细数据可以参考[1]。
-
-
-
-
 
 ## 参考
 

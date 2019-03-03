@@ -6,11 +6,7 @@ excerpt_separator: <!--more-->
 typora-root-url: ../
 ---
 
-
-
 ## Scalable Kernel TCP Design and Implementation for Short-Lived Connections 
-
-
 
 ### 引言
 
@@ -91,13 +87,9 @@ In short, Fastsocket-aware VFS internally customizes VFS for sockets to improve 
 
 .
 
-#### 评估
+### 评估
 
  ![fastsocket-performance](/assets/img/fastsocket-performance.png)
-
-
-
-
 
 ## 参考
 

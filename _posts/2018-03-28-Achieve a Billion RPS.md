@@ -88,10 +88,6 @@ typora-root-url: ../
 
 ![mica-future-platform](/assets/img/mica-future-platform.png)
 
-
-
-
-
 ## 参考
 
 1. Sheng Li, Hyeontaek Lim, Victor W. Lee, Jung Ho Ahn, Anuj Kalia, Michael Kaminsky, David G. Andersen, Seongil O, Sukhan Lee, and Pradeep Dubey. 2016. Full-stack architecting to achieve a billion-requests-per- second-throughput on a single key-value store server platform. ACM Trans. Comput. Syst. 34, 2, Article 5 (April 2016), 30 pages. DOI: http://dx.doi.org/10.1145/2897393.

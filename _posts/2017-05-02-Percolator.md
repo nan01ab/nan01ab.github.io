@@ -6,11 +6,7 @@ excerpt_separator: <!--more-->
 typora-root-url: ../
 ---
 
-
-
 ## Large-scale Incremental Processing Using Distributed Transactions and Notifications 
-
-
 
 ### 引言
 
@@ -53,9 +49,7 @@ bool UpdateDocument(Document doc) {
 }
   ```
 
-上面是Paper中使用Percolator的一小段代码，这里如果Commit()返回的是false就表示事务执行失败了。在给定的一个时间戳，Percolator能提供稳定的一个快照读取。在使用一个时间戳读取了数据之后，一个事务可以以一个玩一些的时间戳来执行写入操作。这个SI隔离很好的解决了写-写之间的冲突，即使时两个事务写入同一个cell(Bigtable中的cell)，大部分时候都能保证它们能都提交成功。这里Percolator并不提供serializability级别的隔离级别。
-
-下面的表是Percolator使用到的一些字段：
+上面是Paper中使用Percolator的一小段代码，这里如果Commit()返回的是false就表示事务执行失败了。在给定的一个时间戳，Percolator能提供稳定的一个快照读取。在使用一个时间戳读取了数据之后，一个事务可以以一个玩一些的时间戳来执行写入操作。这个SI隔离很好的解决了写-写之间的冲突，即使时两个事务写入同一个cell(Bigtable中的cell)，大部分时候都能保证它们能都提交成功。这里Percolator并不提供serializability级别的隔离级别。下面的表是Percolator使用到的一些字段：
 
 | Column   | Use                                                          |
 | -------- | ------------------------------------------------------------ |
@@ -64,8 +58,6 @@ bool UpdateDocument(Document doc) {
 | c:data   | Stores the data itself；保存的就是数据本身；                 |
 | c:notify | Hint: observers may need to run，用于标示，具体参考论文[1]的2.4节； |
 | c:ack_O  | Observer “O” has run ; stores start timestamp of successful last run； |
-
-
 
 #### 伪代码+分析
 
@@ -153,8 +145,6 @@ class Transaction {
     }
 }; // class Transaction
 
-
-
 ```
 
  事务执行Commit的第一个的第一个阶段就是Prewrite，这里的目的就是尝试锁住所有的要写入的cell，这里来看一些Prewrite的操作:
@@ -224,7 +214,7 @@ class Transaction {
 Percolator handles this by designating one cell in every transaction as a synchronizing point for any commit or cleanup operations. This cell’s lock is called the primary lock. Both A and B agree on which lock is primary (the location of the primary is written into the locks at all other cells). Performing either a cleanup or commit operation requires modifying the primary lock; since this modification is performed under a Bigtable row transaction, only one of the cleanup or commit operations will succeed. 
 ```
 
-这里的提交和清理的操作都是要现在primaty的操作上面达成一致，也就是对primary的lock进行修改，这里依赖的是Bigtable的单行事务。用于行里面的c:lock实际上保存的就是primary的位置信息，所以一个Get操作想要去清理这个锁的时候，它这样通过这里获取到这个锁的位置，在上面提交的代码中，在提交之前也是要先检查这个在start_ts_时刻的锁释放存在，如果这个时候发现不存在了，那么就是被其它的事务清理掉了，操作只能返回false。在前面的Commit()的代码中，在检查lock通过之后，它是会清理这个primary上面的锁的，如果这读的事务发现primary的锁还存在，它就可以将这些锁安全的清楚(这里只是安全地清除，还是存在一定的可能让一个正在准备提交的事务提交失败的)
+  这里的提交和清理的操作都是要现在primaty的操作上面达成一致，也就是对primary的lock进行修改，这里依赖的是Bigtable的单行事务。用于行里面的c:lock实际上保存的就是primary的位置信息，所以一个Get操作想要去清理这个锁的时候，它这样通过这里获取到这个锁的位置，在上面提交的代码中，在提交之前也是要先检查这个在start_ts_时刻的锁释放存在，如果这个时候发现不存在了，那么就是被其它的事务清理掉了，操作只能返回false。在前面的Commit()的代码中，在检查lock通过之后，它是会清理这个primary上面的锁的，如果这读的事务发现primary的锁还存在，它就可以将这些锁安全的清楚(这里只是安全地清除，还是存在一定的可能让一个正在准备提交的事务提交失败的)
 
 ```c++
     bool Get(Row row, Column c, string* value) {
@@ -293,8 +283,6 @@ Percolator handles this by designating one cell in every transaction as a synchr
 | Bob  | 8: ;7:$3; 6:   ;5:$10 | 8: ; 7: I am primary; 6:  ; 5: | 8; data@7; 7: ;6: data@5;  5: |
 | Joe  | 8: ;7: $9; 6:   ;5:$2 | 8: ;7: ; 6:  ; 5:              | 8: data@7; 7: ;6: data@5 ; 5: |
 
-
-
 ### 时间戳
 
   前面可以看到每一个的事务都会请求Oracle两次。这里使用的一个优化的方法也是在类似时间戳or计数器分配的一个常用的优化的方法：每一都分配一段时间戳，而不是一个，当系统崩溃的时候，恢复就使用上次被分配出去的更大的值，即使上次被分配出去并没有使用完。由于Oracle可以保障给出的时间戳都是单调递增的，Percolator这里可以保证一个Get操作可以返回所有在它获取的时间戳前提交的事务的数据，
@@ -309,13 +297,9 @@ Since T-W < T-R, we know that the timestamp oracle gave out TW before or in the 
 
   这里时Percolator中一个非常有用的一个功能，可以在某些数据改变的时候触发某些擦走。这里也是上面提到的`c:notify`列的起作用的地方，就是用于加快查找这个修改了的数据。不过这里与Percolator事务实现没有太大的关系。这里就没有总结了。
 
-
-
 ### 评估
 
   具体信息可以参考论文[1].
-
-
 
 ## 参考
 

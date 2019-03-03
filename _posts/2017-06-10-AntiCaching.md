@@ -6,11 +6,7 @@ excerpt_separator: <!--more-->
 typora-root-url: ../
 ---
 
-
-
 ## Anti-Caching: A New Approach to Database Management System Architecture 
-
-
 
 ### 引言
 
@@ -32,8 +28,6 @@ We implemented a prototype of our anti-caching proposal in a high-performance, m
 
  系统运行的时候，数据库会监控系统的内存使用情况，当内存使用达到一定的阈值之后，系统会选择一个”冷“的数据块驱逐到磁盘上面。由于一般的内存数据的数据都不像传统的数据一样时按page组织的。未来支持anti-cacing，这里将要被驱逐出去的数据组织成固定大小的数据块。系统会保存这些被驱逐出去的数据块的信息，在一个事务需要这些数据的时候，数据库会先通过一个“pre-pass” 模式去确定这个事务会访问哪些元组，当这个工作完成的时候，系统先将这个事务abort。然后再将这些在磁盘上面的数据取回来，在重启这些事务。在传统的数据库架构中，在buffer pool中的数据除了暂时还有持久化到磁盘上面的部分数据(这部分数据也在log中)，都是既在buffer pool中，又在磁盘上面。而anti-cahing架构数据库的数据同一时间只会在一个地方，不会同时存在磁盘和内存里面。
 
-
-
 ### 系统模型
 
 #### 存储架构 
@@ -43,8 +37,6 @@ We implemented a prototype of our anti-caching proposal in a high-performance, m
 1. 一个磁盘上面的hash table叫做Block Table，保存着被驱逐出去的数据块。每个数据块的大小固定，有一个4bytes的数组标示。每一个块的header保存了来自哪一个table以及被创建的时间等的信息；
 2. 一个在内存中的Evicted Table，保存着元组到数据块的映射信息，它存在的目的就是需要将数据取回的时候知道去哪一个数据块读取数据；
 3. 一个内存中的LRU Chain，这个chain的信息被用于确定哪些数据时冷数据。在Paper中的实现中，这个chain被组织为double list，相关的结构被直接保存在元祖的header里面，而不是用分开的数据结构保存。为了减少系统的overhead，不是所有的事务都被记录访问信息，系统只会挑选其中的一部分来组织LRU的信息。
-
-
 
 #### Block Eviction 
 
@@ -112,8 +104,6 @@ For some transactions, it is not possible for the DBMS to discover all of the da
 ### 评估
 
   这里的详细信息可以参看原论文。
-
-
 
 ## 参考
 

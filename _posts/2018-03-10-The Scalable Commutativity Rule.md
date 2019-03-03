@@ -6,51 +6,33 @@ excerpt_separator: <!--more-->
 typora-root-url: ../
 ---
 
-
-
 ## The Scalable Commutativity Rule: Designing Scalable Software for Multicore Processors 
-
-
 
 ### 0x00 引言
 
-   CPU的单核性能增长现在已经慢到不行，核心数量的增长还是很快的。如何改变软件让其适应越来越多的核心的CPU，这是个问题，233。
-
-   API的设计(the design of the software interface )对系统可可拓展性有着很大的影响，一个例子就是open这个系统调用。POSIX标准规定返回的文件描述符必须是空闲的里面最小的，实际上对于这个API来说，文件描述符只要能保证是唯一的就行了，完全没必要有这样的要求。就是当初这样一个设定，导致了可拓展性的问题。在[MegaPipe](http://www.eecs.berkeley.edu/%7Esylvia/papers/osdi2012_megapipe.pdf)等之类的设计中都抛弃了这一个设定。
+   CPU的单核性能增长现在已经慢到不行，核心数量的增长还是很快的。如何改变软件让其适应越来越多的核心的CPU，这是个问题，233。API的设计(the design of the software interface )对系统可可拓展性有着很大的影响，一个例子就是open这个系统调用。POSIX标准规定返回的文件描述符必须是空闲的里面最小的，实际上对于这个API来说，文件描述符只要能保证是唯一的就行了，完全没必要有这样的要求。就是当初这样一个设定，导致了可拓展性的问题。在[MegaPipe](http://www.eecs.berkeley.edu/%7Esylvia/papers/osdi2012_megapipe.pdf)等之类的设计中都抛弃了这一个设定。
 
 ```
 This forces the kernel to coordinate file descriptor allocation across all threads, even when many threads are opening files in parallel. This choice simplified the kernel interface during the early days of Unix, but it is now a burden on implementation scalability. It’s an unnecessary burden too: a simple change to allow open to return any available file descriptor would enable the kernel to choose file descriptors scalably.
 ```
 
-.
-
 ### 0x01 A Rule for Interface Design 
 
-​    这篇文章就给出了一种新的设计可拓展性的软件接口的方法，这个方法的核心就是:
+   这篇文章就给出了一种新的设计可拓展性的软件接口的方法，这个方法的核心就是:
 
 ```
   At the core of our approach is what we call the scalable commutativity rule: in any situation where several operations commute (meaning there’s no way to distinguish their execution order using the interface), there exists an implementation that is conflict free during those operations (meaning no core writes a cache line that was read or written by another core). Since conflict-free operations empirically scale, this implementation scales. Thus, more concisely, whenever interface operations commute, they can be implemented in a way that scales.
 ```
 
-  在任何情况下，都存在一个实现可以使得所需要的操作是没有相互冲突的。很显然，操作指令没有冲突就以为着容易拓展。
-
-  但是这个道理说起来谁都懂，可是能做到没有冲突就没有冲突吗？这个正是设计的难点所在，如何找到这样的一种设计。
-
-
+  在任何情况下，都存在一个实现可以使得所需要的操作是没有相互冲突的。很显然，操作指令没有冲突就以为着容易拓展。 但是这个道理说起来谁都懂，可是能做到没有冲突就没有冲突吗？这个正是设计的难点所在，如何找到这样的一种设计。
 
 ### 0x02 SIM Commutativity  
 
-   Paper中都一大段一大段抽象的分析证明，这里还是不要有这些东西了。这里将里面最核心的东西提炼出来。
-
-  文中定义了一个可交换的原则，简而言之就是操作的顺序的可交换性，操作顺序和最终的结果直接的关系。最好的场景就是最终结果和操作的顺序无关。这种情况下实现可拓展是最可行的。设计这样的接口之前，我们要先知道不满足这个原则的地方在哪里。
-
-   Paper设计实现了COMMUTER工具来分析接口之间的冲突情况。利用这个和另外一个叫做TESTGEN的工具，可以生存测试冲突覆盖率的测试用例。
+   Paper中都一大段一大段抽象的分析证明，这里还是不要有这些东西了。这里将里面最核心的东西提炼出来。文中定义了一个可交换的原则，简而言之就是操作的顺序的可交换性，操作顺序和最终的结果直接的关系。最好的场景就是最终结果和操作的顺序无关。这种情况下实现可拓展是最可行的。设计这样的接口之前，我们要先知道不满足这个原则的地方在哪里。Paper设计实现了COMMUTER工具来分析接口之间的冲突情况。利用这个和另外一个叫做TESTGEN的工具，可以生存测试冲突覆盖率的测试用例。
 
 ```
 To capture different conflict conditions as well as path conditions, we introduce a new notion called conflict coverage. Conflict coverage exercises all possible access patterns on shared data structures: looking up two distinct items from different operations, looking up the same item, and so forth.
 ```
-
-.
 
 ### 0x03 实际例子
 
@@ -60,11 +42,7 @@ To capture different conflict conditions as well as path conditions, we introduc
 
  ![scr-sv6-fs](/assets/img/scr-sv6-fs.png)
 
-
-
    感兴趣这是如何找到的吗。这里就需要2篇paper论文的时间，论文[3]，和论文[4]，[4]的结果发表在了SOSP2017上，基本的设计思想来自这篇论文，具体实用的基本方法来自论文[2]。后面会有关于这2篇论文的。
-
-
 
 ### 0x04 Guidelines
 
@@ -84,8 +62,6 @@ To capture different conflict conditions as well as path conditions, we introduc
   For example, writing to a pipe must deliver SIGPIPE immediately if there are no read FDs for that pipe, so pipe writes do not commute with the last close of a read FD. This requires aggressively tracking the number of read FDs; a relaxed specification that promised to eventually deliver the SIGPIPE would allow implementations to use more scalable read FD tracking.
   ```
 
-.
-
  4个设计可拓展接口的设计模式:
 
 * Layer scalability，分层可拓展性。使用容易拓展的方式，比如 linear arrays, radix trees, and hash tables 就比balanced trees 容易拓展。
@@ -93,13 +69,9 @@ To capture different conflict conditions as well as path conditions, we introduc
 * Precede pessimism with optimism，先乐观后悲观。和OCC的思想比较相似。
 * Don’t read unless necessary，不要读取不必要的东西。
 
-
-
 ### 0x05 总结
 
   这篇论文的感觉就是很抽象，文章长达47页。
-
-
 
 ## 参考
 

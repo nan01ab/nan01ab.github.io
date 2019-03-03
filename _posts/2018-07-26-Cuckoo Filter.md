@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Cuckoo Filter -- Practically Better Than Bloom
+title: Cuckoo Filter and Cuckoo Switch
 tags: [Data Structure]
 excerpt_separator: <!--more-->
 typora-root-url: ../
@@ -102,9 +102,7 @@ Note that, to delete an item x safely, it must have been previously inserted. Ot
 
 ### 0x03 一些证明
 
- 算法是很简单容易理解的，这里主要是要证明一些东西。
-
-下面是会使用到的一些符号：
+ 算法是很简单容易理解的，这里主要是要证明一些东西。下面是会使用到的一些符号：
 
 ```
 ε 	target false positive rate f fingerprint length in bits
@@ -205,8 +203,17 @@ print(len(s))
 
 ![cuckoo-filter-space](/assets/img/cuckoo-filter-space.png)
 
+
+
+## Scalable, High Performance Ethernet Forwarding with CUCKOOSWITCH
+
+### 0x00 引言
+
+
+
 ## 参考
 
 1. Cuckoo Filter: Practically Better Than Bloom, CoNEXT’14.
 2. SILT: A Memory-Efficient, High-Performance Key-Value Store, SOSP'11.
+3. Scalable, High Performance Ethernet Forwarding with CUCKOOSWITCH, CoNEXT '13.
 

@@ -6,8 +6,6 @@ excerpt_separator: <!--more-->
 typora-root-url: ../
 ---
 
-
-
 ## NOVA-Fortis: A Fault-Tolerant Non-Volatile Main Memory File System
 
 ### 0x00 引言
@@ -26,8 +24,6 @@ NOVA-Fortis’ reliability features consume 14.8% of the storage for redundancy 
 
   快照是NOVA-Fortis文件系统在NOVA文件系统上面的一个增加的功能。NOVA-Fortis可以支持系统在运行的时候创建快照，可以挂载一个快照作为一个只读文件系统，也可以回滚到过去的一个快照。NOVA-Fortis支持无线数量的快照，另外，NOVA-Fortis面向的是NVMM存储介质，它也实现了应用在使用DAX mmap()的时候也可以产生一个一致性的快照。
 
-
-
 #### 建立一个快照和恢复到一个快照
 
   NOVA-Fortis快照的实现主要是维持了系统的一个全局的快照ID，另外在每一个Log项里面保存了一个本地的快照ID。建立一个快照的方式就是增加这个全局的快照的ID，将之前的有效的快照ID保存到一个list中。建立一个快照在NOVA-Fortis中是一个常数时间的操作，只要目前没有文件正在使用mmap。使用过去文件系统的一个快照时，NOVA-Fortis挂载文件系统为一个只读的文件系统。读取一个打开读取文件时，只会处理那些本地的快照ID小于等于使用的快照ID的数据。关于NOVA-Fortis快照设计的另外几点，
@@ -43,8 +39,6 @@ NOVA-Fortis’ reliability features consume 14.8% of the storage for redundancy 
   ```
 
   NOVA-Fortis使用的方法就是阻塞一个读取read-only的操作直到所有的相关的Pages都被标记完成位read-only，这样久避免了更新操作插入到这些标记这些不同的Pages的操作中去。
-
-
 
 ### 0x02 处理数据错误
 
@@ -73,17 +67,11 @@ NOVA-Fortis’ reliability features consume 14.8% of the storage for redundancy 
 
 * 另外还有处理Scribbles[1]……....
 
-
-
 ### 0x03 评估
 
   这里的具体信息可以参看[1]，这部分这篇Paper做得非常精美了鸭🦆。
 
 ![novaf-perf](/assets/img/novaf-perf.png)
-
-
-
-
 
 ## 参考
 

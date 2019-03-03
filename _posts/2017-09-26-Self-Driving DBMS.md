@@ -6,11 +6,7 @@ excerpt_separator: <!--more-->
 typora-root-url: ../
 ---
 
-
-
 ## Self-Driving Database Management Systems 
-
-
 
 ### 引言
 
@@ -30,8 +26,6 @@ typora-root-url: ../
 * 利用LLVM、SQL JIT和SIMD之类的一些方式优化性能；
 * orz
 
-.
-
 ### 基本问题
 
   自治数据库的一个核心就是自治啦。在Paper中，作者提出了自治数据库主要要解决的几个问题：
@@ -42,8 +36,6 @@ typora-root-url: ../
 * 还需要的考虑的是另外的两点限制：1.  必须与现在的一些系统的使用方式相容。也就是自治数据的行为必须都是自我实现的，不需要人工参与。或者是需要修改现在的代码的话，这个是不可以接受的；2. 必须能够使用各种各样的环境；
 
 ![peloton-self-driving](/assets/img/peloton-self-driving.png)
-
-.
 
 ### 系统架构
 
@@ -68,8 +60,6 @@ typora-root-url: ../
 
 3. 行为计划和执行引擎；这里的行为计划和执行引擎并不是指传统关系型中SQL的执行。而是指在前面的组件发现了可以使得数据性能更好的方式之后，对数据库的前面提到的可以行使的一些操作的执行的过程，这些操作主要由两个指标决定它的特性： 1. 代价，执行这个“自治”操作需要付出的代价；2. 收益，执行了这个“自治”操作之后可以获取的好处。Peloton会根据这些指标对可以进行的操作进行排序，依次执行。
 
-
-
 另外Paper 中提到的一个部分就是与人交互相关的，Peloton需要讲执行的操作以方便人类阅读的形式展现，辅助DBA决策等等：
 
 ```
@@ -83,8 +73,6 @@ Lastly, it may be necessary to provide an override mechanism for DBAs. ... To pr
   这个具体信息参看[1]
 
 ![peloton-preliminary-result](/assets/img/peloton-preliminary-result.png) 
-
-
 
 ## 参考
 

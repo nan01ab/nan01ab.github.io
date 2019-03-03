@@ -43,8 +43,6 @@ Once committed, the SSD hardware copies the final values from the log to their t
 
 ![mars-policy](/assets/img/mars-policy.png)
 
-
-
 #### Building MARS 
 
   MARS在3个主要的地方不同于ARIES，首先它依赖于存储设备，通过EAW的操作，在提交的时候应用redo log；第二，没有undo log，不过通过EAW保留来undo log能带来的好处；第三，没有transactional pages，直接操作对象。
@@ -57,13 +55,9 @@ Once committed, the SSD hardware copies the final values from the log to their t
 MARS uses LogWrite operations for transactional updates to objects (e.g., rows of a table) in the database. This provides several advantages. Since LogWrite does not update the data in-place, the changes are not visible to other transactions until commit. This makes it easy for the database to implement isolation. MARS also uses Commit to efficiently apply the log.
  ```
 
-.
-
 #### Force
 
  ARIES不行强制将立即就将更新之后的page持久化，只是考虑到HHD的特点，避免随机写操作。但是对应随机写性能很好的NVM来说，这个随机写可以接受。所以MARS是强制的，
-
-.
 
 #### No-Steal
 
@@ -73,8 +67,6 @@ MARS uses LogWrite operations for transactional updates to objects (e.g., rows o
 Instead of writing uncommitted data to disk at its target location, MARS writes the uncommitted data directly to the redo log entry corresponding to the LogWrite for that location. When the system issues a Commit for the transaction, the SSD will write the updated data into place.
 ```
 
-.
-
 #### byte-addressable 
 
   EAW提供了byte-addressable的接口。ARIES中的LSN和Page都是为顺序写磁盘的方式设计的，这里就没有这个必要的。这里的很多工作都交给了EAW了完成：
@@ -83,15 +75,11 @@ Instead of writing uncommitted data to disk at its target location, MARS writes 
 Instead of an append- only log, EAWs provide a log that can be read and written throughout the life of a transaction. This means that undo logging is unnecessary because data will never be written back in-place before a transaction commits. Also, EAWs implement ordering and recovery in the storage array itself, eliminating the need for application-visible LSNs.
 ```
 
-.
-
 ### Implementation 
 
  实现上需要软件和硬件相互配合，这也可能是其的一个缺点。
 
 TODO
-
-.
 
 ### Results 
 
@@ -100,8 +88,6 @@ We have implemented EAWs and MARS in a next-generation SSD to demonstrate that t
 ```
 
 ![mars-performance](/assets/img/mars-performance.png)
-
-
 
 ## 参考
 

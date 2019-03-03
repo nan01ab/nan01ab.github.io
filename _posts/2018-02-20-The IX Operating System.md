@@ -6,11 +6,7 @@ excerpt_separator: <!--more-->
 typora-root-url: ../
 ---
 
-
-
 ## The IX Operating System: Combining Low Latency, High Throughput, and Efficiency in a Protected Dataplane 
-
-
 
 ### 引言
 
@@ -23,13 +19,9 @@ typora-root-url: ../
 * TCP-friendly flow group migration，
 * Dynamic control loop with user-defined policies。
 
-.
-
 ### 基本设计
 
  ![ix-arch](/assets/img/ix-arch.png)
-
-
 
  IX主要分为了3个部分，一个是运行在Linux内核里面的Dune模块，具体可以参考论文[2]，IX的data planes可以看作是一个特殊的OS(application-specific OSs)，运行在non-root的ring 0态中，最后的应用使用了libix的库，运行在ring 3中。这样的方式提供了一个安全的有效的直接访问硬件功能的方式。
 
@@ -37,15 +29,11 @@ typora-root-url: ../
  This approach provides dataplanes with direct access to hardware features, such as page tables and exceptions, and passthrough access to NICs. Moreover, it provides full, three-way protection between the control plane, dataplanes, and untrusted application code.
 ```
 
- IX的control plane由Linux内核和一个用心在用户态IXCP程序组成，Linux提供资源管理与分配等的功能，提供基本的系统接口，IXCP负责监控资源使用情况、dataplane的性能状况、以及实现资源的分配策略。
-
-  每一个IX dataplane的实例支持运行一个多线程的应用程序，可以看作是一个单一地址空间的特殊OS。在这里面有两种类型的线程，一是elastic threads负责与dataplane交互，处理网络IO，二是background threads。elastic threads不掉用可能导致阻塞的接口。为了实现高性能和可预测的延时，每一个elastic thread都独享一个硬件线程，而多个background threads可能共享一个硬件线程。
+ IX的control plane由Linux内核和一个用心在用户态IXCP程序组成，Linux提供资源管理与分配等的功能，提供基本的系统接口，IXCP负责监控资源使用情况、dataplane的性能状况、以及实现资源的分配策略。每一个IX dataplane的实例支持运行一个多线程的应用程序，可以看作是一个单一地址空间的特殊OS。在这里面有两种类型的线程，一是elastic threads负责与dataplane交互，处理网络IO，二是background threads。elastic threads不掉用可能导致阻塞的接口。为了实现高性能和可预测的延时，每一个elastic thread都独享一个硬件线程，而多个background threads可能共享一个硬件线程。
 
 ```
 For example, if an application were allocated four hardware threads, it could use all of them as elastic threads to serve external requests or it could temporarily transition to three elastic threads and use one background thread to execute tasks such as garbage collection. When the control plane revokes or allocates an additional hardware thread using a protocol similar to the one in Exokernel, the dataplane adjusts its number of elastic threads.
 ```
-
-.
 
 ### IX Dataplane 
 
@@ -86,8 +74,6 @@ Batched system calls和event conditions都是使用由共享内存的，这样�
 
 这里面的操作过程中使用了各种办法来避免内存拷贝。
 
-.
-
 ### Multicore Scalability & Flow Group Migration 
 
 IX通过以下几点来实现多核的可拓展性，
@@ -106,17 +92,11 @@ IX通过以下几点来实现多核的可拓展性，
    Since we cannot reverse the Toeplitz hash used by RSS, we simply probe the ephemeral port range to find a port number that would lead to the desired behavior. Note that this implies that two elastic threads in a client cannot share a flow to a server.
    ```
 
- .
-
 对于添加和移除一个线程时，control plane的IXCP就会产生流迁移的请求，具体可参看论文。
-
->
 
 ### Evaluation  
 
 ![ix-performance](/assets/img/ix-performance.png)
-
-
 
 ## 参考
 

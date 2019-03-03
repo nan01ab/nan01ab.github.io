@@ -6,8 +6,6 @@ excerpt_separator: <!--more-->
 typora-root-url: ../
 ---
 
-
-
 ## Mega-KV: A Case for GPUs to Maximize the Throughput of In-Memory Key-Value Stores
  Mega-Key的基本思路就是使用GPU来做Key-Value的索引，GPU上面的显存有限，数据不保存在GPU上面。它号称可以,
 
@@ -99,8 +97,6 @@ GNoM旨在让利用UDP的应用高效地运行在GPU上面。这里使用的就�
 下面是一些性能信息：
 
 ![dido-perf](/assets/img/dido-perf.png)
-
-
 
 ## 参考
 

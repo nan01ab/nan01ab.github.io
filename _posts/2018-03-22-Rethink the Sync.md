@@ -6,11 +6,7 @@ excerpt_separator: <!--more-->
 typora-root-url: ../
 ---
 
-
-
 ## Rethink the Sync
-
-
 
 ### 0x00 引言
 
@@ -46,8 +42,6 @@ For I/O-intensive benchmarks such as Postmark and an Andrew-style build, the per
 
 * Externally synchronous I/O也存在一些缺点，一个最致命的驱动就是在IO操作返回之后数据并没有被实际保存而这个时候应用认为IO操作已经完成，就会继续执行之后的操作，这个致命的缺陷也就是导致来它几乎不会被真实的使用。这里是不是可以用Log的方式解决部分问题，还有在非易失性内存的情况下有上面好办法；
 
-
-
 ### 0x02 实现
 
   对于externally synchronous I/O的实现，需要做的主要是两件事情：1. 操作之间的依赖关系；2. 缓冲这些操作。
@@ -61,13 +55,11 @@ For I/O-intensive benchmarks such as Postmark and an Andrew-style build, the per
 * FS Support，这里的主要要修改的就是保持操作的顺序来。另外在现在的IO栈中，操作都是“乱序”执行了，一个最明显的地方就是在Block Layer会对操作进行重新排序，以求获取更好的性能。这里必须保持操作被具体执行到存储设备上面的顺序，否则就可能导致错误。
 * Xsyncfs & Output-Triggered Commits。Paper中的实现以ext3文件系统为基础。这里不具体看在ext3上面实现的细节了，[1].
 
-
-
 ### 0x03 评估
 
+  这里具体的信息可以参看[1],
+
  ![esync-perf](/assets/img/esync-perf.png)
-
-
 
 ## 参考
 

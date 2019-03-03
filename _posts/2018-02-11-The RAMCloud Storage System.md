@@ -12,8 +12,6 @@ typora-root-url: ../
 
   RAMCloud是一个基于内存的分布式存储系统，所有的数据任何时候都保存在内存之中，RAMCloud达到了3个总体目标: low latency, large scale, 和 durability。RAMCloud各方面技术的应用都是很激进的。RAMCloud的实现的多个方面都已经发了Paper，而且之前也已经看过了3篇Paper，主要设计到RAMCloud的内存分配方式，RAMCloud的Kye/Value索引的实现以及RAMCloud的快速的恢复机制。这篇文章是RAMCloud的一篇综述性的Paper。另外RAMCloud的一篇主要的Paper就是关于其一致性实现的[2]。
 
-
-
 ### 架构 & 日志结构式存储 & 容错以及恢复
 
  这几点的内容在前面的Paper中以及基本看过了[3,4,5].
@@ -22,8 +20,6 @@ typora-root-url: ../
 * 内存分配的方式不是传统的malloc或者是类似一些类型的方式，而是一种类似在文件系统中常用的日志结构式存储。
 * RAMCloud会将数据持久化到磁盘上，为了支持系统在Crash之后在短时间内恢复，RAMCloud基本的思路就是使用非常大数据的磁盘来提供足够快的恢复时间。RAMCloud好像也不保证完全不丢数据。
 * RAMCloud恢复的方式基本还是基于副本和将数据持久化到磁盘上面的方式。
-
-
 
 ### 低延时
 
@@ -34,8 +30,6 @@ typora-root-url: ../
 * 为了降低延迟，RAMCloud在开始设计的时候考虑了单线程的设计，单个现场轮询请求然后处理请求马上恢复。不养方法在处理一个耗时的请求的时候存在严重的缺陷(也是redis的缺陷)。最终RAMCloud还是使用了多线程的设计。RAMCloud的RPCs有一个单独的分发线程(dispatch thread)和一组工作线程(worker threads )合作处理。前者处理网络通信，后者处理实际的请求。为了降低延迟，两类线程之间的交互也是使用轮询的方式。分发线程选择一个空闲的工作线程，将请求相关结构的指针保存到这个工作线程轮询的一个地方即可。
 
 从上面可以看出，为了降低延迟，RAMCloud采用的都是很激进的方法。
-
-
 
 #### 时间消耗分析
 
@@ -51,11 +45,7 @@ Where Does the Time Go?. Figure 10 shows a timeline for a read of a small object
 * Thread handoffs: The timeline shows about 220ns in direct costs due to thread handoffs between the dispatch and worker threads. However, the handoffs also resulted in 24 additional L2 cache misses that are not visible in the figure.
 ```
 
-
-
 ![ramcloud-timetake](/assets/img/ramcloud-timetake.png)
-
-
 
 ### 线性一致性的实现
 
@@ -85,15 +75,11 @@ Where Does the Time Go?. Figure 10 shows a timeline for a read of a small object
 
 * 垃圾回收，这里主要就是完成记录的回收的问题。这里要确保回收的记录对于的RPC不会在再次请求。同样，这里也是依赖于租约的机制。
 
-
-
 ### 评估
 
  这里的具体的信息可以参考[1],
 
 ![ramcloud-perf](/assets/img/ramcloud-perf.png)
-
-
 
 ## 参考
 

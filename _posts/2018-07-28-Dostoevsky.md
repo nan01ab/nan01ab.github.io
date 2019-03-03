@@ -6,11 +6,7 @@ excerpt_separator: <!--more-->
 typora-root-url: ../
 ---
 
-
-
 ## Dostoevsky: Better Space-Time Trade-Offs for LSM-Tree Based Key-Value Stores via Adaptive Removal of Superfluous Merging 
-
-
 
 ### 0x00 引言
 
@@ -29,15 +25,9 @@ We put everything together to design Dostoevsky, a key-value store that adaptive
 
 ![dostoevsky-worst-case](/assets/img/dostoevsky-worst-case.png)
 
-
-
 下面是Paper中出现的一些符号代表的意思，
 
 ![dostoevsky-terms](/assets/img/dostoevsky-terms.png)
-
-
-
-
 
 Dostoevsky的内容主要就是三点：
 
@@ -51,11 +41,7 @@ Dostoevsky的内容主要就是三点：
 
   上面的这幅图很好的展示了这样做的一个效果。
 
-
-
-* 在上面的图中可以看出来，Lazy leveling的方式比较适合混合类似的workload的，比如混合了updates、point loopup和long range loopup。Leveling模式的和Tiering模式则适合查找为主和更新为主的workload。为此Paper这里了Fluid LSM-Tree，在Lazing leveling的基础上实现了更加灵活的方式。
-
-   在Fluid LSM-Tree最多由Z个部分组成，而其余的则为K，这样就有：
+* 在上面的图中可以看出来，Lazy leveling的方式比较适合混合类似的workload的，比如混合了updates、point loopup和long range loopup。Leveling模式的和Tiering模式则适合查找为主和更新为主的workload。为此Paper这里了Fluid LSM-Tree，在Lazing leveling的基础上实现了更加灵活的方式。在Fluid LSM-Tree最多由Z个部分组成，而其余的则为K，这样就有：
 
   1. K =1 and Z =1时就是leveling模式；
   2. K = T −1 and Z =T −1就是tiering模式；
@@ -66,8 +52,6 @@ Dostoevsky的内容主要就是三点：
 ![dostoevsky-fluid](/assets/img/dostoevsky-fluid.png)
 
  这里的Z和K根据系统情况进行调整，这个是Fluid LSM-tree一个核心的地方，这里就是三个参数的调整：K、Z和T。
-
-
 
 * Dostoevsky，Dostoevsky的目的就是在一定限制条件下将这三个参数调整的最优的值，
 
@@ -104,8 +88,6 @@ Dostoevsky的内容主要就是三点：
  具体可参看[1].
 
 ![dostoevsky-performance](/assets/img/dostoevsky-performance.png)
-
-
 
 ## 参考
 
