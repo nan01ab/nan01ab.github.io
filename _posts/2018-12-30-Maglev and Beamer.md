@@ -73,8 +73,6 @@ Both the steering and muxing modules maintain three pointers to the rings. At th
   */
   ```
 
-.
-
 ### 0x03 另外的几个问题
 
   关于Maglev的另外的几个问题，
@@ -91,8 +89,6 @@ Both the steering and muxing modules maintain three pointers to the rings. At th
   This approach has two limitations: it introduces extra hops to fragmented packets, which can potentially lead to packet reordering. It also requires extra memory to buffer non-first fragments. Since packet reordering may happen anywhere in the network, we rely on the endpoints to handle out-of-order packets.
   ```
 
-.
-
 ### 0x04 评估
 
 这里的详细详细可以参看[1],
@@ -106,8 +102,6 @@ Both the steering and muxing modules maintain three pointers to the rings. At th
 ### 0x10 引言
 
   这里Paper是NSDI‘18上面的，这篇Paper中的主要数据也是和Maglev的对比。在Paper
-
-
 
 ### 0x11 Stable Hasing & Daisy Chaining
 
@@ -127,7 +121,7 @@ When server B fails, the controller will move the third bucket from B to C; the 
 
   这里还有另外一个问题要处理，在下面的图中，开始的时候只有mux1，之后添加了mux2，mux2有更新之后的配置的信息，而此时mux1还是使用之前的配置信息。图中红色的连接后面的数据包发送给了mux1(基于ECMP转发的数据包)，由于mux1还不知道新的配置信息，这个数据包会被mux1转发给A，A将会reset这个连接。为了解决这个问题，数据包会带上一个generation的信息(epoch)，每个服务器会记住它遇到的最高的epcoh，比如在A中收到了B来的数据包，带有的generation信息为2。当A收到一个连接中间状态的数据包(就是连接好之后一般的数据包)，如果不是通过Daisy Chaining过来的，回去检查是不是有最高的generation number，是就reset连接，否则静默drop这个数据包，客户端就会重传这个数据包。
 
-​![beamer-daisy](/assets/img/beamer-daisy.png)  
+![beamer-daisy](/assets/img/beamer-daisy.png)  
 
 ### 0x12 MPTCP
 
@@ -138,15 +132,11 @@ When server B fails, the controller will move the third bucket from B to C; the 
   Note that we only need daisy chaining to redirect initial subflows of MPTCP connections or plain TCP connections. Secondary subflows are sent directly to the appropriate server (uniquely identified by the port).
 ```
 
-.
-
 ### 0x13 控制面
 
   Beamer的控制面基于ZooKeeper设计。控制器会向其中写入配置相关信息，而mux只会从中读取它们。
 
 ![beamer-controlplane](/assets/img/beamer-controlplane.png)
-
-
 
 ### 0x14 评估
 

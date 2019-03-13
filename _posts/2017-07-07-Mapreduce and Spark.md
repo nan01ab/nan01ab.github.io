@@ -97,8 +97,6 @@ reduce (k2,list(v2)) → list(v2)
 ... We show that Spark is up to 20× faster than Hadoop for iterative applications, speeds up a real-world data analytics report by 40×, and can be used interactively to scan a 1 TB dataset with 5–7s latency. More fundamentally, to illustrate the generality of RDDs, we have implemented the Pregel and HaLoop programming models on top of Spark, including the placement optimizations they employ, as relatively small libraries (200 lines of code each).
 ```
 
-.
-
 ### RDD抽象
 
   RDD是一个只读的、分区的数据记录集合。RDD只能从从存储的数据中创建和其它的RDD转化而来。RDD一个关键的地方就在与RDD之间的转换(transformations)，Spark保护诸多的转换的函数。RDD在任何时候都不需要去实例化，它知道其的派生的关系(lineage)，利用这个lineage可以从它的物理存储数据的分区计算出RDD。另外，用户还可以对RDD进行持久化和分区操作。Spark是使用Scala写出的，辨析的代码很精炼，

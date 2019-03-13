@@ -22,8 +22,6 @@ We describe the following contributions:
 (3) How Aurora uses quorum sets and epochs to make non-blocking reversible membership changes to process failures, grow storage, and reduce costs. (Section 4)
 ```
 
-.
-
 ### 0x02 高效写
 
    下面的这幅图大概表示了写入的流程，这幅图就是论文[2]的同样的一幅:
@@ -40,8 +38,6 @@ We describe the following contributions:
   When a commit is received, the worker thread writes the commit record, puts the transaction on a commit queue, and returns to a common task queue to find the next request to be processed. When a driver thread advances VCL, it wakes up a dedicated commit thread that scans the commit queue for SCNs below the new VCL and sends acknowledgements to the clients waiting for commit. There is no induced latency from group commits and no idle time for worker threads.
 ```
 
-.
-
 #### Crash Recovery in Aurora
 
 ​    这里要处理的第一个问题：数据中保存的一些数据是没有持久化的，比如之前说的PGCL和VCL。这个时候就要求从存储结点的SCL信息中将这些信息恢复出来，
@@ -56,8 +52,6 @@ We describe the following contributions:
 
 此外，在恢复操作的时候也会使用epoch的机制，用来解决旧的实例访问的问题。
 
-
-
 ### 0x03 高效读
 
   这里主要讲的是Aurora如何避免quorum reads的方式的。这里的机制就是使用VDL(Volume Durable LSN)，表示是已经持久化的COLs中LSN最大的，这里很显然满足VDL <= VCL(Consistency Point LSNs(CPLs)，在MySQL之类的数据中，一个事务可能会产生多条的redo log，也就是说一个完整的事务log可能是一组的日志)。在去年的Aurora的论文中有提到Master会同步log给Slave结点，同样的，这里也会同步VCL、VDL之类的信息，这样的话slave结点就可以知道哪些段的数据是完整的，读的话直接取这些结点就可以了，不同使用quorum reads的方式来保证读取到最新的数据，减少了读的放大。
@@ -66,15 +60,11 @@ We describe the following contributions:
 Aurora does not do quorum reads. Through its bookkeeping of writes and consistency points, the database instance knows which segments have the last durable version of a data block and can request it directly from any of those segments.
 ```
 
-.
-
 感觉这里和去年的论文没有上面新的东西，这里就是讨论下面提交的概念的作用了,
 
 ```
 The use of monotonically increasing consistency points – SCLs, PGCLs, PGMRPLs, VCLs, and VDLs – ensures the representation of consistency points is compact and comparable. These may seem like complex concepts but are just the extension of familiar database notions of LSNs and SCNs. The key invariant is that the log only ever marches forward. This also simplifies the process of coordinating multiple request processors, as shown here for replicas operating against common storage.
 ```
-
-.
 
 ### 0x04 故障 和 Quorum成员 
 
@@ -82,16 +72,12 @@ The use of monotonically increasing consistency points – SCLs, PGCLs, PGMRPLs,
 
 ![aurora-membership](/assets/img/aurora-membership.png)
 
- 以上面的图中使用G替代F说明为例：
-
-  这里不是直接一步地将F替代，而是分为2步。1. 先将G加入这个Quorum中，变为2个write set：4/6 of ABCDEF 和
+ 以上面的图中使用G替代F说明为例：这里不是直接一步地将F替代，而是分为2步。1. 先将G加入这个Quorum中，变为2个write set：4/6 of ABCDEF 和
 4/6 of ABCDEG，读则是3/6 of ABCDEF OR 3/6 of ABCDEG。如果F在这个过程中重新正常工作，就可以变为原来的状态，如何G获取了需要的数据之后F还是不能工作的状态，这个时候就变为ABCDEG的状态。在这个过程中，write quorum都是可以满足的，不会影响正常工作，
 
 ```
 Let us now consider what happens if E also fails while we are replacing F with G, and we wish to replace it with H. In this case, we would move from a write quorum set of ((4/6 of ABCDEF AND 4/6 of ABCDEG) AND (4/6 of ABCDFH AND 4/6 of ABCDGH)). As with a single failure, I/Os can proceed, the operation is reversible, and the membership change can occur with an epoch increment. Note that, both with a single failure and with multiple failures, simply writing to the four members ABCD meets quorum.
 ```
-
-.
 
 这篇文章和去年的文章相比感觉没有多少新的东西，就是描述的重点不一样而已。在这两篇Paper中出现了这些概念：
 

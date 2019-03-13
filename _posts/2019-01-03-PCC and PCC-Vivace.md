@@ -24,8 +24,6 @@ PCC achieves consistent high performance and significantly beats specially engin
 (h.)PCC performs similar to ICTCP in the incast scenario in data centers.
 ```
 
-.
-
 ### 0x01 基本思路
 
 ```
@@ -40,8 +38,6 @@ PCC的基本的基本思路来自下面几个ideas：
 * 有些丢包是路线本身的一些原因or就是随机的未知情况(某些运营商在某些路线上随机丢包，23333)，而和阻塞没有什么关系，这个时候还是可以继续增加发送速率；
 
 有了上面的这几个ideas，接下来的问题就是如何探明这些情况or如何判断目前大概是个什么情况了。
-
-
 
 ### 0x02 实现
 
@@ -60,8 +56,6 @@ $$
 * 对于每一个发送者，发送速率会汇聚在(x'(1 − ε )^2 , x'(1 + ε )^2 )，x'为发送的稳定状态的值。
 
 PCC的使用不需要路由器的支持，不需要对现在协议改动，也不需要接收方的改动。
-
-
 
 #### 性能监控
 
@@ -83,8 +77,6 @@ PCC的使用不需要路由器的支持，不需要对现在协议改动，也�
    Assume the new rate after Decision Making is r0 and dir = ±1 is the chosen moving direction. In each MI, PCC adjusts its rate in that direction faster and faster, setting the new rate rn as: r_{n} = r_{n−1} · (1 + n · εmin · dir). However, if utility falls, PCC reverts its rate to r_{n−1}  and moves back to the Decision Making State.
   ```
 
-.
-
 ### 0x03 评估
 
  这里可以参看[1]
@@ -102,8 +94,6 @@ PCC的使用不需要路由器的支持，不需要对现在协议改动，也�
 * 对一般的TCP更加友好；
 * 速率控制更加快速收敛，对网络的变化反应更加敏感；
 
-
-
 ### 0x11 基本思路
 
  PCC Vivace的效用函数为，
@@ -112,8 +102,6 @@ $$
 变化的梯度; b,c,t为常数;
 $$
 另外， PCC Vivace同样也是公平的，最终会收敛(收敛的速度比PCC更加快)，而且可以通过设置参数来设置对丢包的忍受程度，另外就是支持不同的资源的分配。这里设计到比较多的数学证明[2]。
-
-
 
 ### 0x02 速率控制
 
@@ -126,8 +114,6 @@ $$
 \\ r_{new} = r + m(n)\theta_0\gamma
 $$
  这个会在增长方向变化的时候归位。
-
-
 
 ### 0x03 评估
 

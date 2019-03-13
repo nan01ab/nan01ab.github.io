@@ -20,8 +20,6 @@ typora-root-url: ../
 Other Assumptions: Dynamo is used only by Amazon’s internal services. Its operation environment is assumed to be non-hostile and there are no security related requirements such as authentication and authorization. Moreover, since each service uses its distinct instance of Dynamo, its initial design targets a scale of up to hundreds of storage hosts. We will discuss the scalability limitations of Dynamo and possible scalability related extensions in later sections.
 ```
 
-.
-
 ### 特点
 
 下面的表格总结了Dynamo要解决的问题，已经解决这个问题使用的技术和所具有的优点：
@@ -47,8 +45,6 @@ Using virtual nodes has the following advantages:
 
 分区的方式要处理的一个问题就是成员的加入和退出。Dynamo新加入一个结点X时，它会随机为其选择一个环上的范围。由于在加入X之前处理这个范围的结点存在多个，在X加入之后，有些结点就不需要处理这个范围内的数据了，这些结点将会将这些数据传输给X。对于删除的情况，就是加入操作的反操作。
 
-.
-
 ### 复制
 
   复制是一种实现high availability一种很常见的方式。Dynamo中的复制的办法是系统配置了一个复制数量的参数N，处了在这个key对用的结点保持一份之外，还做它的N-1给后继结点保存一份(这些结点组成了一个环，用于一致性hash)。保存一个key的这些结点的list叫做preference list。为了解决使用虚拟结点带来的可能一个物理结点代表了对个位置的问题，这里这个list只会保留不同的结点。
@@ -56,8 +52,6 @@ Using virtual nodes has the following advantages:
 ````
 To account for node failures, preference list contains more than N nodes. Note that with the use of virtual nodes, it is possible that the first N successor positions for a particular key may be owned by less than N distinct physical nodes (i.e. a node may hold more than one of the first N positions). To address this, the preference list for a key is constructed by skipping positions in the ring to ensure that the list contains only distinct physical nodes.
 ````
-
-.
 
 ### 数据版本
 
@@ -83,8 +77,6 @@ Dynamo的客户端想要更新一个对象的时候必须指定这个对象的�
  When the number of (node, counter) pairs in the vector clock reaches a threshold (say 10), the oldest pair is removed from the clock. Clearly, this truncation scheme can lead to inefficiencies in reconciliation as the descendant relationships cannot be derived accurately. However, this problem has not surfaced in production and therefore this issue has not been thoroughly investigated.
 ```
 
-.
-
 ### `get ()` 和 `put ()` 执行
 
    Dynamo的任何结点都可以处理任何key的get put操作(没有什么master之类的)。Dynamo的请求一般使用的是HTTP的方式，client可以向一个load balancer发送请求，也可以直接处理分区的客户端直接亲戚合适的协调结点(coordinator nodes)。这个coordinator一般就是preference list中的第一个结点。如果请求时通过load balancer放送，则这个请求可能被路由到环中的任意结点，如果这个节点不在这个key的preference list中，则它会转发这个请求到preference list中的第一个结点。为了保持数据的一致性，Dynamo使用了一种类似quorum的机制，这里就可以参考关于quorum的相关资料：
@@ -94,8 +86,6 @@ This protocol has two key configurable values: R and W. R is the minimum number 
 ```
 
 Coordinator结点收到put请求的时间，它就会为这个新版本生成vector clock，并将这些数据发送给preference list中前N个可达的结点，当有W - 1个结点返回成功时这个操作就算成功了(加上自己就是W个)，同理get请求则是等待R个结点返回。
-
-
 
 ### 故障处理
 
@@ -107,8 +97,6 @@ Coordinator结点收到put请求的时间，它就会为这个新版本生成vec
 Using hinted handoff, Dynamo ensures that the read and write operations are not failed due to temporary node or network failures. Applications that need the highest level of availability can set W to 1, which ensures that a write is accepted as long as a single node in the system has durably written the key it to its local store.
 ```
 
-.
-
 #### Handling permanent failures: Replica synchronization 
 
   上面的`hinted handoff`很好地处理了临时性的故障。为了处理故障结点没有会到环中造成的对可用性的影响，这里Dynamo使用的方式是一种`anti-entropy` (replica synchronization)协议来保持副本的同步。Dynamo使用了一种叫做`Merkle Tree`的方法来快速检测副本之间的不一致、并减少传输的数据量(这里关于Markel Tree可以参考相关资料),
@@ -119,8 +107,6 @@ For instance, if the hash values of the root of two trees are equal, then the va
 
 Dynamo使用Merkle Tree的方式是：每一个结点为一个key的范围维持一个Merkel Tree(这个范围就是一个虚拟结点覆盖的key的范围)。这可以使得结点之间可以快速比较在这个范围的数据是否一致，并执行适当的同步操作。这种方式的一个缺点就是在结点离开or加入环的时候，这些tree都得重新计算，Dynamo通过改进partitioning解决了这个问题，具体可以参考论文。
 
-
-
 ### 成员及其故障探测
 
   为了处理成员变化的各类情况，Dynamo使用了人工处理成员变化的方式。一个基于gossip的协议用来传播协议变化的信息。
@@ -129,17 +115,13 @@ Dynamo使用Merkle Tree的方式是：每一个结点为一个key的范围维持
 A gossip-based protocol propagates membership changes and maintains an eventually consistent view of membership. Each node contacts a peer chosen at random every second and the two nodes efficiently reconcile their persisted membership change histories.
 ```
 
-此外，结点在环上的映射信息已经分区的信息也是通过基于gossip的协议来传输的。每一个结点都知道另外的结点处理的范围，这个使得每个结点可以正确处理key的读写操作。
-
- Dynamo另外要处理的一个问题就是`logically partitioned `。它在这样一种情况出产生，管理员先节点A加入到环，然后将节点B加入环。在这种情况下，A和B都认为自己是环的一员，但是会存在Ａ不知道B的存在，B也不知道A的存在的情况，这个就叫做`logically partitioned `。这里的处理方式是使一些结点为`seeds`角色，它使用外部的机制发现所有的结点(external mechanism)，这里就可以理解为一些结点不是通过常规的方法获取到这些信息的，而是有另外的来源，一个常见的策略就是在某个地方保存了相关的配置信息。
+此外，结点在环上的映射信息已经分区的信息也是通过基于gossip的协议来传输的。每一个结点都知道另外的结点处理的范围，这个使得每个结点可以正确处理key的读写操作。Dynamo另外要处理的一个问题就是`logically partitioned `。它在这样一种情况出产生，管理员先节点A加入到环，然后将节点B加入环。在这种情况下，A和B都认为自己是环的一员，但是会存在Ａ不知道B的存在，B也不知道A的存在的情况，这个就叫做`logically partitioned `。这里的处理方式是使一些结点为`seeds`角色，它使用外部的机制发现所有的结点(external mechanism)，这里就可以理解为一些结点不是通过常规的方法获取到这些信息的，而是有另外的来源，一个常见的策略就是在某个地方保存了相关的配置信息。
 
 ```
 To prevent logical partitions, some Dynamo nodes play the role of seeds. Seeds are nodes that are discovered via an external mechanism and are known to all nodes. Because all nodes eventually reconcile their membership with a seed, logical partitions are highly unlikely. Seeds can be obtained either from static configuration or from a configuration service. Typically seeds are fully functional nodes in the Dynamo ring.
 ```
 
 关于故障检测，Dynamo也是用来基于gossip的去中心化的协议。
-
-.
 
 ### 评估
 

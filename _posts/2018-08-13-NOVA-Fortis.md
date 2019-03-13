@@ -18,8 +18,6 @@ NOVA-Fortis’ reliability features consume 14.8% of the storage for redundancy 
 
  另外这篇Paper可以说是做的很精美了，2333。
 
-
-
 ### 0x01 快照
 
   快照是NOVA-Fortis文件系统在NOVA文件系统上面的一个增加的功能。NOVA-Fortis可以支持系统在运行的时候创建快照，可以挂载一个快照作为一个只读文件系统，也可以回滚到过去的一个快照。NOVA-Fortis支持无线数量的快照，另外，NOVA-Fortis面向的是NVMM存储介质，它也实现了应用在使用DAX mmap()的时候也可以产生一个一致性的快照。

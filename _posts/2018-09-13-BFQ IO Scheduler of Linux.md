@@ -12,8 +12,6 @@ typora-root-url: ../
 
    Linux目前使用的IO Scheduler有CFQ，NOOP和Deadline。在最近几年，Linux的Block Layer做了很多的有哈，最大的一个改变就是添加了multi-queue block layer。相适应的，IO Scheduler也出现了新的变化，在4.12版本中新加入了Budget Fair Queueing (BFQ) Storage-I/O Scheduler和Kyber multiqueue I/O scheduler。前者有不少的资料，这里先记录一下BFQ。Kyber multi-queue I/O scheduler没有文档资料，不过这个应该是一个比较简单的，代码只有约1000行，先研究研究再说。BFQ包含了很多细节的优化，这里以后慢慢完善。
 
-
-
 ### 0x01 BFQ基本思路
 
    BFQ保持每一个进程一个IO请求队列，不同于CFQ用RR的方式轮询这些队列的方法，BFQ给这些队列一个I/O budget，这个I/O budget代表了下次能写入到磁盘的扇区(这里是HHD上面的说法)的数量。这个I/O budget的计算时一个很复杂的过程，这里只会简单的说明，不会很具体的讨论。这个I/O budget主要和进程的行为有关。
@@ -40,8 +38,6 @@ typora-root-url: ../
 ```
 To further limit the extent at which random applications may decrease the throughput, on a budget timeout BFQ also (over)charges the just deactivated application an entire budget even if the application has used only part of it. This reduces the frequency at which applications incurring budget timeouts access the disk.
 ```
-
-.
 
 ### 一些细节和优化
 

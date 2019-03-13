@@ -16,8 +16,6 @@ typora-root-url: ../
 Our datacenter networks run at dozens of sites across the planet, scaling in capacity by 100x over ten years to more than 1Pbps of bisection bandwidth.
 ```
 
-.
-
 ### 0x01 动机与设计理念
 
  Google发展它自己的网络的动机很简单：使用其它厂商的解决方案不仅仅是价格的问题，而且是很难区满足Google的要求。Google建设自己的网络的时候遵循下面的设计原则：

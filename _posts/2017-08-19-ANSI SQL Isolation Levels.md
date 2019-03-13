@@ -10,8 +10,6 @@ typora-root-url: ../
 
 在ANSI SQL-92 [MS, ANSI]（之后简称SQL-92）根据Phenomena（这个类似专有名词，不翻译了，中文意思是‘现象’）定义了SQL的隔离级别：Dirty Reads, Non-Repeatable Reads, and Phantoms。《A Critique of ANSI SQL Isolation Levels》[1]这篇paper阐述了有些Phenomena是无法用SQL-92中定义的一些隔离级别正确表征的，包括了各个基本上锁的实现。该论文讨论了SQL-92中的Phenomena中的定义模糊的地方。除此之外，还介绍了更好表征隔离级别的Phenomena，比如*Snapshot Isolation*。
 
-
-
 ### 介绍
 
 不同的隔离级别定义了不同的在并发、吞吐量之间的取舍。较高的级别更容易正确的处理数据，而吞吐量比较低的隔离级别更低，较低的隔离级别更容易获得更高的吞吐量，却可能导致读取无效的数据和状态。SQL-92定义了4个隔离级别：(1)  READ UNCOMMITTED,  (2)  READ COMMITTED,   (3)  REPEATABLE READ, (4)  SERIALIZABLE. 
@@ -21,8 +19,6 @@ typora-root-url: ../
     1. 锁(locking)；
     2. 数据流图(data flow graph)；
     3. 异常(anomalies)。通过**Phenomena**(或者叫 anomalies) 来定义隔离级别而不是基于锁。
-
-.
 
 ### 隔离级别的定义
 
@@ -34,8 +30,6 @@ typora-root-url: ../
   事务1满足谓词P的读取和写入一组记录分别由r1 [P]和w1 [P]表示。
   同理，事务1的提交和中止分别被记为c和a相同的方法表示。
 ```
-
-.
 
 ### ANSI
 
@@ -71,8 +65,6 @@ A3: r1[P]...w2[y in P]...c2...r1[P]...c1
 ```
 注意P3只是禁止范围内的写入。
 
-
-
 ### 分析ANSI SQL隔离级别
 
 将P0定义为脏写，用上面的表示方法表示如下:
@@ -97,8 +89,6 @@ H3: r1[P] w2[insert y to P] r2[z] w2[z] c2 r1[z] c1
  ```
 这里T2执行条件搜索知道符合条件的记录，然后T2插入了新的数据，然后更新数量z，T1在读出z时数据就产生了不一致。谓词范围没有被访问两次，所以它是被A3所允许，同样，P3则没有这个问题，它不允许这样的操作。根据以上的几个例子，发现严格的A1、A2和A3有意想不到的缺点，所以认为ASNI旨在定义P1、P2和P3。
 
-
-
 ### 其它隔离级别
 
 #### Cursor Stability(游标稳定)
@@ -116,14 +106,11 @@ P4肯定不会是P0级别的，它不会产出脏写脏读，仔细对比P2盒P4
 P4: r1[x]...w2[x]...w1[x]...c1
 P2: r1[x]...w2[x]...((c1 or a1) and (c2 or a2) any order) 
 ```
-所以P4处于P1和P2之间。
+所以P4处于P1和P2之间。Cursor Stability隔离级别拓展了RC下对SQL游标的锁行为，游标上读取游标(rc)的操作要求在游标当前的数据项下保持长读锁(关于长读锁具体可以参考论文)，知道游标移动or关闭。使用引入P4C:
 
-Cursor Stability隔离级别拓展了RC下对SQL游标的锁行为，游标上读取游标(rc)的操作要求在游标当前的数据项下保持长读锁(关于长读锁具体可以参考论文)，知道游标移动or关闭。使用引入P4C:
 ```
 P4C: rc1[x]...w2[x]...w1[x]...c1 (Lost Update) 
 ```
-
-.
 
 #### Snapshot Isolation(快照隔离级别)
 
@@ -167,8 +154,6 @@ A5B: r1[x]...r2[y]...w1[y]...w2[x]...(c1 and c2 occur) (Write Skew)
 SI的隔离是高于读以提交的，首先first-committer-wins排除了脏写入，时间戳机制下不会有脏读，因此快照隔离至少是读已提交级别。此外，加上A5A可能在满足读已提交，但却不满足快照隔离与时间戳机制，因此读已提交<快照隔离。
   SI也不会有A3，T2更新相同谓词下的数据时，T1能始终看到相同的数据，对于可重复读，则有可能遇到。在SI中，A5B时可能的，但是在可重复读中是不可能的。这样就有以下的现象: SI允许A5B禁止A3，可重复读(RR)则禁止A5B允许A3。但是，要注意的是，SI并不排除P3。考虑这样一个约束，表示由谓词确定的一组作业任务小时数不大于8。T1读取此谓词，发现总和只有7小时，就添加1小时持续时间的新任务，同时T2做同样的事情。由于T1 T2正在插入不同的数据项，First-Committer-Wins不排除此情况，这个可能发生在快照隔离中。但在P3不会出现这样的现象。
 
-
-
 ### Summary and Conclusions 
 
   总之，原始ANSI SQL隔离级别的定义存在许多的问题。下面是一个总结性的表格:
@@ -199,8 +184,6 @@ P: Possible
 N: Not Possible
 S: Sometimes Possible 
 ```
-
-.
 
 ## 参考
 

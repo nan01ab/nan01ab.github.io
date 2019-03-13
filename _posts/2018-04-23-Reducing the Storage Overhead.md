@@ -15,10 +15,8 @@ typora-root-url: ../
 ```
 The dual-stage architecture maintains a small dynamic “hot” store to absorb writes and a more compact, but read-only store to hold the bulk of index entries. Merge between the stages is triggered peri- odically and can be performed efficiently. Unlike prior work [20, 35, 39, 47, 53], our design offers low latency and high throughput for the point queries and short-range scans that typify the OLTP workloads used with main-memory databases [34, 50].
 ....
-we find that hybrid indexes meet the goals, achieving performance comparable to the original indexes while reducing index memory consumption by up to 70% (Section 6). Also, by using hybrid in- dexes, H-Store is able to sustain higher throughput for OLTP work- loads for more transactions and with fewer performance interrup- tions due to memory limitations (Section 7).
+we find that hybrid indexes meet the goals, achieving performance comparable to the original indexes while reducing index memory consumption by up to 70% (Section 6). Also, by using hybrid indexes, H-Store is able to sustain higher throughput for OLTP workloads for more transactions and with fewer performance interruptions due to memory limitations (Section 7).
 ```
-
-.
 
 ### 0x01 基本设计
 
@@ -36,8 +34,6 @@ entries from X to compact X.
 • Step 4: Place X and compact X in the dual-stage architecture
 as shown in Figure 1.
 ```
-
-.
 
 ### 0x02 动态到静态的规则
 
@@ -71,8 +67,6 @@ using a general purpose compression algorithm.
 Although merge-cold may work better in some cases, given the insert-intensive workload patterns of OLTP applications, we con- sider merge-all to be the more general and more suitable approach. We compensate for the disadvantage of merge-all (i.e., some older yet hot tuples reside in the static stage and accessing them requires searching both stages in order) by adding a Bloom filter atop the dynamic stage as described in Section 3.
 ```
 
-.
-
 ##### When to Merge 
 
   这里采用的方法是根据Dynamic和Static数据的比例来决定是否merge的，思路比较简单：
@@ -80,8 +74,6 @@ Although merge-cold may work better in some cases, given the insert-intensive wo
 ```
 The advantage of a ratio-based trigger is that it automatically ad- justs the merge frequency according to the index size. This strategy prevents write-intensive workloads from merging too frequently. Although each merge becomes more costly as the index grows, merges happen less often. One can show that the merge overhead over time is constant. The side effect is that the average size of the dynamic stage gets larger over time, resulting in an increasingly longer average search time in the dynamic stage.
 ```
-
-.
 
 ### 0x04 评估
 

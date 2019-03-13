@@ -12,13 +12,11 @@ typora-root-url: ../
 
   SSD在个人电脑是逐渐要普及了。在一个很多公司，数据库的机器也是被特殊对待，一般会配备性能杠杠的SSD。这篇主要参考了[1]，这本书是可以免费获取的。
 
-
-
 ### 0x01 基本结构和操作
 
    SSD中分为2级的结构，blocks常见的大小是128KB 256KB，另外一个是Page，最常见的大小是4KB。SSD中更加基本的结构是transistor ，一个transistor 可以存储1 2 3 4bits(目前最多一般只有4个)的信息。一个transistor 里面bit越多，性能越差，寿命越短(相对而言，在同样的技术条件下)。
 
-##### 基本操作
+#### 基本操作
 
  Flash的基本操作有3个:
 
@@ -38,37 +36,25 @@ The typical lifetime of a block is currently not well known. Manufac- turers rat
 
 ### 0x03 A Log-Structured FTL 
 
-​    一个常用的方法就是Log-Structured的 FTL，思路和Log-Structured File System相似(都是这里要解决的问题不同)。基本操作都是写入下一个空闲的page，然后更新mapping table。这里就可以想象，SSD的主控就是一个功能专用的计算机。
-
-  Mapping Table是保存在内存里面的(SSD的内存)，那么这里就遇到了一个和很多存储系统相同的问题：掉电了怎么办？解决办法当然也和很村存储系统一样，使用logging加上checkpoint机制。
+​    一个常用的方法就是Log-Structured的 FTL，思路和Log-Structured File System相似(都是这里要解决的问题不同)。基本操作都是写入下一个空闲的page，然后更新mapping table。这里就可以想象，SSD的主控就是一个功能专用的计算机。Mapping Table是保存在内存里面的(SSD的内存)，那么这里就遇到了一个和很多存储系统相同的问题：掉电了怎么办？解决办法当然也和很村存储系统一样，使用logging加上checkpoint机制。
 
  ![flash-ssd-maping-table](/assets/img/flash-ssd-maping-table.png)
 
-
-
 #### Mapping Table Size 
 
-  另外一个mapping table需要解决的问题就是这个table的尺寸问题，对于现在的SSD，TB级别的很常见了(咸鱼这台电脑就已经512GB，三星一些1TB级别的性能爆表，价格也比前几年下降了好多)，甚至出现了10TB级别的SSD。对于1TB的mapping table，它的尺寸就是1GB(a single 4-byte entry per 4-KB page results in 1 GB of memory needed the device)。
-
-  有没有想到OS的多级页表，这里也可以使用类似的方法。Page上面有更大的block。现在很多SSD使用了Hybrid Mapping 的机制。在这种方法中，FTL保持几个blocks是已经被擦除的，写的时候直接写这些blocks，这些blocks被称为log blocks。与此同时，FTL必须能以page为单位进行操作，所以它保存了一个page基本的mapping table，但只是对于这些log blocks的，这个table叫做log table。另外一个更大的block级别的table叫做data table。
+  另外一个mapping table需要解决的问题就是这个table的尺寸问题，对于现在的SSD，TB级别的很常见了(咸鱼这台电脑就已经512GB，三星一些1TB级别的性能爆表，价格也比前几年下降了好多)，甚至出现了10TB级别的SSD。对于1TB的mapping table，它的尺寸就是1GB(a single 4-byte entry per 4-KB page results in 1 GB of memory needed the device)。有没有想到OS的多级页表，这里也可以使用类似的方法。Page上面有更大的block。现在很多SSD使用了Hybrid Mapping 的机制。在这种方法中，FTL保持几个blocks是已经被擦除的，写的时候直接写这些blocks，这些blocks被称为log blocks。与此同时，FTL必须能以page为单位进行操作，所以它保存了一个page基本的mapping table，但只是对于这些log blocks的，这个table叫做log table。另外一个更大的block级别的table叫做data table。
 
 ```
 The key to the hybrid mapping strategy is keeping the number of log blocks small. To keep the number of log blocks small, the FTL has to periodically examine log blocks (which have a pointer per page) and switch them into blocks that can be pointed to by only a single block pointer. This switch is accomplished by one of three main techniques, based on the contents of the block
 ```
 
-.
-
 ### 0x04 Garbage Collection 
 
-​    Log-Structured是FTL需要解决的一个问题。对于SSD来说，回收垃圾，然后重新安排存活的page，将空闲的空间放在一块有利于提高性能。这里的基本思路也是和  Log-Structured File System相似，都是读取存活的数据，然后写到另外一个地方，同时将垃圾回收。
-
-   为此，SSD一般预留了一些额外的空间，或者出现了一些240GB的容量之类的。SSD的垃圾回收也是很影响性能的。
+​    Log-Structured是FTL需要解决的一个问题。对于SSD来说，回收垃圾，然后重新安排存活的page，将空闲的空间放在一块有利于提高性能。这里的基本思路也是和  Log-Structured File System相似，都是读取存活的数据，然后写到另外一个地方，同时将垃圾回收。为此，SSD一般预留了一些额外的空间，或者出现了一些240GB的容量之类的。SSD的垃圾回收也是很影响性能的。
 
 ```
 To reduce GC costs, some SSDs overprovision the device; by adding extra flash capacity, cleaning can be delayed and pushed to the background, perhaps done at a time when the device is less busy. 
 ```
-
-.
 
 ### 0x05 Wear Leveling 
 
@@ -77,8 +63,6 @@ To reduce GC costs, some SSDs overprovision the device; by adding extra flash ca
 ```
 To remedy this problem, the FTL must periodically read all the live data out of such blocks and re-write it elsewhere, thus making the block available for writing again. This process of wear leveling increases the write amplification of the SSD, and thus decreases performance as extra I/O is required to ensure that all blocks wear at roughly the same rate.
 ```
-
-.
 
 ### 0x06 另外一个问题
 

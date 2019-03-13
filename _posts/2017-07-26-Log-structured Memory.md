@@ -12,8 +12,6 @@ typora-root-url: ../
 
    Log-structured的文件系统是很有名的一类文件系统了，其Log-structured设计的主要目的就是讲写入转化为顺序写来提高性能。而这篇文章在Main-Memory的存储系统是讨论了Log-structured的内存分配，主要目的是提高内存利用率，此外就是提高性能。这个是RAMCloud系统的一部分。
 
-
-
 ### 动机
 
    通用的使用malloc(or类似方式)的内存管理方式的一个缺点就是低的内存利用率:
@@ -21,8 +19,6 @@ typora-root-url: ../
 ![lsm-memory-utilization](/assets/img/lsm-memory-utilization.png)
 
   从这个图标来看，各个的利用率都很不好看。
-
-
 
 ### 基本设计
 
@@ -39,8 +35,6 @@ LFS中log包含了很多额外的索引的信息，为的是方便读取。由�
 ```
 Tombstones have proven to be a mixed blessing in RAMCloud: they provide a simple mechanism to prevent object resurrection, but they introduce additional prob- lems of their own. One problem is tombstone garbage collection. Tombstones must eventually be removed from the log, but this is only safe if the corresponding objects have been cleaned (so they will never be seen during crash recovery). To enable tombstone deletion, each tombstone includes the identifier of the segment containing the obsolete object. When the cleaner encounters a tombstone in the log, it checks the segment referenced in the tombstone. If that segment is no longer part of the log, then it must have been cleaned, so the old object no longer exists and the tombstone can be deleted. If the segment still exists in the log, then the tombstone must be preserved.
 ```
-
-.
 
 ### Two-level Cleaning 
 
@@ -69,8 +63,6 @@ There are three points of contention between cleaner threads and service threads
 
 对于第1个问题，解决办法是cleaner和servic的线程使用不同的log segment；第2个问题就是直接使用lock了。对与第3个问题，实际上和现在的一些同步方法例如RCU，hard pointer之类的方法要解决的问题是相同的RAMCloud使用的方式当最近的请求都处理完成后就可以回收了。此外关于处理磁盘上备份的内容和deadlock避免的问题可以参考原论文。这里的重点就是如何回收内存吧。
 
-
-
 ### 评估
 
   Log-structured的内存分配方式在RAMCloud中可以实现80 - 90%的内存利用率。利用率高是最吸引人的地方吧。
@@ -80,8 +72,6 @@ There are three points of contention between cleaner threads and service threads
 • At high memory utilizations, two-level cleaning im- proves client throughput up to 6x over a single-level approach.
 • Log-structured memory also makes sense for other DRAM-based storage systems, such as memcached.
 ```
-
-.
 
 ## 参考
 

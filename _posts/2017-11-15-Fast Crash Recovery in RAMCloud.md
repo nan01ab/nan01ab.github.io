@@ -16,8 +16,6 @@ typora-root-url: ../
 RAMCloud employs randomized techniques to manage the system in a scalable and decentralized fashion. In a 60-node cluster, RAMCloud recovers 35 GB of data from a failed server in 1.6 seconds. Our measurements suggest that the approach will scale to recover larger memory sizes (64 GB or more) in less time with larger clusters.
 ```
 
-.
-
 ### 基本思路
 
   RAMCloud的数据持久化备份子啊磁盘上面的，要向在1-2秒的时间将及时GB的数据一下子恢复到内存里面，这里使用的部分就是利用大规模的资源。可以简单的理解为将数据分散保存在非常多的磁盘上面，如何在恢复的时候并发的读取这些磁盘上面备份的数据，这样就可以实现在极短的时间内将数据取回。比如，同时使用1000个磁盘，这样64GB的数据大概就会被分为64MB的小部分，以现在的HHD大约100- 200MB/s的顺序读取速度，就可以在1s内将这些数据读取到内存里面，然后在将这些数据恢复成所需要的格式，就可以做大在就可以做到恢复 64GB的数据的时间为 1-2s。
@@ -29,8 +27,6 @@ RAMCloud employs randomized techniques to manage the system in a scalable and de
 ```
 Thus, the overall approach to recovery in RAMCloud is to com-bine the disk bandwidth, network bandwidth, and CPU cycles of thousands of backups and hundreds of recovery masters. The sub- sections below describe how RAMCloud divides its work among all of these resources and how it coordinates the resources to re- cover in 1-2 seconds.
 ```
-
-.
 
 ### Scattering Log Segments 
 
@@ -64,8 +60,6 @@ RAMCloud computes wills using tablet profiles. Each tablet pro- file tracks the 
 ```
 In either case, server failures are reported to the coordinator. The coordinator verifies the problem by attempting to communicate with the server itself, then initiates recovery if the server does not respond. Timeouts must be relatively short (tens of millisec- onds) so that they don’t significantly delay recovery. 
 ```
-
- .
 
 ### Recovery 
 
@@ -102,8 +96,6 @@ In either case, server failures are reported to the coordinator. The coordinator
 ```
 Once a backup with a replica of the active segment has been contacted, it will reject backup opera- tions from the sick master with an indication that the master must stop servicing requests until it has contacted the coordinator. Masters will periodically check in with their backups, so disabling a master’s backup operations will also stop it from servicing read requests by the time recovery completes.
 ```
-
-.
 
 ### Additional Failure Modes 
 

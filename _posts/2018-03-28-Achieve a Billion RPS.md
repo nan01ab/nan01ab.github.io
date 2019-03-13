@@ -23,8 +23,6 @@ typora-root-url: ../
 
  网站很多事从MICA这个系统出发讨论的，使用最好先阅读一下[2]。  
 
-
-
 ### 0x01 The Road To 120 Million RPS Per KVS Server
 
   这里讨论的事如何使得MICA得到120M的RPS的，这里使用客户端批量执行的话可以达到160M PRS。
@@ -79,8 +77,6 @@ typora-root-url: ../
 ```
 ... As throughput increases from 120MRPS to 167MRPS, latency increases gracefully; the mean goes from 39 to 70μs and the 95th percentile from 58 to 112μs. As in the nonbatched case, higher system throughputs take a toll on tail latencies. At 167MRPS throughput, the 99th and 99.9th percentile latencies are 268μs and 824μs, respectively.
 ```
-
-.
 
 ### 0x02 Achievng 1 Billion RPS Per Server
 

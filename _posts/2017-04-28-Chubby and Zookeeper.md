@@ -41,8 +41,6 @@ We describe our experiences with the Chubby lock service, which is intended to p
 ZooKeeper, a service for coordinating processes of distributed applications. Since ZooKeeper is part of critical infrastructure, ZooKeeper aims to provide a simple and high performance kernel for building more complex coordination primitives at the client. It incorporates elements from group messaging, shared registers, and distributed lock services in a replicated, centralized service. 
 ```
 
-.
-
 ### 基本架构
 
 Chubby大体的架构看上去比较简单(实际上一点都不简单):
@@ -51,7 +49,7 @@ Chubby大体的架构看上去比较简单(实际上一点都不简单):
 
  
 
-Chubby主要由两部分组成，一个是客户端使用的库，一部分就是Chubby Cell。还有就是一个可选的代理服务。在这个图上没有表现出来。这里的库没有什么好说的，之间忽略。一个Chubby Cell通常由5个服务器组成，着5个副本由 分布式共识协议来选举出一个Master，其它副本都都复制了一份Master上的数据，但是只有Master处理读写请求。客户端通过发送请求给这些副本，它们会返回Master的信息。这里Zookeeper的基本架构师几乎是一样的，然后优点组件的名字叫法不一样。不一样的地方在与能够读的结点，在Zookeeper中，它特别强调了为读的优化，所以Zookeeper的所有结点都是可以读的，这样就获得很好的读的性能：
+  Chubby主要由两部分组成，一个是客户端使用的库，一部分就是Chubby Cell。还有就是一个可选的代理服务。在这个图上没有表现出来。这里的库没有什么好说的，之间忽略。一个Chubby Cell通常由5个服务器组成，着5个副本由 分布式共识协议来选举出一个Master，其它副本都都复制了一份Master上的数据，但是只有Master处理读写请求。客户端通过发送请求给这些副本，它们会返回Master的信息。这里Zookeeper的基本架构师几乎是一样的，然后优点组件的名字叫法不一样。不一样的地方在与能够读的结点，在Zookeeper中，它特别强调了为读的优化，所以Zookeeper的所有结点都是可以读的，这样就获得很好的读的性能：
 
 ```
 Read requests are handled locally at each server. Each read request is processed and tagged with a zxid that corresponds to the last transaction seen by the server. This zxid defines the partial order of the read requests with respect to the write requests. By processing reads locally, we obtain excellent read performance because it is just an in-memory operation on the local server, and there is no disk activity or agreement protocol to run. This design choice is key to achieving our goal of excellent performance with read-dominant workloads.
@@ -66,8 +64,6 @@ FIFO client order: all requests from a given client are executed in the order th
 ```
 
 关于共识协议的就不写在这篇总结中了，因为内容比较多。
-
-.
 
 ### 文件，目录，句柄 和 事件
 
@@ -88,8 +84,6 @@ Open() opens a named file or directory to produce a handle, analogous to a UNIX 
 ```
 
  为了通知客户端某些事件的发生，两个都提供了通知的机制，Chubby中叫做Events，Zookeeper中叫做Watcher。 此外关于访问控制，Chubby的论文中明确表示了它使用了ACL，而Zookeeper的论文中没有提及，但是现在它是有ACL机制的。
-
-.
 
 ### 锁 和 其它API
 
@@ -154,8 +148,6 @@ When file data or meta-data is to be changed, the modification is blocked while 
 ```
 A Chubby session is a relationship between a Chubby cell and a Chubby client; it exists for some interval of time, and is maintained by periodic handshakes called KeepAlives. Unless a Chubby client informs the master otherwise, the client’s handles, locks, and cached data all remain valid provided its session remains valid.
 ```
-
-.
 
 ### 故障切换
 

@@ -16,8 +16,6 @@ typora-root-url: ../
  We implement the barrier-enabled IO stack in server as well as in mobile platforms. SQLite performance increases by 270% and 75%, in server and in smartphone, respectively. In a server storage, BarrierFS brings as much as by 43× and by 73× performance gain in MySQL and SQLite, respectively, against EXT4 via relaxing the dura- bility of a transaction.
 ```
 
-.
-
 ### 0x01 基本思路
 
   在了解基本的思路之前，先来看一下现在的IO Stack中的一些特点。首先最重要的是IO Stack中的顺序。这里定义了下面的几种顺序：1. Issue Order，发出顺序，表示为I(原Paper上面使用的是很奇怪的符号来表示，这里就以首字母来表示)，表示了FS向下面发送请求的顺序；2. Dispatch Order，分发顺序，表示为D； 3. Transfer Order，传输顺序，表示为T；4. Persist Order，持久化顺序，表示为P。这里定义一种偏序(partial order)：当上面的操作在各个操作之间相对的顺序保持不变，则说这顺序之间满足这个偏序关心。这里的“偏”是是对barrier而言的，
@@ -41,8 +39,6 @@ a partial order is preserved if the relative position of the requests against a 
 ```
 Within a transaction, JBD needs to ensure that JD is made durable ahead of JC. Between the journal transactions, JBD has to ensure that journal transactions are made durable in order. When either of the two conditions are violated, the file system may recover incorrectly in case of unexpected failure.
 ```
-
-.
 
 ### 0x02 保留顺序的Block层
 
@@ -68,8 +64,6 @@ Within a transaction, JBD needs to ensure that JD is made durable ahead of JC. B
 
  经过了上面的三个部分的工作，就可以保证从IO请求被发出到被持久化之间的偏序关系是可以得到保留的。看起来这个工作一点都不容易。
 
-
-
 ### 0x03 可使用屏障的文件系统
 
   为了支持在应用层面使用这个屏障，这里条件了两个syscall: `fbarrier`和`fdatabarrier`。这个两者之间的差异和fsync和fdatasync之间的差异是一样。这两个添加的API用来表示要满足的顺序关系，而不会保证数据的持久化，
@@ -93,8 +87,6 @@ Within a transaction, JBD needs to ensure that JD is made durable ahead of JC. B
   ```
 
 * Paper中这部分还对在改动ext4文件系统是Page冲突和并发日志进行了说明，具体参考[1].
-
-
 
 ### 0x04 看几段代码
 

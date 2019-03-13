@@ -30,8 +30,6 @@ FLSM的存储布局：
  Doing so ensures that data is written exactly once in most levels; a different compaction algorithm is used for the the last few highest levels.  FLSM achieves this using a novel storage layout and organizing data using guards.
 ```
 
-.
-
 ### 0x02 Guards
 
  Guards是FLSM中核心的概念，基本的思路来自Skip List。前面说到FLSM将每层分为了更小的单元，为了更快的找到数据所在的单元，这里使用了Guards。这里为什么可以和基本的工作方式联想一下Skip List即可。传统的LSM，每一层包含了不相交的数据的sstabls，也就是说一个数据最多在这些sstables中出现一次。FLSM则改变了这种方式，它由每一层的多个sstables的范围是可以重叠的(注意这里是sstables，FLSM每一层多个的sstable，而且每一个Gruard下面也可以由多个)，也就是说一个数据在多个的这些sstabls里面。
@@ -61,8 +59,6 @@ Much like skip lists, if a key K is selected as a guard in level i, it becomes a
 ```
 During compaction, guard G is deleted and sstables belonging to guard G will be partitioned and appended to either the neighboring guards in the same level i or child guards in level i + 1. Compaction from level i to i + 1 proceeds as normal (since G is still a guard in level i + 1). At the end of compaction, FLSM persists metadata indicating G has been deleted at level i. If required, the guard is deleted in other levels in a similar manner. Note that if a guard is deleted at level i, it should be deleted at all levels < i; FLSM can choose whether to delete the guard at higher levels > i.
 ```
-
-.
 
 ### 0x03 FLSM Operations 
 

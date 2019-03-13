@@ -28,15 +28,15 @@ typora-root-url: ../
 ## DistCache: Provable Load Balancing for Large-Scale Storage Systems with Distributed Caching
 ### 0x10 引言
 
-  DistCache是一种为存储系统设计的一种缓存的测量。它的基本方式是使用一个两层的Cache结构，不同的层使用不同的Hash函数，用于将热点的数据尽可能的分散到不同机器上面，
+  DistCache是一种为存储系统设计的一种缓存方式。它的基本方式是使用一个两层的Cache结构，不同的层使用不同的Hash函数，用于将热点的数据尽可能的分散到不同机器上面，
 
 ![distcache-idea](/assets/images/distcache-idea.png)
 
 ### 0x11 基本思路
 
-  在之前的一些解决方案中，常见的两种方式是Cache分区和Cache复制。对于前者的缺点就是处理热点Key的时候不能很好地分散这些请求，而后者的缺点在于Cache一致性的处理比较困难，整体系统的复杂度也更加大。而DistCache则采用了上图中的设计，在不同的层使用不同的Hash喊出尽可能的去分开热点数据的查询。另外，在选择那个缓存节点处理查询的时候，就采用了简单有效的 power-of-two-choices的方法。就是随机找两个选择其中load更加小的。另外文中还有一大堆对这个方法具体情况的分析[2]。
+  在之前的一些解决方案中，常见的两种方式是Cache分区和Cache复制。对于前者的缺点就是处理热点Key的时候不能很好地分散这些请求，而后者的缺点在于Cache一致性的处理比较困难，整体系统的复杂度也更加大。而DistCache则采用了上图中的设计，在不同的层使用不同的Hash函数尽可能的去分开热点数据的查询。另外，在选择那个缓存节点处理查询的时候，就采用了简单有效的 power-of-two-choices的方法。就是随机找两个选择其中load更加小的。另外文中还有一大堆对这个方法具体情况的分析[2]。
 
-  Paper中实现了类似于NetCache的一个基于交换机的DistCache的一个实现。上面架构是在一个two-layer leaf-spine架构中的数据中心网络中的一个实现。在这个实现中，会有一个Cache Controller管理处理缓存交换机、处理设备故障。Cache交换机负责缓存热点数据，同时负责分发它的load的信息，这个load的状态会用于如何路由这个查询。于客户端相连的ToR交换机负责处理查询路由的问题(使用power-of-two-choices的测量)。后端的存储节点可以就是一个一般的KVS。下图是一个处理流程的例子。S6与客户端相连，S6使用power-of-two-choices选择了S1 S3，根据负载信息从中作梗选择一个。缓存命中的时候直接返回即可。缓存缺失的时候，操作会被直接转发到存储节点。
+  Paper中实现了类似于NetCache的一个基于交换机的DistCache的一个实现。上面架构是在一个two-layer leaf-spine架构中的数据中心网络中的一个实现。在这个实现中，会有一个Cache Controller管理处理缓存交换机、处理设备故障。Cache交换机负责缓存热点数据，同时负责分发它的load的信息，这个load的状态会用于如何路由这个查询。于客户端相连的ToR交换机负责处理查询路由的问题(使用power-of-two-choices的测量)。后端的存储节点可以就是一个一般的KVS。下图是一个处理流程的例子。S6与客户端相连，S6使用power-of-two-choices选择了S1 S3，根据负载信息从中选择一个。缓存命中的时候直接返回即可。缓存缺失的时候，操作会被直接转发到存储节点。
 
 ![distcache-switch](/assets/images/distcache-switch.png)
 
@@ -117,9 +117,17 @@ $$
 
   这里的具体信息可以参看[3],
 
+## KeySched: Timeslot-based Hot Key Scheduling for Load Balancing in Key-Value Store
+### 0x30 基本思路
+
+   KeySched是一片关于KVS负载均衡的一篇Poster。之前有几篇Paper是利用可编程交换机的来做相关的事情，而这里则是利用SmartNIC网卡来做，也就是说重点在于单机上面的Load Balancing。这里监控热点Key的方式是给予timeslot的方式，基本的方式在将时间分为一定程度的timeslot。使用Count-min Sketch之类的方式来发现热点key，然后将这个timeslot里面的热点的可以分配到最近的几个timeslots里面load最低的分区。基本的架构如下图，主要是三个基本组件。
+
+![keyshchduled-arch](/assets/images/keyshchduled-arch.png)
+
 ## 参考
 
 1.  Join-Idle-Queue: A novel load balancing algorithm for dynamically scalable web services. Perform. Eval. 68, 11 (2011).
 2.  DistCache: Provable Load Balancing for Large-Scale Storage Systems with Distributed Caching, FAST '19.
 3.  Small Cache, Big Effect: Provable Load Balancing for Randomly Partitioned Cluster Services, SoCC '11.
+4.  KeySched: Timeslot-based Hot Key Scheduling for Load Balancing in Key-Value Store, SIGCOMM '18.
 

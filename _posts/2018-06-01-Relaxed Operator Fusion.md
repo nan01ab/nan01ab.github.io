@@ -16,8 +16,6 @@ typora-root-url: ../
 ... Our evaluation shows that our approach reduces the execution time of OLAP queries by up to 2.2x and achieves up to 1.8x better performance compared to other in-memory DBMSs.
 ```
 
-.
-
 ### 0x01 背景
 
  这里就是描述了关于ROF相关的三个部分：编译、向量化和预取。
@@ -78,8 +76,6 @@ for (auto &block : L.GetBlocks()) {
 return agg.GetRevenue();
 ```
 
-.
-
 #### 预取
 
   在一些内存访问操作比较复杂又是内存密集型的应用下，缓存预取能够获得很好的效果。预取操作可以被硬件预取、也可以被软件预取，后者就是使用显式的缓存预取指令，而硬件预取一般适应的范围比较有限。在关于MICA这样一个KVS的一篇Paper[3]中，将了预取带来的明显的性能提升，不过预取也加大了对内存带宽的需求。现在的软件预取的一些研究如Group prefetching (GP)，Software-pipelined prefetching(SPP)和Asynchronous memory-access chaining(AMAC)，
@@ -87,8 +83,6 @@ return agg.GetRevenue();
 ```
 ... Group prefetching (GP) works by processing input tuples in groups of size G. Tuples in the same group proceed through code steps in lock-step, thereby ensuring at most G simultaneous independent in-flight memory accesses. Software-pipelined prefetching (SPP) works by processing different tuples in each code step, thereby creating a fluid pipeline. Asynchronous memory-access chaining (AMAC) works by having a window of tuples in different steps of processing, swapping out tuples as soon as they complete to enable early stopping.
 ```
-
- .
 
 #### 问题
 

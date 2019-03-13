@@ -16,8 +16,6 @@ typora-root-url: ../
 For I/O-intensive benchmarks such as Postmark and an Andrew-style build, the performance of xsyncfs is within 7% of the default asynchronous implementation of ext3. ... Xsyncfs is as much as an order of magnitude faster than the default version of ext3 mounted synchronously, which allows data to be lost on power failure because committed data may reside in the volatile hard drive cache. Xsyncfs is as much as two orders of magnitude faster than a version of ext3 that guards against losing data on power failure.
 ```
 
-.
-
 ### 0x01 基本思路
 
    Paper引入了同步操作的不同的定义，external synchrony的基本概念不同于传统的同步IO的定义。

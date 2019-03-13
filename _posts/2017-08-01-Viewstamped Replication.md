@@ -23,8 +23,6 @@ it is a replication protocol rather than a consensus protocol
 
  所以网上一些将其和Paxos之类的consensus protocol对比，有时候是把它当作了consensus protocol，这是不正确的。
 
-
-
 ### Background & Overview 
 
   VR中一组保存副本的节点称为Replica Groups，在一个数量为2f + 1的replica groups，VR最多可容忍f个副本出错。VR中每一个副本必须开始于一个初始的状态，而且操作是确定性的，如果可以满足副本上执行操作的顺序相同，则各个副本就处于同样的状态。对于一个复制协议来说，难点在与在各个副本上以相同的顺序执行操作。
@@ -34,8 +32,6 @@ it is a replication protocol rather than a consensus protocol
         1. 正常情况下的的处理流程；
         2. view change以选择新的primary；
         3. 恢复协议。
-
-
 
 ### The VR Protocol 
 
@@ -50,8 +46,6 @@ it is a replication protocol rather than a consensus protocol
 6. The log，op-number条目的数组，包含到目前为止按指定顺序收到的请求；
 7. The commit-number，最近提交操作的op-number；
 8. The client-table，记录每个客户端其最近的请求的数量，如果请求已被执行，则为该请求发送的结果。
-
-
 
 ### 正常执行流程
 
@@ -88,8 +82,6 @@ Replica 2      +----------------------------------------------------------
                              |               |              |
 ```
 
-.
-
 ### View Changes 
 
 Backup根据一定的规则判断primary故障之后，就会进入view change阶段，执行的流程如下:
@@ -119,15 +111,10 @@ Backup根据一定的规则判断primary故障之后，就会进入view change�
   2. The old-configuration, 初始化空。 
   ```
   另外还有增加了另一个status: transitioning 。副本将在下一个epoch开始的时候将其状态设置为transitioning。新的副本在新的epoch开始时使用old-configuration进行状态转移。这样一来，新节点就知道在哪里得到状态信息。当新epoch中replica group的副本的log都更新到这个epoch开始时，副本就将其状态设置为normal。
-现在，每条消息都包含一个epoch-number 。副本只处理与它们所在的epoch-number匹配的消息(来自client或其他副本)。如果接收到具有epoch-number的消息，则需要转移到到该时期，如果收到具有较早epoch-number的消息，则它们丢弃该消息，同时会通知发送者有更新的epoch-number。
-
-
-​    重新配置的请求由特殊客户端c 发送，例如管理员的节点，该节点向当前主节点发送⟨RECONFIGURATION e，c，s，new-config⟩消息。其中，e: c已知的当前时代，s: c的请求号，new-config: 新组的所有成员的IP地址。Primary只有当s足够大(基于client-table)，e是当前epoch-number时才接受该请求。此外，如果new-config少于3个IP地址，主节点将丢弃该请求。
+现在，每条消息都包含一个epoch-number 。副本只处理与它们所在的epoch-number匹配的消息(来自client或其他副本)。如果接收到具有epoch-number的消息，则需要转移到到该时期，如果收到具有较早epoch-number的消息，则它们丢弃该消息，同时会通知发送者有更新的epoch-number。重新配置的请求由特殊客户端c 发送，例如管理员的节点，该节点向当前主节点发送⟨RECONFIGURATION e，c，s，new-config⟩消息。其中，e: c已知的当前时代，s: c的请求号，new-config: 新组的所有成员的IP地址。Primary只有当s足够大(基于client-table)，e是当前epoch-number时才接受该请求。此外，如果new-config少于3个IP地址，主节点将丢弃该请求。
 
    如果primary接受了该请求，它会按通常的方式处理client请求的方式处理这个请求，但是有两个区别：首先，(1)主要立即停止接受其他客户端请求，重新配置请求是当前时代处理的最后一个请求。其次，(2)执行请求不能导致an up-call to the service code，重新配置仅影响VR状态。
 具体的Reconfiguration Protocol可以参考论文[1]，到这里这算法已经介绍的差不多了，更加具体的信息还是看原论文. 总的来说，论文[1]以步骤的形式给出了VR的操作，描述还是很清晰的。
-
-
 
 ## 参考
 

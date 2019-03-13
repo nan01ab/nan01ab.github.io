@@ -12,8 +12,6 @@ typora-root-url: ../
 
  Btree及其变体可以是是最重要和使用最广泛的较复杂的数据结构之一了。对Btree的改进页非常多，从传统的面向机械硬盘等存储介质的优化，到为内存实现的优化，再到现在的为非易失性内存的优化以及写优化等等的很多很多的变体。这里就简单地总结了若干的Btree的变体。在之前的看过的论文中包括了一些B-Tree的变体: Masstree、PLAM、Bz-tree以及Bw-tree。
 
-
-
 ### 0x01 Bε-tree
 
  Bε-tree是Btree的一个写入优化的版本(保存在磁盘上时)，它的思路的是在一个内部节点不仅仅保存Key和指向下一层节点的指针。还包含了一部分的Buffer空间。数据添加的时候先添加到这个Buffer，在Buffer中数据的数量达到一定量的时候将其“下推”。Bε-tree这样的做的优化就是使得小数据量的写入可以先集中写，也可以实现在一个地方将写入累积其它，达到一定量的时候在写入下层对应的位置。 Bε-tree这样的做的缺点就是结构的复杂程度会提高，实现起来更加复杂。另外就是范围操作的时候可能麻烦不少。Bε-tree在BetrFS中得到了应用[3]，
@@ -83,8 +81,6 @@ Algorithm 3 SplitLeaf(LeafNode Leaf):
 15: reset μLog;
 ```
 
-.
-
 ### 0x05 Write-Atomic B+-Trees (a.k.a. wB+-Trees)
 
   wB+-Tree则是将内部节点和叶子节点都保存到非易失性内存之上。它排序的做法不是直接对数据项本身进行排序，而是使用了一个slot array，里面保存的是实际数据的index。排序的时候排序这个slot array。因为这个index array的大小一般都元小于实际的数据项。另外的一个和前面的FP-Tree一样，wB+-Trees也使用bitmap。
@@ -124,8 +120,6 @@ Algorithm 3 SplitLeaf(LeafNode Leaf):
 During failure recovery, a slot+bitmap node may be in one of three consistent states: (i) the original state before insertion, (ii) the original state with invalid slot array, or (iii) successful insertion with valid bitmap and valid slot array.
 */
 ```
-
-.
 
 ### 0x06 clfB-tree: Cacheline Friendly Persistent B-tree for NVRAM
 

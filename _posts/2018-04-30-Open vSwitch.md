@@ -10,7 +10,7 @@ typora-root-url: ../
 
 ### 0x00 引言
 
-  虚拟化对数据中心网络的产生了很大的影响。现在的很多的网络接入层的端口都是虚拟化的而不是物理的。现在的网络的第一条的交换机越来越是hypervisor，而不是用来的数据中心网络中的ToR交换机。已有解决方案的不足导致了网络虚拟化的出现，	在这样的网络中，虚拟交换机变成了一个重要的组成部分，虚拟的交换机在数据中心网络和hypervisor之间传输IP隧道数据包，它可以使得虚拟网络和和物理网络分离。Open vSwitch为解决这些问题和客服现有一些解决方案的局限性而出现，
+  虚拟化对数据中心网络的产生了很大的影响。现在的很多的网络接入层的端口都是虚拟化的而不是物理的。现在的网络的第一条的交换机越来越是hypervisor，而不是用来的数据中心网络中的ToR交换机。已有解决方案的不足导致了网络虚拟化的出现，在这样的网络中，虚拟交换机变成了一个重要的组成部分，虚拟的交换机在数据中心网络和hypervisor之间传输IP隧道数据包，它可以使得虚拟网络和和物理网络分离。Open vSwitch为解决这些问题和客服现有一些解决方案的局限性而出现，
 
 ```
 Today, on Linux, its original platform, Open vSwitch works with most hypervisors and container systems, including Xen, KVM, and Docker. Open vSwitch also works “out of the box” on the FreeBSD and NetBSD operating systems and ports to the VMware ESXi and Microsoft Hyper-V hypervisors are underway.
@@ -21,8 +21,6 @@ Today, on Linux, its original platform, Open vSwitch works with most hypervisors
 * 资源共享，独立的交换机它的计算资源是独立占有的，它就可以只用考虑如何发挥出这些硬件资源的性能即可。但是虚拟交换机和其它的部分共享资源，这就要求它能够尽可能地节约资源的使用。虚拟交换机也就很难去优化各种各样的情况，而是只能去优化最常见的情况。这个情况导致了Open vSwitch的实现中大量了使用各种的缓存机制来降低CPU的使用率和提供转发的速率；
 * 安放位置，虚拟交换机处于网络的边缘位置，消除了很多存在的网络问题。但是这里要处理的一个问题就是一个hypervisor上面运行上千台的虚拟机情况并不罕见，虚拟机的状态变化也要求虚拟交换机进行相应的状态更新。这个就要求Open vSwitch能够处理这样的情况。这也影响了Open vSwitch的O(1)的分类算法的设计。
 * SDN, use cases, and ecosystem，另外还有3个原因影响了Open vSwitch的设计，1. 它一开始就是一个OpenFlow交换机；2. OpenFlow开始很注重灵活性，但也导致了在一些环境下面的处理的线路太长，造成了不小的负载，这个是的它必须使用流缓存；3. Open vSwitch要能使用不同的环境，这个是的它注重模块化和可移植性。
-
-.
 
 ### 0x01 设计
 
@@ -50,8 +48,6 @@ Open vSwitch的基本架构设计：
 
 * 使用OpenFlow作为编程模型，Open vSwitch使用 proactive flow programming的方法。具体[1].
 
-.
-
 ### 0x02 Flow Cache的设计与Cache失效
 
  Open vSwitch的流缓存设计：
@@ -70,13 +66,9 @@ Open vSwitch的基本架构设计：
   The megaflow cache is a single flow lookup table that supports generic matching, i.e., it supports caching forwarding decisions for larger aggregates of traffic than connections.
   ```
 
-.
-
 #### Cache失效
 
   在一些情况下，Open vSwitch需要对缓存的内容进行更新。在一些情况下，处理可能的改变也是一件很复杂的事情，这Paper中有一大段论述了这些情况[1].
-
-
 
 ### 0x03 Cache敏感的包分类器
 

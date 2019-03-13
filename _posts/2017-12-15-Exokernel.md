@@ -16,8 +16,6 @@ typora-root-url: ../
 Measurements show that application-level virtual memory and interprocess communication primitives are five to 40 times faster than Ultrix’s kernel primitives. Compared to state-of-the-art implementations from the literature, the prototype exokernel system is at least five times faster on operations such as exception dispatching and interprocess communication.
 ```
 
-.
-
 ### 基本思路
 
    Exokernel使用的其实是一种很激进的思路。Exokernel认为传统的统一抽象的方式并不能最佳地发挥出应用的性能。OS来管理资源的一个缺点就是它不知道如果抽象、管理资源才是最适应某一类应用的，对这个最了解的一应该就是应用本身。Exokernel的做法就是Kernel只复杂处理一些基本的管理、安全相关的问题，而对于资源具体的管理，就通过接口暴露给应用自己去管理。Exokernel要实现它的功能，主要要解决的问题有以下这些：
@@ -37,8 +35,6 @@ Measurements show that application-level virtual memory and interprocess communi
 * Expose Revocation;
 ```
 
-.
-
 #### Secure Bindings
 
  在讲资源暴露给应用管理之后，Exokernel一个最重要的任务就是保护应用不受另外的应用的影响。应用彼此之间都是假设为不能信任的。这里其实就是如何安全地资源多路复用。为了高性能地实现Secure Bindings，Exokernel使用了如下的方式：1. 保护检查必须可以被实现为kernel或者硬件可以高效执行的操作；2. 一个Secure Bindings执行权限验证的时候只在Bind的时候进行。
@@ -53,13 +49,9 @@ Measurements show that application-level virtual memory and interprocess communi
 * 软件缓存(software caching)，Secure bindings的信息也可以缓存在内核中；
 * 应用代码下放(downloading application code)，这种方式就是将应用的代码下放在内核中运行；
 
-
-
 #### Visible Resource Revocation
 
   资源管理的权限交给一个应用之后，必须有方法在合适的时候回收这些资源。一般的资源回收都是应用可感知的，当然也可以在应用不知情的情况下就将资源回收了。在应用可知的情况下进行资源回收可以让应用做一些状态保存的善后的工作。
-
-
 
 #### Abort Protocol
 
@@ -69,13 +61,9 @@ Measurements show that application-level virtual memory and interprocess communi
 To record the forced loss of a resource, we use a repossession vector. When an exokernel takes a resource from a library operating system, this fact is registered in the vector and the library operating system receives a “repossession” exception so that it can update any mappings that use the resource.
 ```
 
-.
-
 ## Aegis
 
-  Paper中描述了一个Exokernel架构的一个实现。并在多种环境对多种的应用进行了测试，从Paper中的结果来看，Aegis的编写很优秀。
-
-
+  Paper中描述了一个Exokernel架构的一个实现。并在多种环境对多种的应用进行了测试，从Paper中的结果来看，Aegis的表现很优秀。
 
 ## 参考
 

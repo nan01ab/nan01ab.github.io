@@ -18,8 +18,6 @@ typora-root-url: ../
 We implemented a prototype of our anti-caching proposal in a high-performance, main memory OLTP DBMS and performed a series of experiments across a range of database sizes, workload skews, and read/write mixes. We compared its performance with an open-source, disk-based DBMS optionally fronted by a distributed main memory cache. Our results show that for higher skewed workloads the anti-caching architecture has a performance advantage over either of the other architectures tested of up to 9x for a data size 8x larger than memory.
 ```
 
-.
-
 ### 基本思路
 
 一个基本的对比图:
@@ -53,8 +51,6 @@ We implemented a prototype of our anti-caching proposal in a high-performance, m
 This eviction process continues until the block is full, at which point the transaction will create the next block. The process stops once the transaction has evicted the req- uisite amount of data from each table. Groups of blocks are written out in a single sequential write. For example, if the table is asked to evict a set of n blocks, it will create each of the n blocks independently, and only when all n blocks have been created will it write the result to disk in one sequential write.
 ```
 
- .
-
 #### Transaction Execution  & Block Retrieval 
 
 ![anticaching-execute](/assets/img/anticaching-execute.png)
@@ -69,8 +65,6 @@ This eviction process continues until the block is full, at which point the tran
 For some transactions, it is not possible for the DBMS to discover all of the data that it needs in a single pre-pass. This can occur if the non-indexed values of an evicted tuple are needed to retrieve additional tuples in the same transaction. In this case, the initial pre-pass phase will determine all evicted data that is not dependent on currently evicted data. 
 ```
 
-.
-
  ##### Block Retrieval 
 
   这里只关注一个问题：以什么样的方式取回数据？这里有2中方式，一种是取回包含要访问元组的这个块，一种就是只虫块内取回需要访问的元组：
@@ -83,7 +77,6 @@ For some transactions, it is not possible for the DBMS to discover all of the da
   We employ a lazy block compaction algorithm during the merge process. This compaction works by tracking the number of holes in each of the blocks in the Block Table. When the DBMS retrieves a block from disk, it checks whether the number of holes in a block is above a threshold. If it is, then the DBMS will merge the entire block back into the memory, just as with the block-merge strategy.
   ```
 
-  .
 
 #### Distributed Transactions & Snapshots & Recovery	 
 
@@ -99,7 +92,6 @@ For some transactions, it is not possible for the DBMS to discover all of the da
   Instead of making copies for each checkpoint, the DBMS takes delta snapshots. Because the data within a block in the Block Table is not updated, the DBMS just checks to see which blocks were added or removed from the Block Table since the last snapshot. This technique greatly reduces the amount of data copied with each snapshot invocation.
   ```
 
-  .
 
 ### 评估
 

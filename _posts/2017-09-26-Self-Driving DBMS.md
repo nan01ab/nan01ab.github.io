@@ -66,8 +66,6 @@ typora-root-url: ../
 Lastly, it may be necessary to provide an override mechanism for DBAs. ... To prevent the DBA from making bad decisions that are permanent, the DBMS can require the DBA to provide a expiration for the manual actions. If the action was truly a good idea, then the DBMS will keep it. Otherwise, it is free to remove it and choose a better one
 ```
 
-.
-
 ### 评估
 
   这个具体信息参看[1]

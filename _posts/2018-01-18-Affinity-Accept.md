@@ -28,8 +28,6 @@ Accept Affinity每个core一个accept queue，应用线程优先在本地的core
 When new connections arrive, the network stack wakes up any threads waiting on the local core’s accept queue. This allows all connection processing to occur locally.
 ```
 
-.
-
 ### 负载均衡
 
  上面的分区的方式可能导致的一个问题就是负载不均衡的问题。这里的负载不均衡分为两类：这里就不具体讨论细节了。
@@ -45,8 +43,6 @@ When new connections arrive, the network stack wakes up any threads waiting on t
   ```
   each non-busy core finds the victim core from which it has stolen the largest number of connections, and migrates one flow group from that core to itself (by reprogramming the NIC’s FDir table). In our configuration (4,096 flow groups and 48 cores), stealing one flow group every 100ms was sufficient. Busy cores do not migrate additional flow groups to themselves.
   ```
-
-.
 
 ### 评估
 

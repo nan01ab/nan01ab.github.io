@@ -18,8 +18,6 @@ typora-root-url: ../
 ... is bounded by 4TD where D is the longest distance between any two servers in a network in terms of number of hops and T is the period of the fastest clock (≈ 6.4ns). Moreover, in software, a DTP daemon can access the DTP clock with usually better than 4T (≈ 25.6ns) precision. As a result, the end-to-end precision can be better than 4T D + 8T nanoseconds
 ```
 
-.
-
 ### 0x01 背景和存在的问题
 
 网络中的时钟同步存在下面的一些的误差源：
@@ -44,9 +42,7 @@ Paper中还对目前的一些解决方案入NTP、PTP和GPS也做了分析[1]。
 
 ### 0x02 基本思路
 
-  DTP中的一些假设： 网络设备使用的oscillators(震荡器)存在一定的误差，但是这个误差在一定的范围内[f−0.0001f, f+0.0001f]，在10G的以太网中，这个f是156.25MHz；不用考虑时钟的拜占庭问题；使用网络线缆的长度一般不长，不超过1km，一般在10m以内。
-
-  DTP协议中，每个网络端口有一个局部的计数器，运行在物理层，每一个时钟滴答会递增。DTP直接在物理层操作局部计数器，交换机需要通过它额外的一部去同步它所有的端口的局部计数器。另外还维持了一个全局的计数器，也是每次时钟滴答的时候递增，但是总是去它和所有的局部计数器中的最大的值。一个同步两个对等实体的算法的基本的伪代码如下：
+  DTP中的一些假设： 网络设备使用的oscillators(震荡器)存在一定的误差，但是这个误差在一定的范围内[f−0.0001f, f+0.0001f]，在10G的以太网中，这个f是156.25MHz；不用考虑时钟的拜占庭问题；使用网络线缆的长度一般不长，不超过1km，一般在10m以内。DTP协议中，每个网络端口有一个局部的计数器，运行在物理层，每一个时钟滴答会递增。DTP直接在物理层操作局部计数器，交换机需要通过它额外的一部去同步它所有的端口的局部计数器。另外还维持了一个全局的计数器，也是每次时钟滴答的时候递增，但是总是去它和所有的局部计数器中的最大的值。一个同步两个对等实体的算法的基本的伪代码如下：
 
 ```
 Algorithm 1 DTP inside a network port:
@@ -118,8 +114,6 @@ A DTP-enabled device can be implemented with additional logic on top of the DTP-
 A NetFPGA-based verification in a 128-server, 2-stage Clos data center network shows that HUYGENS and HUYGENS-R achieve less than 12–15ns average error and under 30–45ns 99th percentile error at 40% network load. At 90% load, the numbers increase to 16–23ns and 45–58ns, respectively.
 ```
 
-.
-
 ### 0x11 基本思路
 
  HUYGENS算法的3点的核心思路，这里的第一二条的目的就是为了更加精确地处理测量one-way propagation times，下面第3点是使用设备自身来降低误差，
@@ -155,8 +149,6 @@ Finally, HUYGENS exploits a natural network effect—the idea that a group of pa
 
   这里的具体信息可以参看[1].
 
-
-
 ## A Scalable Ordering Primitive for Multicore Machines
 
 ### 0x20 引言
@@ -166,8 +158,6 @@ Finally, HUYGENS exploits a natural network effect—the idea that a group of pa
 ```
 Our evaluation shows that there is a possibility that the clocks are not synchronized on two architectures (Intel and ARM) and that Ordo generally improves the efficiency of several algorithms by 1.2–39.7× on various architectures.
 ```
-
-.
 
 ### 0x21 基本思路
 

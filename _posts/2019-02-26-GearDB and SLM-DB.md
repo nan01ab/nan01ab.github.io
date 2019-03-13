@@ -18,7 +18,7 @@ We implement and evaluate GearDB with LevelDB on a real HM-SMR drive. Our extens
 
 ### 0x01 基本思路
 
- #### Data Layout
+#### Data Layout
 
   在SMR磁盘上面，它将磁盘的存储空间分为若干的zone，每一个zone的大小多为256MB，而在这个zone里面数据只能顺序写入，就类似于一个磁带。另外SMR也存在一些可以随机写的区域，HM-SMR磁盘提高了一些接口来交给软件来管理。之前的在SMR磁盘上面的一个改进就是将SST的文件放大到一个zone的大小，不过这样的确定到来的另外一个问题就是随机读性能的下降，以及Compaction操作的时候文件过大带来的延迟的问题。GearDB的第一个改进首先就是改变LSM-Tree的SST文件保存安排的位置是随机的情况。在GearDB中，它会安排在一个zone中保存属于同一个level的文件。这样做的原因就是不同Level的Compaction操作执行频率是不同的，这样可以减少zones里面的数据。比如下图中的zone 1中L0，如果L0执行Compaction操作，zone 1中两个L0的文件就变成碎片不能使用，如果需要使用这个部分的文件则需要对整个的zone进行整理。而如果是同一个level的文件，则可以有可能可以整理。
 

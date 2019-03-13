@@ -12,8 +12,6 @@ typora-root-url: ../
 
   这篇Paper是一篇关于Crash-Consistency的Paper。对于如何写出正确的文件操作的代码很有价值。Paper中提出了一个BOB的工具来测试文件系统的persistence properties，开发了一个ALICE的工具来分析应用代码的crash vulnerabilities。
 
-
-
 ### 0x01 持久化特性
 
   文件系统的持久化特性决定了持久化特性在一个操作执行的时候，发生了错误最终文件系统中数据的情况。Paper 中测试了多种的Linux下面的文件系统ext2、ext3、ext4、btrfs、xfs 和 reiserfs。应用层面的Crash一致性很依赖于文件系统的持久化特性。下面举一个🌰，
@@ -33,8 +31,6 @@ typora-root-url: ../
 
 * 原子性，在上面的表中，所有的文件系统所有的配置情况都提供了单个扇区的覆盖写的一致性，一些文件系统的这个性质依赖于底层存储设备写入一个扇区的原子性(现在的存储设备应该都支持这个特性)。在一些新的存储介质上面，比如非易失性内存，它提供byte级别的写入原子性(一般最多为8bytes)，而不是扇区级别。由于添加一个扇区涉及到数据块的写入和文件元数据的修改，所以这里有些文件系统是不能保证原子性的。对于一个or多个块的覆盖写，则比一个or多个块的追加更加难以处理，这个一般地使用日志、CoW等的机制来保障。支持这2个特性的文件系统就少多了。而文件系统的操作一般都能保证一致性(处理ext2)，这个主要得益于日志or CoW技术地使用。
 * 顺序，在数据日志的模or sync模式下面，几个文件系统的顺序都是保证，但是结果就是较低的性能。文件系统的延迟分配技术会影响都最佳操作的顺序。
-
-
 
 ### 0x02 ALICE工具
 
@@ -98,8 +94,6 @@ Listing 2: Annotated Update Protocol Example. Micro-operations generated for eac
 ALICE is not complete, in that there may be vulnerabilities that are not detected by ALICE. It also requires the user to write application workloads and checkers; we believe workload automation is orthogonal to the goal of ALICE, and various model-checking techniques can be used to augment ALICE.
 ```
 
-.
-
 ### 0x03 应用中易出错的地方
 
   Paper中测试多个的应用，发现了不少的问题，
@@ -111,8 +105,6 @@ Figure 4: Protocol Diagrams. The diagram shows the modularized update protocol f
 ```
 
 这里以(A)中问题为例，(i)部分显示的是LevelDB的Compaction操作，(ii)显示的是LevelDB的添加操作。LevelDB这里的一个问题就是添加的log的时候可能导致只是追加了部分数据，一部分是垃圾数据，而LevelDB的恢复垃圾没有处理好这种情况。另外的一个问题在与Compaction的时候，没有正确之持久化目录的目录项，导致文件找不到。
-
-
 
 ## 参考
 

@@ -20,8 +20,6 @@ typora-root-url: ../
 3. How to eliminate multi-phase synchronization, crash recovery and checkpointing in distributed storage (Section 4).
 ```
 
-.
-
 ### 可拓展和可用性存储
 
    可拓展和可用性使用副本是一个最常用的办法，在这里Aurora也不例外。之前在Amazon中有使用过的基于Quorum的协议也被用用在Aurora这里。在Aurora中，数据会被默认保存为6份，分布在3个不同的AZ(Availability Zone)，写入使用6/4的Quorum协议，即写入的时候有4个副本返回成功就代表成功，读区使用3/6，3 + 4 > 6。这里不是常见的复制3份基于以下的考虑是因为Aurora认为三副本的设置无法容忍一些同时出现的故障，
@@ -42,8 +40,6 @@ These are each replicated 6 ways into Protection Groups (PGs) so that each PG co
 
 在10Gpbs的网络喜爱，Aurora可以做到一个数据段的故障在10s就恢复，所以只有在10s遇到2个及以上的数据段故障的时候才会影响到可用性。
 
-
-
 ### The Log is Database
 
    Aurora中最核心的一个概念就是The Log is Database了。在一般的MySQL写数据会写入多次，如LOG，数据Page，还有就是Double Write和BinLog等带来的写入，这样加起来就远远超过了数据原来的大小。这个在多副本的情况下变得更加严重(这个写放大的问题在很多的存储系统中都存在)，下面的一个图就是表示出了MySQL写入的数据:
@@ -61,8 +57,6 @@ These are each replicated 6 ways into Protection Groups (PGs) so that each PG co
 ```
 
  这里从redo log中恢复出数据page来的工作在存储层完成，这个工作是运行在后台异步完成的。这种方式显著地减少了网络通信的流量。在传统的数据中，在Crash之后重启需要从最近的checkpoint开始将redo log里面的记录进行重放。而在Auroara中，这一些都不是有数据库计算部分完成的，它也就不需要做这些工作，所以在Auroara中，Crash之后的恢复就是简单的重启即可。
-
-
 
 #### 存储层设计要点
 
@@ -83,8 +77,6 @@ These are each replicated 6 ways into Protection Groups (PGs) so that each PG co
 
 这里只有第1 2步是串行同步处理的，其余都是异步处理的。
 
-
-
 ### The Log Marches Forward 
 
    这里讨论的就是log的一致性的问题。
@@ -100,8 +92,6 @@ These are each replicated 6 ways into Protection Groups (PGs) so that each PG co
 ```
 The database can, however, further constrain a subset of points that are allowable for truncation by tagging log records and identifying them as CPLs or Consistency Point LSNs. We therefore define VDL or the Volume Durable LSN as the highest CPL that is smaller than or equal to VCL and truncate all log records with LSN greater than the VDL. For example, even if we have the complete data up to LSN 1007, the database may have declared that only 900, 1000, and 1100 are CPLs, in which case, we must truncate at 1000. We are complete to 1007, but only durable to 1000.
 ```
-
-.
 
 #### 正常情况下的操作
 
@@ -125,7 +115,6 @@ The database can, however, further constrain a subset of points that are allowab
   The replica obeys the following two important rules while applying log records: (a) the only log records that will be applied are those whose LSN is less than or equal to the VDL, and (b) the log records that are part of a single mini-transaction are applied atomically in the replica's cache to ensure that the replica sees a consistent view of all database objects. In practice, each replica typically lags behind the writer by a short interval (20 ms or less).
   ```
 
-  .
 
 #### Recovery 
 
@@ -136,8 +125,6 @@ Once the database has established a read quorum for every PG it can recalculate 
 ```
 
 在Aurora中，没有提交事务的undo recovery的工作可以在online进行。
-
- 
 
 ### Put it All Together
 
@@ -156,8 +143,6 @@ Once the database has established a read quorum for every PG it can recalculate 
 ```
 The storage control plane uses the Amazon DynamoDB database service for persistent storage of cluster and storage volume configuration, volume metadata, and a detailed description of data backed up to S3.
 ```
-
-.
 
 ### 评估
 

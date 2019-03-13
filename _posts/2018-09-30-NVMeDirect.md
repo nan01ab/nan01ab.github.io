@@ -18,8 +18,6 @@ typora-root-url: ../
 
 SPDK也是一个类似的framework，它的缺点是只支持单一的用户和应用，而NVMeDirect会尝试解决这些问题。这篇Paper只有5页，对比那些动不动就十几页的还是很短的。NVMeDirect的一些思路和netmap很像。
 
-
-
 ### 0x01 基本设计
 
   在NVMe SSD中，一个很重要的概念就是队列(其实很多其它的存储设备也是)。NVMe可以提供多个的IO队列，单个的NVMe SSD可以提供多大64K个的队列，而一个队列可以管理多达64K个命令。这个数量是远超过一半的存储设备的。当一个向NVMe SSD发送一个IO命令时，先是将其放置到submission queue(SQ)，然后通过doorbell寄存器来同时NVMe SSD。当NVMe SSD完成一个IO命令时，它将结果放入completion queue(CQ)，然后使用中断的方式来通知系统。由于在高速的硬件下面，中断也是一个开销很大的操作，在这里使用了MSI/MSI-X和中断聚合的方式来提高性能。和其他很多优化一项，现在的Liunux Kernel也使用了per-core的数据结构来减少冲突。
@@ -44,11 +42,7 @@ SPDK也是一个类似的framework，它的缺点是只支持单一的用户和�
 * Since the interrupt-based I/O completion incurs context switching and additional software overhead, ... , NVMeDirect utilizes a dedicated polling thread with dynamic polling period control based on the I/O size or a hint from applications to avoid unnecessary CPU usage.
 ```
 
-  这里的IO completion线程作为一个独立的线程，使用轮询检查IO的完成情况。多个CQ可以共享一个IO completion线程，or 单个CQ可以使用专有的线程。不同的配置可以根据应用自身调整，这也是它的一个灵活性的表现。此外，轮询周期可以根据应用的IO特性动态调整。
-
- 在实现中，NVMeDirect主要有三个组件组成，queue management, admin tool和user-level library。前两个运行在内核空间之中，而后者是用户空间内的一个函数库。如前面所言，admin tool类似于一个Master的存在，做为一个管理者。Queue management则具体地去管理队列的创建和管理，并负责请需要的东西映射到用户空间中。
-
-
+  这里的IO completion线程作为一个独立的线程，使用轮询检查IO的完成情况。多个CQ可以共享一个IO completion线程，or 单个CQ可以使用专有的线程。不同的配置可以根据应用自身调整，这也是它的一个灵活性的表现。此外，轮询周期可以根据应用的IO特性动态调整。 在实现中，NVMeDirect主要有三个组件组成，queue management, admin tool和user-level library。前两个运行在内核空间之中，而后者是用户空间内的一个函数库。如前面所言，admin tool类似于一个Master的存在，做为一个管理者。Queue management则具体地去管理队列的创建和管理，并负责请需要的东西映射到用户空间中。
 
 ### 0x03 评估
 

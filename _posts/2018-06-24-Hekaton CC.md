@@ -16,8 +16,6 @@ typora-root-url: ../
 ... We also implemented a main-memory optimized version of single-version locking. Experimental results show that while single-version locking works well when transactions are short and contention is low performance degrades under more demanding conditions. The multiversion schemes have higher overhead but are much less sensitive to hotspots and the presence of long-running transactions.
 ```
 
-.
-
 ### 0x01 多版本存储引擎
 
  Paper这部分讲的多版本存储引擎的实现。 在MVCC的并发控制中，最方便实现和最常用隔离级别是SI。但是SI并不完全满足Serializability的隔离级别。为了可以支持Serializability的隔离级别，下面的两点必须要满足，1. Read stability，一个事务T在事务执行中读取的数据的版本在数据提交的时候，对这个事务可见的版本还是原来的版本；2. Phantom Avoidance，不能返回额外的新的版本的数据。对于比这个低的隔离级别旧容易实现了，
@@ -106,8 +104,6 @@ Lower isolation levels are easier to support.
 2. When T updates or deletes a version V that is read locked, it takes a wait-for dependency on V.
 3. When T inserts a new version into a bucket B, it checks for bucket locks and takes out wait-for dependencies as needed.
 ```
-
-.
 
 ### 0x04 评估
 

@@ -34,8 +34,6 @@ The contributions of this work are as follows:
 • We show through measurement that Barrelfish satisfies our goals of scalability and adaptability to hardware characteristics, while providing competitive performance on contemporary hardware.
 ```
 
-.
-
 ### 基本架构
 
 ![mkernel-model](/assets/img/mkernel-model.png)
@@ -72,8 +70,6 @@ The CPU driver implements a lightweight, asynchronous (split-phase) same-core in
  A monitor can also idle the core itself (to save power) when no other processes on the core are runnable. Core sleep is performed either by waiting for an inter-processor interrupt (IPI) or, where supported, the use of MONITOR and MWAIT instructions.
 ```
 
-.
-
 #### Process structure & Inter-core communication 
 
   Multikernel模型上面的process抽象和在传统的内核上的有所不同。在Barrelfish中，一个进程代表来一个dispatcher对象的集合，可以在任意的一个核心上运行。实际上，在Barrelfish中，通信实际发生在dispatcher之间，而不是进程之间。一个核心上面的dispatchers有在那个核心上面的CPU driver调度，主要这里与传统的调度方式不相同，这里由dispatcher提高的upcall接口唤起，这里具体的方式可以参看Paper给的参考文献，
@@ -91,8 +87,6 @@ Dispatchers on a core are scheduled by the local CPU driver, which invokes an up
 ```
 All message transports are abstracted behind a common interface, allowing messages to be marshaled, sent and received in a transport-independent way. As in most RPC systems, marshaling code is generated using a stub compiler to simplify the construction of higher-level services. A name service is used to locate other services in the system by mapping service names and properties to a service reference, which can be used to establish a channel to the service. Channel setup is performed by the monitors.
 ```
-
-.
 
 #### Memory management & Shared address spaces 
 
@@ -114,8 +108,6 @@ Barrelfish supports the traditional process model of threads sharing a single vi
 Barrelfish is responsible only for multiplexing the dispatchers on each core via the CPU driver scheduler, and coordinating the CPU drivers to perform, for example, gang scheduling or coscheduling of dispatchers. 
 ```
 
-.
-
 ### 评估
 
   具体数据参看论文。
@@ -123,8 +115,6 @@ Barrelfish is responsible only for multiplexing the dispatchers on each core via
 ```
 We make stronger claims for the microbenchmarks. Barrelfish can scale well with core count for these operations, and can easily adapt to use more efficient communication patterns (for example, tailoring multicast to the cache architecture and hardware topology). Finally we can also demonstrate the benefits of pipelining and batching of request messages without requiring changes to the OS code performing the operations.
 ```
-
-.
 
 ## 参考
 

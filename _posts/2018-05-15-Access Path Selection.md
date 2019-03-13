@@ -16,8 +16,6 @@ typora-root-url: ../
   SQL statements do not require the user to specify anything about the access path to be used for tuple retrieval. Nor does a user specify in what order joins are to be performed. The System R optimizer chooses both join order and an access path for each table in the SQL statement. Of the many possible choices, the optimizer chooses the one which minimizes “total access cost” for performing the entire statement.
 ```
 
-.
-
 ### 0x01 The Research Storage System
 
   The Research Storage System (RSS)是System R中负责存储的子系统，它是一个面向元组的系统(tuple-oriented)，这些元组保存的一定大小的page中，不会跨pages存储。为了访问这些元组，这里有两种方式，一种就是顺序扫描,
@@ -34,8 +32,6 @@ These indexes are stored on separate pages from those containing the relation tu
 
 顺序扫描意味着元组的访问是连续的，而使用索引的方式则不一定，很显然这两种方式适应的是不同的使用环境。这里optimizer一个任务就是决定哪一种方式是更加好的。很显然更加好直观的感受就是跑得更加快，但是这个数据看自己做出决策来说，这个是不能使用的。为了评估一种访问方式的好坏，这里就是使用了COST的概念。
 
-
-
 ### 0x02 Costs for single relation access paths
 
   这里先讨论的是在一个relation上面的优化，也就是一个table上面的。这里使用下面这个基本的公式来计算一种access pathde成本：
@@ -44,9 +40,7 @@ These indexes are stored on separate pages from those containing the relation tu
 COST = PAGE FETCHES + W * (RSI CALLS)
 ```
 
-  COST主要是两个部分组成，PAGE FETCHES代表了IO的成本，而RSI CALLS(storage system interface (RSI))代表了CPU的成本。W则是一个比例因子。具体来说，RSI CALLS代表了预测的会返回的元组的数量，在System R中，大部分的CPU实际是化在RSI calls，使用这个就是一个很好的CPU成本的估计。
-
-  一个查询返回的元组的数量与查询中的where中的断言有很大的关系，在这个where的谓词中，每一个具体的谓词会被赋予一个因子F，使用这个因子大概代表会满足这个谓词的元组占所有元组的比例。这样，这里的重点之一就是为了这些因子的估计，这里使用了启发式和基于统计信息的方法，System R会维持下面的一些统计信息:
+  COST主要是两个部分组成，PAGE FETCHES代表了IO的成本，而RSI CALLS(storage system interface (RSI))代表了CPU的成本。W则是一个比例因子。具体来说，RSI CALLS代表了预测的会返回的元组的数量，在System R中，大部分的CPU实际是化在RSI calls，使用这个就是一个很好的CPU成本的估计。 一个查询返回的元组的数量与查询中的where中的断言有很大的关系，在这个where的谓词中，每一个具体的谓词会被赋予一个因子F，使用这个因子大概代表会满足这个谓词的元组占所有元组的比例。这样，这里的重点之一就是为了这些因子的估计，这里使用了启发式和基于统计信息的方法，System R会维持下面的一些统计信息:
 
 ```
 For each relation T,
@@ -62,9 +56,7 @@ For each index I on relation T,
 - NINDX(I), the number of pages in index I. 这个索引使用的pages的数量。
 ```
 
-然后就是一个计算的方式，下面基本就是where中各种谓词的方式如何计算，如果看过《数据库索引设计与优化》这本书的话，就会发现这本书其中的一些内容讲的就是这个，很相似m(._.)m。
-
-选择因子的估计:
+然后就是一个计算的方式，下面基本就是where中各种谓词的方式如何计算，如果看过《数据库索引设计与优化》这本书的话，就会发现这本书其中的一些内容讲的就是这个，很相似m(._.)m。选择因子的估计:
 
 ```
 column = value
@@ -130,8 +122,6 @@ Segment scan -> TCARD/P + W * RSICARD
 Using an index access path or sorting tuples produces tuples in the index value or sort key order. We say that a tuple order is an interesting order if that order is one specified by the query block’s GROUP BY or ORDER BY clauses.
 ```
 
-.
-
 ### 0x03 Access path selection for joins
 
   emmmm，关于join在数据库中的优化是一个很大的话题。在这篇Paper中也直讲了一些基本的东西，这离总结也会只总结最基本的几个东西。Join的优化两个重要的的问题就是1. 选择怎么样的join算法， Paper中讲了 nested-loop based joins和merging-scan based joins，当然现在hash join也是一个很常用的方法。另外一个更加复杂的问题就是如何选择join的顺序了，这个问题被研究了几十年了。为了减少考虑的join顺序，也使用了一些启发式的方法，
@@ -178,8 +168,6 @@ where TEMPPAGES is the number of pages required to hold the inner relation. This
 
  可以发现这里的计算方式竟然是一样的。当然这里还是存在区别的，对于merge-join来说，有时候内部扫描的成本会低很多。这里对于join算法就放在之后的一些总结中讨论吧。
 
-
-
 ### 0x04 Nested Queries
 
  这里将的就是子查询（嵌套查询），比如下面的例子，
@@ -216,13 +204,9 @@ A correlation subquery must in principle be re-evaluated for each candidate tupl
 
 当然还会有更加复杂的查询。
 
-
-
 ### 0x05 总结
 
  数据库优化器的基本思想，在今天看来这些东西都是很基本的东西，却在数据库的发展历程中起到了至关重要的作用。
-
-
 
 ## 参考
 

@@ -12,8 +12,6 @@ typora-root-url: ../
 
   PNUTS是雅虎开发的一个类似的Amazon Dynamo的系统，不同的Dynamo的是，PNUTS提供了更加多样化的一致性的支持，这个系统是非开源的。而Cassandra是facebook主导开发的一个类似的系统。
 
-
-
 ### 数据模型
 
   Cassandra和PNUTS之间的数据模型是很相似的，类似于Bigtable的表格的特点。在这样的一种模型上面，抽象为类似传统数据库一样的table，每个table可以由若干的指定类似的列。由于Cassandra和PNUTS本质上还是key-value的系统，它们进行删除更新等的操作的时候还是只能根据primary key来处理。下面是Cassandra的主要的接口：
@@ -27,8 +25,6 @@ typora-root-url: ../
 
 columnName can refer to a specific column within a column family, a column family, a super column family, or a column within a super column.
 ```
-
-.
 
 ### 一致性模型
 
@@ -60,9 +56,7 @@ PNUTS这里的一致性模型是基于`per-record timeline consistency`，即一
   Of course, if the need arises, our API can be packaged into the traditional BEGIN TRANSACTION and COMMIT for single-row transactions, at the cost of losing expressiveness. 
   ```
 
-为了低的延时，PNUTS使用的是异步地在副本上面应用更新的方式，这里使用了雅虎自己的message broker，一个publish/subscribe的系统。上面的提到的一致性的模型的实现也基本就是基于这个系统。PNUTS这个的Master是在record级别上面的，也就是说不同的记录可能是不同的master，这样有利于提高系统的性能和吞吐量。而且写操作在雅虎的实践中，这条记录的Master和操作的发起者有85%左右的都是在同一个数据中心。然后，对于非Master的副本，使用的就是雅虎的pub/sub系统来处理，这里会保证操作的顺序是按照写操作提交的顺序来的。
-
-  这里的在一体记录上面的更新不一定就等直接请求这条记录的Master，也可以直接请求一个非Master副本，不过这个副本必须将这个操作转发给Master，这样来保证操作顺序的要求。对于一条记录的Master的信息，保存在这条记录的元数据中，
+为了低的延时，PNUTS使用的是异步地在副本上面应用更新的方式，这里使用了雅虎自己的message broker，一个publish/subscribe的系统。上面的提到的一致性的模型的实现也基本就是基于这个系统。PNUTS这个的Master是在record级别上面的，也就是说不同的记录可能是不同的master，这样有利于提高系统的性能和吞吐量。而且写操作在雅虎的实践中，这条记录的Master和操作的发起者有85%左右的都是在同一个数据中心。然后，对于非Master的副本，使用的就是雅虎的pub/sub系统来处理，这里会保证操作的顺序是按照写操作提交的顺序来的。这里的在一体记录上面的更新不一定就等直接请求这条记录的Master，也可以直接请求一个非Master副本，不过这个副本必须将这个操作转发给Master，这样来保证操作顺序的要求。对于一条记录的Master的信息，保存在这条记录的元数据中，
 
 ```
 Each record maintains, in a hidden metadata field, the identity of the current master. If a storage unit receives a set() request, it first reads the record to determine if it is the master, and if not, what replica to forward the request to. The mastership of a record can mi- grate between replicas.
@@ -72,9 +66,7 @@ Each record maintains, in a hidden metadata field, the identity of the current m
 
 #### Cassandra
 
-  对于Cassandra的一致性模型，在Cassandra的论文[2]没有仔细讨论，不过在其它的一些资料中有说明[3]。在Cassandra中也是支持不同的一致性基本(当然也都是弱一致性的).
-
-
+  对于Cassandra的一致性模型，在Cassandra的论文[2]没有仔细讨论，不过在其它的一些资料中有说明[3]。在Cassandra中也是支持不同的一致性基本(当然也都是弱一致性的)。
 
 ### 基本架构
 

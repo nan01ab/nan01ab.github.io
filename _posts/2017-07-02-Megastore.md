@@ -12,8 +12,6 @@ typora-root-url: ../
 
   Megastore就是为了解决Bigtable存在的一些问题而产生的，也是基于Megastore而设计的。Megastore在NoSQL的可拓展性上面的实现了传统的RDMS的可用性。当然在Spanner出现后，Megastore被吐槽延时太高等的缺点。这篇Paper还是值的一看的。
 
-
-
 ### 高可用性和可拓展性
 
 #### 分区和局部性
@@ -87,8 +85,6 @@ CREATE GLOBAL INDEX PhotosByTag
 The IN TABLE User directive instructs Megastore to colocate these two tables into the same Bigtable, and the key ordering ensures that Photo entities are stored adjacent to the corresponding User. This mechanism can be applied recursively to speed queries along arbitrary join depths. Thus, users can force hierarchical layout by manipulating the key order.
 ```
 
-.
-
 #### 索引
 
  前面就提到了Megastore的索引有Local索引和Global的索引。前者是一个Group里面局部的消息，而且它能保证ACID的语义。Global索引的一致性是弱的，但是是跨越Group的消息。索引也是保存为Bigtable中的表，Row Key为有这个索引相关的字段组织得到的一个值，而Value就是主键。
@@ -114,8 +110,6 @@ Megastore可以使用Queue和2PC来实现跨Entity Group的事务，两者各有
 ```
 Queues provide transactional messaging between entity groups. They can be used for cross-group operations, to batch multiple updates into a single transaction, or to defer work. A transaction on an entity group can atomically send or receive multiple messages in addition to updating its entities. Each message has a single sending and receiving entity group; if they differ, delivery is asynchronous.
 ```
-
-.
 
 ### 更多的复制的内容
 

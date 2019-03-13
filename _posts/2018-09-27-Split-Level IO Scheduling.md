@@ -16,8 +16,6 @@ typora-root-url: ../
 our Actually Fair Queuing sched- uler reduces priority-misallocation by 28×; our Split-Deadline scheduler reduces tail latencies by 4×; our Split-Token scheduler reduces sensitivity to interference by 6×. We show that the framework is general and operates correctly with disparate file systems (ext4 and XFS).
 ```
 
-.
-
 ### 0x01 基本思路
 
  传统的IO调度器一般是实现在block层的。这样的调度器存在2个主要的缺点，一个也是最重要的，block-level的调度器无法对这样的一些文件系统小心保证顺序的以达到一致性的写请求进行重排序。第二个就是无法进行精确的统计，它缺乏用于知道那一个原因负责哪一个IO请求的信息。Split-level I/O scheduling的解决办法就是这个调度器是跨越了多个layer的，即 system-call, page-cache,和 block layers三个层面。Split schedulers可以知道具体是哪一个应用发出的IO请求和精确地估计IO操作的开销。此外，它还可以，
@@ -25,8 +23,6 @@ our Actually Fair Queuing sched- uler reduces priority-misallocation by 28×; ou
 ```
  Furthermore, memory notifications make schedulers aware of write work as soon as possible (not tens of seconds later when writeback occurs). Finally, split schedulers can prevent file systems from imposing orderings that are contrary to scheduling goals.
 ```
-
-.
 
 ### 0x02 Split Framework Design
 
@@ -44,8 +40,6 @@ our Actually Fair Queuing sched- uler reduces priority-misallocation by 28×; ou
 Processes P1 and P2 both dirty the same data page, so the page’s tag includes both processes in its set. Later, a writeback process, P3, writes the dirty buffer to disk. In doing so, P3 may need to dirty the journal and metadata, and will be marked as a proxy for {P1, P2}. Thus, P1 and P2 are considered responsible when P3 dirties other pages, and the tag of these pages will be marked as such. The tag of P3 is cleared when it finishes submitting the data page to the block level.
 ```
 
-.
-
 #### Cost Estimation
 
    执行IO操作成本也是做出调度决策的一个重要因素，比如消耗存储设备的适合or其它的一些标准。这里统计的最好的地方是在靠近的硬件的地方。在Block层，写入的位置是已经知道了的。此外，不会因为实际读取的吃page cache而操作多估计，也不会因为没有统计到例如写入日志而造成少估计。不过这里存在的一个问题就是写入时候的page cache。由于写入的数据可以会被保存到buffer中一段比较长的时间，才会被flush。这样的话会对统计造成比较大的误差。将这个统计的操作放在更高的layer(memory level (write buffer))上面则可以避免这个问题，不过前面的在block layer统计的优点就会变成缺点。这里的做法是在两个地方都是添加了hooks，两个地方都可以被使用。其间的权衡有具体的调度器实现自己来做，
@@ -54,13 +48,9 @@ Processes P1 and P2 both dirty the same data page, so the page’s tag includes 
 Our framework exposes hooks at both the memory and block levels, enabling each scheduler to handle the trade-off in the manner most suitable to its goals. Schedulers may even utilize hooks at both levels. For example, Split-Token promptly guesses write costs as soon as buffers are dirtied, but later revises that estimate when more information becomes available (e.g., when the dirty data is flushed to disk).
 ```
 
-.
-
 #### Reordering
 
   对请求进行重排序是IO调度器实现更好性能的一个常用的手段，特别是在机械磁盘上面。 Split Framework在block 层开放了hooks用于实现读写请求的重新排序。这里存在的一个问题就是写请求的可重排序的能力会收到了文件系统特点的影响。所以这里的hooks也会暴露给文件系统，调度器可以通过控制写入的syscall的运行来控制写入操作对文件系统的可见性。Split Framework也会将对元数据的操作的hooks暴露出来，同样的，元数据操作的成本文件系统的内部实现很大的影响。此外，fsync之类的操作对调度的决择也有很大的影响，比如写入后面跟着一个fsync操作和仅仅是一个写入操作相比，前者的成本高很多，由此，这里也会暴露相关的hook.
-
-
 
 ### 0x03 Split Scheduling in Linux
 
@@ -89,8 +79,6 @@ Our framework exposes hooks at both the memory and block levels, enabling each s
   ```
   with the default Linux settings, average overhead is 14.5 MB (0.2% of total RAM); the maximum is 23.3 MB. Most tagging is on the write buffers; thus, a system tuned for more buffering should have higher tagging overheads. With a 50% dirty ratio [5], maximum usage is still only 52.2 MB (0.6% of total RAM).
   ```
-
-.
 
 ### 0x04 Scheduler Case Studies
 

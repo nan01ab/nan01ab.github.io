@@ -60,8 +60,6 @@ EPaxos算法中还会有很多的内容和细节。
 We implemented a prototype of SDPaxos, and compared its performance with typical single-leader (Multi-Paxos) and multi-leader (Mencius, EPaxos) protocols. Our experiment results demonstrate that SDPaxos achieves: (1) 1.6× the throughput of Mencius with a straggler, (2) stable performance under different contention degrees and 1.7× the throughput of EPaxos even with a low contention rate of 5%, (3) 6.1× the throughput of Multi-Paxos without straggler or contention, (4) 4.6× the throughput of writes when performing reads, and (5) up to 61% and 99% lower wide-area latency of writes and reads than other protocols.
 ```
 
-.
-
 ### 0x11 基本设计
 
   SDPaxos的基本思路是复制和定序分离，复制使用的是类似EPaxos中的方法，每次客户端的请求都是指定一个Command Leader来处理，但是处理请求顺序的是一个中心化的Sequencer节点处理。这个看起来就是一个更折中的方法。由于定序带来的开销比复制小的多，这个定序的中心节点的负载也会小于Multi-Paxos/Raft中的Leader/Master。下面的图是一个SDPaxos执行流程的示例，
@@ -144,8 +142,6 @@ foreach empty O-instance between non-empty ones do
   propose no-cl
 ```
 
-.
-
 ### 0x12 优化
 
 SDPaxos另外的一些优化的策略，
@@ -165,8 +161,6 @@ SDPaxos另外的一些优化的策略，
   ```
   Another simple yet effective optimization is batching: a replica’s n commands can be batched in one global slot, so the number of O-instances will be divided by n. Even a small value of n like 2 or 3 can significantly reduce the load of O-instances.
   ```
-
-.
 
 ### 0x13 评估
 

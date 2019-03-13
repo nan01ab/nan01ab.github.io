@@ -10,11 +10,7 @@ typora-root-url: ../
 
 ### 0x00 引言
 
-   这是我目前读过的最喜欢的一篇论文之一。首先，论文写的非常通俗易懂，即使你之前对Lock Schedule没有什么了解，通过这篇论文也能很清楚的知道Contention-Aware Lock Scheduling的原理。另外，这个算法不仅仅是一个理论上的，只存在于实验室中，这个算法已经被MySQL 8.0采用了。简直赞的不行，如此快速的在真正的实际的被广泛使用软件中得到应用，也侧面印证了这个研究very excellent。
-
-   文章一步一步的说明思路，从简单的想法开始，最终得出来 Largest-Dependency-Set-First 和batched Largest-Dependency- Set-First 两种算法，很喜欢这样的写作套路，对于这篇paper中大量的数学化描述，只需要理解其中的关键部分就可以了。类似的套路的文章(举两个例子)有《Paxos Made Simple》，还有《The Operating System: Three Easy Pieces》这本书中的不少章节，都讲的很不错，强烈推荐。
-
-
+   这是我目前读过的最喜欢的一篇论文之一。首先，论文写的非常通俗易懂，即使你之前对Lock Schedule没有什么了解，通过这篇论文也能很清楚的知道Contention-Aware Lock Scheduling的原理。另外，这个算法不仅仅是一个理论上的，只存在于实验室中，这个算法已经被MySQL 8.0采用了。简直赞的不行，如此快速的在真正的实际的被广泛使用软件中得到应用，也侧面印证了这个研究very excellent。文章一步一步的说明思路，从简单的想法开始，最终得出来 Largest-Dependency-Set-First 和batched Largest-Dependency- Set-First 两种算法，很喜欢这样的写作套路，对于这篇paper中大量的数学化描述，只需要理解其中的关键部分就可以了。类似的套路的文章(举两个例子)有《Paxos Made Simple》，还有《The Operating System: Three Easy Pieces》这本书中的不少章节，都讲的很不错，强烈推荐。
 
 ### 0x01 背景与动机 
 
@@ -36,7 +32,7 @@ Our goal is to find a lock scheduling algorithm under which the expected transac
 
 ### 0x02 算法
 
- 	接下来就是讨论了几类算法，并分析了优缺点。
+ 接下来就是讨论了几类算法，并分析了优缺点。
 
 #### Most Locks First (MLF) 
 
@@ -64,8 +60,6 @@ A more sophisticated criterion is the depth of a transaction’s dependency subg
 DDF使用了dependency graph的深度来决定那个txn最先运行，就有可能让更对的dependency graph的“深度”更加浅的尽快得到运行，减少contention。但是缺点是没有考虑到深度很深的，但是之间contention很少的情况，比如就是一条比较长的链结构的case。
 ```
 
-.
-
 ### 0x03 Largest-Dependency-Set-First 
 
  算法描述，这里涉及到太多的数学符号，直接使用Paper中的一张图，
@@ -79,8 +73,6 @@ Consider two transactions t1 and t2 in the system. If there is a path from t1 to
 ```
 
  就是使用dependency作为判断依据，让依赖性它最多的txn最先执行，这个就好比出租车和大客车同时通过一个只能经过一辆车的路口，显然让大客车先过能让平均等待时间最少。
-
-
 
 ### 0x04 The bLDSF Algorithm 
 

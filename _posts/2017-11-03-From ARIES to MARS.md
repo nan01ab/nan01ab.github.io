@@ -16,8 +16,6 @@ typora-root-url: ../
 This paper presents a novel WAL scheme, called Modified ARIES Redesigned for SSDs (MARS), optimized for NVM-based storage. The design of MARS reflects an examination of ARIES, a popular WAL-based recovery algorithm for databases, in the context of these new memories. MARS provides the same high-level features for implementing efficient and robust transactions as ARIES, but without any of the disk-based design decisions ARIES incorporates.
 ```
 
-.
-
 ### 基本思路
 
 #### EAW 

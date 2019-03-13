@@ -20,8 +20,6 @@ typora-root-url: ../
 (3) end-system based address resolution to scale to large server
 ```
 
-.
-
 ### 0x01 分析
 
   在讨论VL2的具体设计之前，Paper先总结了几个数据中心网络的几个特点(Paper中的观点以及数据)：
@@ -40,8 +38,6 @@ typora-root-url: ../
   ```
   most failures are small in size (e.g., 50% of network device failures involve < 4 devices and 95% of network device failures involve < 20 devices) while large correlated failures are rare (e.g., the largest correlated failure involved 217 switches). However, downtimes can be significant: 95% of failures are resolved in 10 min, 98% in < 1 hr, 99.6% in< 1 day,but 0.09% last > 10 days.
   ```
-
-.
 
 ### 0x02 基本架构
 
@@ -84,8 +80,6 @@ Our current design uses 1G server links and 10G switch links, and the next desig
    Our design consists of (1) a modest number (50-100 servers for 100K servers) of read-optimized, replicated directory servers that cache AA-to-LA mappings and handle queries from VL2 agents, and (2) a small number (5-10 servers) of write-optimized, asynchronous replicated state machine (RSM) servers that offer a strongly consistent, reliable store of AA-to-LA mappings. 
   ````
 
-.
-
 ### 0x03 评估
 
  具体可以参看[1].
@@ -95,8 +89,6 @@ Our current design uses 1G server links and 10G switch links, and the next desig
 ### 0x10 引言
 
  和VL2一样，PortLand也是发表在啊SIGCOMM‘09上面关于数据中心网络的一篇Paper。PortLand也是以FlatTree为基础，认为现在的 layer 2 和 layer 3 存在诸多的问题： 缺乏可伸缩性、管理困难、通信不灵活或对虚拟机迁移的支持有限等。Paper中认为，数据中心网络的基本拓扑和增长模式一般都是可知的，基于这样的观察，Paper中提出一种 layer 2的面向数据中心网络环境的路由和转发协议PortLand，
-
-
 
 ### 0x11 基本思路
 
@@ -130,8 +122,6 @@ Our current design uses 1G server links and 10G switch links, and the next desig
   ```
   1. The detecting switch informs the fabric manager about the failure in step  2. The fabric manager maintains a logical fault matrix with per-link connectivity information for the entire topology and updates it with the new information in step 3.  Finally, in step 4, the fabric manager informs all affected switches of the failure, which then individually recalculate their forwarding tables based on the new version of the topology. 
   ```
-
-.
 
 ### 0x13 评估
 

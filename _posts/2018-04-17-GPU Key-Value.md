@@ -35,8 +35,6 @@ typora-root-url: ../
 ... For the 95% GET 5% SET skewed workload, Mega-KV achieves 110 MOPS, 55 MOPS, and 34 MOPS with get query, and achieves 139 MOPS, 60 MOPS, and 30 MOPS with getk query. For the 100% GET skewed workload, Mega-KV achieves 107 MOPS, 56 MOPS, and 36 MOPS with get query, and achieves 144 MOPS, 62 MOPS, and 33 MOPS with getk query, respectively. 
 ```
 
-.
-
 ## MemcachedGPU: Scaling-up Scale-out Key-value Stores
 
   这篇Paper也是关于如何在GPU上面实现KVS的Paper，不够侧重掉不相同。Mega-KV强调的是KVS的索引、批处理请求等方面的设计。这篇Paper提出的GNoM框架侧重点在网络方面，

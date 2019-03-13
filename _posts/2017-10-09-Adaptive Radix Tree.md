@@ -12,8 +12,6 @@ typora-root-url: ../
 
   Adaptive Radix Tree是最近出现的为Main-Memory Database设计的的支持范围数据结构里面个人认为最优美的一种了，不如Masstree，Bwtree那么复杂，另外，相比于传统的一些结构如T-tree，也更好的适应了现代的多核处理器。这篇时关于Adaptive Radix Tree(ART)的基本结构的，另外有一篇时关于ART的Concurrency Control的，之后会加上。ART的主要思路时使用不同大小的Node，来减少内存使用。同时加上一些额外的如高度上的优化。
 
-
-
 ### 基本结构
 
  前面提到，ART的内部Node有不同的大小。一般而言，离root比较远的Node里面保护的数据项时比较小的。一般的Radix Tree使用完整的Node的话，会浪费很多的内存，而ART就解决了这个问题：

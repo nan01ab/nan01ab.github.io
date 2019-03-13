@@ -16,8 +16,6 @@ typora-root-url: ../
 ... Our evaluation on the TPC-H and SSB benchmarks shows extremely high absolute performance and an average speedup of over 30 with 32 cores.
 ```
 
-.
-
 ### 0x01 Morsel-Driven执行方式
 
   Morsel的执行方式是之前每次处理一条记录(数据)的一种优化，能够更好地利用好现在的硬件，比如多核、SIMD等。HyPer内存数据库会将SQL使用JIT的方式转化为机器码执行的方式。在HyPer使用流水线执行的方式，这个流水线的一段会被编译为一段机器代码。Morsel-Driven中，代数的计划执行被称为QEPobject的对象控制，它会将执行的流水线信息传输给Dispatcher。一个操作(比如3个表的Join)会规划为若干的流水线执行，QEPobject会变为每条流水线开辟一些临时存储区域，用于保存其的结果，这里存储区域的分配会考虑到NUMA。 Paper中举例了一个3个表R、S、T 连接的例子，加上T、S表被优化器选择构建Hash Table，而使用R中符合条件的记录去“试探”这个两个Hash Table。

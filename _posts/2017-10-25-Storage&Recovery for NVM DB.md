@@ -12,8 +12,6 @@ typora-root-url: ../
 
   这篇Paper主要讨论了数据库的不同类型的存储和恢复方式在NVM上的表现。NVM有着不同于DRAM和SSD的性能特点，自然不同的方式在NVM也有着不同的性能体现。Paper主要讨论了常见的就地更新，Copy-on-Write和 Log-structured Updates在NVM为基础的数据库上的各种的表现。
 
-
-
 ### 分类
 
 基本分类：
@@ -40,8 +38,6 @@ When a transaction inserts a tuple into a table, the engine first checks the tab
  The InP engine uses a variant of ARIES that is adapted for main memory DBMSs with a byte-addressable storage engine. As we do not store physical changes to indexes in this log, all of the tables’ indexes are rebuilt during recovery because they may have been corrupted.
 ```
 
-.
-
 #### Copy-on-Write Updates Engine (CoW) 
 
   CoW类型的策略时从来步更新原来的数据，只会在原来的基础上创建一个新的数据。CoW引擎使用directories 的方式访问不同版本的数据，常见的例子就是System R上面的影子页。CoW中存在一个Master记录，用于保存目前的directories的信息，基本的组织方式上面的图有很好的说明：
@@ -63,8 +59,6 @@ the DBMS maintains two look-up directories at all times: (1) the current directo
 ```
 When the DBMS comes back on-line, the master record points to the current directory that is guaranteed to be consistent. The dirty directory is garbage collected asynchronously, since it only contains the changes of uncommitted transactions.
 ```
-
-.
 
 #### Log-structured Updates Engine (Log) 
 
@@ -89,8 +83,6 @@ The log-structured update approach performs well for write-intensive workloads a
 ```
 It first replays the log to ensure that the changes made by committed transactions are present. It then removes any changes performed by uncommitted transactions, thereby bringing the MemTable to a consistent state.
 ```
-
-.
 
 ### NVM-Aware Engine
 
@@ -167,8 +159,6 @@ Like the NVM-InP engine, this new engine also stores the WAL as a non-volatile l
 ```
 During recovery, the NVM-Log engine only needs to undo the effects of uncommitted transactions on the MemTable. Its recovery latency is therefore lower than the Log engine as it no longer needs to rebuild the MemTable.
 ```
-
-.
 
 ### 评估
 

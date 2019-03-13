@@ -17,8 +17,6 @@ typora-root-url: ../
  In WAS, data is stored durably using both local and geographic replication to facilitate disaster recovery. Currently, WAS storage comes in the form of Blobs (files), Tables (structured storage), and Queues (message delivery). In this paper, we describe the WAS architecture, global namespace, and data model, as well as its resource provisioning, load balancing, and replication systems.
 ```
 
-.
-
 ### 基本架构
 
  WAS主要由两部分组成，一是Location Service，二是Storage Stamp。
@@ -54,8 +52,6 @@ The LS then updates DNS to allow requests to now route from the name https://Acc
 
 * Intra-Stamp Replication (stream layer)，这里保证数据在一个stamp之内的持久化。其复制操作是同步的。这里会将数据跨结点和fault domains来保持数据的可用性。由于这里是同步的复制，且在client写请求的关键路径上面，这里只有在复制成功之后才可以给client返回成功的信息，所以这里实现低延时的操作很关键。
 * Inter-Stamp Replication (partition layer)，这里的复制是stmap之间的异步的复制。复制操作在后台完成，不在client写请求的关键路径之上。这里的复制是对象级别的复制，与此对应的Intra-Stamp的复制则是复制数据block。
-
-
 
 ### Stream Layer
 
@@ -134,8 +130,6 @@ Once the sealing is done, the commit length of the extent will never be changed.
 
 这里关于这里Paper中还有一些读取模式和优化的讨论。
 
-
-
 ### Partition Layer
 
    Partition Layer则是在Stream Layer的基础上实现其它的功能，主要负责的任务如下：
@@ -166,9 +160,7 @@ Once the sealing is done, the commit length of the extent will never be changed.
 
 * Lock Service，这个是个类似于Chubby的系统，PM的领导选举和PS的服务租约都需要用到这个lock service。这里做的方式也和使用Chubby的没有很大的不同。从上面的图中看，这里是处理Partition Layer之外的，是一个单独的lock service。
 
- RangePartition也是使用了LSM-tree来持久化保存数据，每一个RangePartition又一组的Stream组成：Metadata Stream，Commit Log Stream，Row Data Stream，Blob Data Stream。内存中的Memtable功能就是LSM-tree中的Memtable，保存最近更新的一些信息。此外还使用Index Cache来Cache index的数据，Row Data Cache缓存的就是行数据。
-
-  当一个写入请求到达 RangePartition得时候，操作的信息会先被append到Commit Log 中，然后被添加到Memtable里面。这里时候就可以返回client成功的信息了。当Memtable或者Commit Log Stream达到一定的大小的时候，Memtable就会被持久化保存到row data stream中，这个时候Commit Log Stream也就可以移除了。这里也就相当于一个checkpoint，为了减少checkpo的数量，PS会定期地合并它们。
+ RangePartition也是使用了LSM-tree来持久化保存数据，每一个RangePartition又一组的Stream组成：Metadata Stream，Commit Log Stream，Row Data Stream，Blob Data Stream。内存中的Memtable功能就是LSM-tree中的Memtable，保存最近更新的一些信息。此外还使用Index Cache来Cache index的数据，Row Data Cache缓存的就是行数据。 当一个写入请求到达 RangePartition得时候，操作的信息会先被append到Commit Log 中，然后被添加到Memtable里面。这里时候就可以返回client成功的信息了。当Memtable或者Commit Log Stream达到一定的大小的时候，Memtable就会被持久化保存到row data stream中，这个时候Commit Log Stream也就可以移除了。这里也就相当于一个checkpoint，为了减少checkpo的数量，PS会定期地合并它们。
 
 ### 评估
 

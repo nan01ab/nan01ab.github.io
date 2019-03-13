@@ -16,8 +16,6 @@ typora-root-url: ../
 The Multi-level Feedback Queue (MLFQ) scheduler was first described by Corbato et al. in 1962 in a system known as the Compatible Time-Sharing System (CTSS), and this work, along with later work on Multics, led the ACM to award Corbato its highest honor, the Turing Award. The scheduler has subsequently been refined throughout the years to the implementations you will encounter in some modern systems.
 ```
 
-.
-
 ### 0x01 How To Change Priority
 
    算法的核心就是到达一下的目标：
@@ -36,8 +34,6 @@ How can we design a scheduler that both minimizes response time for interactive 
 • Rule 2: If Priority(A) = Priority(B), A & B run in RR.
 ```
 
-.   
-
    要改变Priority的一个原因就是根据任务运行的状况观测太是出于哪一种类型的人物，对于交互式的任务(or IO密集型的)，一般的做法就是提高它的Priority，来达到更好的反应时间。交互式任务的一个特点就是等待(想想一个人键盘的输入，从按下空格键到按下回车键对于计算机来说都是一段很长的时间了，对于计算机来说，它等你按回车键等了很久)。所以这里一个基本的思路就是，对于每次运行丢用不完自己时间片的任务，就保持它的Priority，对于能用完自己时间片的任务，更加可能是非交互式的任务，所以就降低它的Priority：
 
 ```
@@ -48,15 +44,11 @@ How can we design a scheduler that both minimizes response time for interactive 
 • Rule 4b: If a job gives up the CPU before the time slice is up, it stays at the same priority level.
 ```
 
-.
-
 ##### 存在的问题
 
 1. 饥饿，交互式的任务一多，其它类型的任务就很难得到运行的机会；
 2. 不安全，应用可以hack这个sheduler，通过在这个时间片的末尾发出IO请求，它就能一直保持住它的优先级；
 3. 任务的行为不是一成不变的，一个任务已开始可能是IO密集型的，之后会变成CPU密集型的，反之亦然。然而在这里一旦开始被认为是CPU密集型的，它就没机会变为IO密集型的了(sheduler的看法)
-
-
 
 ### The Priority Boost 
 
@@ -68,8 +60,6 @@ How can we design a scheduler that both minimizes response time for interactive 
 
   很显然的上面的第1，3个问题就被解决了。
 
-
-
 ### Better Accounting 
 
 ​    上面提到的第2个问题还是没有解决。之所以存在这个问题，是因为上面的rule 4a,4b。那就将rule修改一下:
@@ -79,8 +69,6 @@ Rule 4: Once a job uses up its time allotment at a given level (regardless of ho
 ```
 
   现在，只要它用完了在一个allotment上面的时间片，它就会被削减priority。对于交互型的任务，它就越可能留在更高的优先级上，对于非交互型的任务，它就会越快地滑向低优先级。
-
-
 
 ### Summary 
 
@@ -104,8 +92,6 @@ MLFQ is interesting for the following reason: instead of demanding a priori know
 • Rule 5: 周期性地将所有任务提升到最后优先级.
 ```
 
-.
-
 ### 0x02 Proportional Share 
 
   除了上面说的Multi-level Feedback Queue之外，proportional-share也是一种设计思想。书中以lottery scheduling调度方法为例子，对于这种思路来说，核心就是:
@@ -114,8 +100,6 @@ MLFQ is interesting for the following reason: instead of demanding a priori know
 How can we design a scheduler to share the CPU in a proportional manner? What are the key mechanisms for doing so? How effective are they?
 ```
 
-.
-
 #### 最基本的思路
 
   lottery scheduling使用的一个最基本的概念就是：tickets，凭证。使用tickets来代表了使用分享到的资源，tickets的比例代表了分享到的资源的比例。它使用一种概率性的方法来决定下一个运行的进程，比如下面这个例子，系统必须知道这里一共有多少个tickets(这里就是100)，然后挑选一个随机的ticket，数字是0-99。如果是0-74则运行A，74-99则运行B。
@@ -123,8 +107,6 @@ How can we design a scheduler to share the CPU in a proportional manner? What ar
 ```
 Let’s look at an example. Imagine two processes, A and B, and further that A has 75 tickets while B has only 25. Thus, what we would like is for A to receive 75% of the CPU and B the remaining 25%.
 ```
-
-.
 
 #### Ticket机制
 
@@ -136,15 +118,9 @@ Let’s look at an example. Imagine two processes, A and B, and further that A h
 Rather, *inflation* can be applied in an environment where a group of processes trust one another; in such a case, if any one process knows it needs more CPU time, it can boost its ticket value as a way to reflect that need to the system, all without communicating with any other processes.
 ```
 
-.
-
 #### The Linux Completely Fair Scheduler (CFS) 
 
- 目前linux使用的默认的调度器CFS的思路就和fair-share scheduling 很相似。CFS的基本思路就是尽可能的将CPU平均分配给所有的进程，它使用一个基于计数的机制就是virtual runtime (vruntime)。进程运行的时候就会累积vtime，在一般情况下，进程vtime增加的速度是一样的，与物理上的时间成一定的比例(具体参考更加详细的资料)。
-
-  没有调度器是完美的， fair-share schedulers 存在的问题一是这样的方法与IO不怎么协调，频繁使用IO的进程可能得不到它们分到的CPU份额。另外一个问题就是如何赋予进程合适的ticket或者叫优先级。
-
-
+ 目前linux使用的默认的调度器CFS的思路就和fair-share scheduling 很相似。CFS的基本思路就是尽可能的将CPU平均分配给所有的进程，它使用一个基于计数的机制就是virtual runtime (vruntime)。进程运行的时候就会累积vtime，在一般情况下，进程vtime增加的速度是一样的，与物理上的时间成一定的比例(具体参考更加详细的资料)。没有调度器是完美的， fair-share schedulers 存在的问题一是这样的方法与IO不怎么协调，频繁使用IO的进程可能得不到它们分到的CPU份额。另外一个问题就是如何赋予进程合适的ticket或者叫优先级。
 
 ## 参考
 

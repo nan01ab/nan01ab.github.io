@@ -22,8 +22,6 @@ We synchronize the Adaptive Radix Tree (ART) using two such protocols, Optimisti
 
    从这里看到，这里提高的方法中ROWEX和optimistic lock coupling在在没有特殊硬件的支持下这两个方面的平衡是最后的。近些年HTM被一些硬件支持(intel TSX，IBM Power 8, 9)，看起来更加好。 如果这里对ART不了解，可以先看一看[2]；如果对HTM不了解，可以看看网上的介绍文章，也能找到相关的论文；如果对 lock coupling不了解，可以先看一看[3]，(不过这篇论文很老了，比较难找，不过还是可以在网上找到的)，
 
-
-
 ### 0x01 Optimistic Lock Coupling 
 
   Lock Coupling同一时刻最多持有2个lock，是一种标准的Btree的同步机制。ART的一个特点有利于使用这样的同步机制，在ART中，一个修改操作最多影响到2个结点，修改的结点(删除，添加 or 更新)和其父结点，这个比Btree的情况更加简单。Optimistic Lock Coupling(OLC)是 Lock Coupling乐观版本，其基本出发点是:
@@ -70,8 +68,6 @@ To change the prefix of the node atomically, we store both the prefix and its le
 ```
  With this additional information, the intermediate state in Figure 4 is safe, because a reader will detect that the prefix at the blue node has to be skipped. Similarly, it is also possible that a reader sees the final state of the blue node without having seen the green node before. In that situation, the reader can detect the missing prefix using level field and retrieve the missing key from the database.
 ```
-
-.
 
 ### 0x03 评估
 

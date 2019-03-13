@@ -12,8 +12,6 @@ typora-root-url: ../
 
  这篇总结总结的是3个为内存数据库设计的checkpoint的算法，一个发表在SIMOD2016[1]，另外两个出自一篇Paper[2]，发表在SIGMOD 2011。这两个Paper讲的是同一个问题，如何在内存中实现 checkpoint-recovery or snapshot算法。
 
-
-
 ### 0x01 Wait-Free Zigzag
 
   这个算法出自[2]。基本思路如下: 在这个算法中的开始，系统的状态会被拷贝为2份，AS0 和 AS1，这两个数组的一个字就代表了一个状态信息。另外还有两个数组MR 和 MW，MR的一个bit，MR[i]用来指示应该从哪一个AS中读取，而后者则是指示应该写入哪一个AS，前者初始化为0，而后者初始化为1。在进行checkpoint操作的周期内，MW的值不会变化，这个保证了它不会写入的AS的值不会变化，而synchronous Writer操作就是讲这些words写入到磁盘以设置checkpoint。在更新一个状态值的时候，会写入MW[i]指示的位置，同时把MR[i]设置为MW[i]一样的值。这个算法理解起来很容易，结合下面的图很显然，
@@ -110,8 +108,6 @@ loop
 end loop
 ```
 
-.
-
 ### 0x03 Checkpointing Asynchronously using Logical Consistency (CALC)
 
   这个算法出自[1]。CALC保护这样的一些结构，CALC算法分为5个步骤：
@@ -205,8 +201,6 @@ function RunCheckpointer()
     wait for all active txns to have start−phase == COMPLETE;
     SwapAvailableAndNotAvailable ();
 ```
-
-.
 
 ### 0x04 评估
 

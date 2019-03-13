@@ -24,8 +24,6 @@ typora-root-url: ../
 
 一些BtrFS基本的概念的简单介绍。
 
-.
-
 ### 0x01 基本设计
 
 BtrFS几个基本的知识：

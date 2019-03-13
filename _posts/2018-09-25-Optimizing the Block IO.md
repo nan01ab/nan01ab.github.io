@@ -38,8 +38,6 @@ In this article, we explore six optimizations for the block I/O subsystem: polli
 - Narrow Device I/O Interface，狭隘的设备IO接口，只留出的操作的余地很小；
 - Disk-Oriented Configuration，主要是面向HHD的一些设计，比如CFQ IO调度器，粗粒度的timer，预读确实高成本；
 
-
-
 ### 0x03 优化的基本的方法和性能相关值的度量
 
 对于优化基本的方向就是两个：
@@ -68,8 +66,6 @@ O6. using double buffering for I/O requests.
 
  下面就是讨论了一些具体的方法，这里是从一个方法出发解决现有的问题，但方法本身也带来了额外的问题，然后提出改进策略，直到达到一个较好的结果。
 
-
-
 ### 0x04 SyncPath: Designing a Synchronous I/O Path
 
    SyncPath设计为block layer的一个子系统，对应优化方法中的O1 O2。分为这些步骤处理IO请求:
@@ -88,8 +84,6 @@ O1 and O2 directly lead to performance improvement under several workloads. Sync
 On the contrary, the sequential write throughput drops from 479MB/s to 309MB/s, reaching the random write throughput. As SyncPath cannot take advantage of an I/O scheduler to merge contiguous write requests, the sequential write workload is handled in the same way as the random write workload.
 ```
 
-.
-
 ### 0x05  Extending Device I/O Interface 
 
   SyncPath中表现出了没有合并写请求对顺序写性能的影响。现在Scatter-gather DMA I/O是一种常见的优化方式，这里提出了一种新的device IO接口，Scatter-Scatter I/O (SSIO) Interface。用于将不连续的主机内存里面的数据写入到存储设备不连续的段里面，反之同理。这利用了SSD内部的并行特性，给合并IO请求提供了额外的机会。这种方式也要求对DMA做出一些改进。
@@ -98,8 +92,6 @@ On the contrary, the sequential write throughput drops from 479MB/s to 309MB/s, 
  The DMA engine of the DRAM-based SSD is customized accordingly by using a set of descriptors for an I/O request. A request descriptor represents a single mapping of {host memory segment, storage address segment, data size}. The Block Control Table (BCT) maintains 1,024 request descriptors, implying that the block I/O subsystem can dispatch up to 1,024 I/O requests at a time through the SSIO interface.
 ```
 
-.
-
 ### 0x06 STM: Synchronously Merging Discontiguous I/O Requests 
 
   SSIO利用的是SSD的性能特点，不同于现在的Spatial Merge在空间的局部性上做合并操作，SSIO是在在时间上的局部性做合并的操作。这里就定义了Temporal Merge，即在一个时间窗口内的操作被合并到一起。利用这个特点，这里就实现了Synchronous Temporal Merge。
@@ -107,8 +99,6 @@ On the contrary, the sequential write throughput drops from 479MB/s to 309MB/s, 
 ```
 Figure 7 depicts the difference between Spatial Merge and Temporal Merge. When 5 contiguous and 3 discontiguous I/O requests enter the block I/O subsystem, Spatial Merge would combine them into one large I/O request and three small I/O requests, while Temporal Merge would build one I/O request with 8 request descriptors.
 ```
-
-
 
 ![optimizeing-blk-tm](/assets/img/optimizeing-blk-tm.png)
 
@@ -132,8 +122,6 @@ Figure 7 depicts the difference between Spatial Merge and Temporal Merge. When 5
 
  利用时间上的局部性很好的提高了顺序写入的性能，解决了之前SyncPath存在的问题的同时了也利用好了SyncPath的优点。不过STM方式也存在缺点，一个是时间合并的在IO请求较少时难以发挥。第二个是随机读的性能明显低于随机写。
 
-
-
 ### 0x07 ATM: Asynchronously Merging Discontiguous I/O Requests 
 
   Asynchronous Temporal Merge可以看作是STM的一个改进版本，ATM基于上面的O1 O2和O4。不同于STM，它使用请求队列阻塞机制来积累IO请求。在将IO请求插入到IO调度队列之前，先将IO请求的kernel buffer映射到DMA buffer，这一步叫做queue bouncing。在收到一个unplugging(疏通)事件时，先Temporal Merge，然后一次性地将这些请求发送出去。在检测到IO操作完成的时候，使用每个CPU的软件中断，让之前的阻塞的CPU核心参与之后的工作。
@@ -149,8 +137,6 @@ On the other hand, the sequential and the random read throughput by ATM are lowe
 ```
 
   ATM表现出比STM更加好的写性能，然而这里的读性能低于STM，原因在与ATM很好地合并读请求。
-
-
 
 ### 0x08 HTM: Hybrid Use of Synchronous and Asynchronous Temporal Merge 
 
@@ -191,8 +177,6 @@ In the case of ext3, the synchronous writes issued by a jour- naling thread prev
 ```
 
  这个问题没有完全解决。
-
-
 
 ### 0x0B 评估
 

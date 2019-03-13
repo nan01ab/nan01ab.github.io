@@ -12,8 +12,6 @@ typora-root-url: ../
 
   Log是Computer Science中一个非常重要的思想，与存储相关的地方都非常常见。Log-Structured File System(这里是LFS)是不同与常见的Unix FFS的一类文件系统，这篇论文发表于1992年(还是比我年龄要大呀)，比发表于1984年的Unix FFS晚了8年时间。计算机系统随着时间也发生了很多的变化，新的方法也会随之诞生。Log-Structured 是从文件系统，内存分配起到NVM空间管理，到Log-Structured 的数据结构，SSD的内部等等等，一大堆。可以来一个集合。
 
-
-
 ### 0x01 动机
 
  动机基于以下的观察:
@@ -28,8 +26,6 @@ typora-root-url: ../
 ```
 How can a file system transform all writes into sequential writes? For reads, this task is impossible, as the desired block to be read may be any- where on disk. For writes, however, the file system always has a choice, and it is exactly this choice we hope to exploit.
 ```
-
-.
 
 ###  0x02 Writing To Disk Sequentially 
 
@@ -51,8 +47,6 @@ How can a file system transform all writes into sequential writes? For reads, th
          |          |
          +----------+
 ```
-
-.
 
 ##### 问题
 
@@ -119,8 +113,6 @@ People often say that the solution to all problems in Computer Science is simply
 
   解决第一个问题的方法是使用2个CR，每次更新的时候是更新另外一个。先修改CR，然后在修改指针的方式。此外，CR在前后两端保存了时间戳，当是完整更新的时候这两个时间戳是系统的，不相同则认为没有更新成功。解决第二个问题使用了类似数据中的方法。从最后的检查点开始，查找有效的更新。如果存在，则相应更新操作。
 
-.
-
 ### 0x07 Summary
 
   经典文章，值得一读。
@@ -128,8 +120,6 @@ People often say that the solution to all problems in Computer Science is simply
 ```
 some modern commercial file systems, including NetApp’s WAFL, Sun’s ZFS, and Linux btrfs, and even modern flash-based SSDs, adopt a similar copy-on-write approach to writing to disk, and thus the intellectual legacy of LFS lives on in these modern file systems. In particular, WAFL got around cleaning problems by turning them into a feature; by providing old versions of the file system via snapshots, users could access old files whenever they deleted current ones accidentally.
 ```
-
-.
 
 ## 参考
 

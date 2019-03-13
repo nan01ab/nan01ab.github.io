@@ -16,8 +16,6 @@ typora-root-url: ../
 ... a single Tango object running on 18 clients provides 180K linearizable reads/sec against a 10K/sec write load... In our evaluation, a set of Tango objects runs at over 100K txes/sec when 16% of transactions span objects on different clients.
 ```
 
-.
-
 ### 0x01 基本架构
 
   Tango中的一个Tango对象是抽象的一个核心，它是一个在Shared Log中保存数据结构的一个副本，Tango使用两个基本的API来方便实现对对象的更新和查询，
@@ -74,8 +72,6 @@ Figure 3: TangoRegister: a linearizable, highly available and persistent registe
 
 * 错误处理，Tango的错误处理都是基于超时的，前面没有Stream抽象的操作也是一样。因为日志中包含了最初事务决定的所有信息，这里只需要超时后重新操作即可。
 
-
-
 ### 0x03 评估
 
  这里具体的信息可以参看[1],
@@ -123,8 +119,6 @@ Figure 3: TangoRegister: a linearizable, highly available and persistent registe
 * vCorfu中也和Tango一样，事务中写入的数据保存在一个Write Buffer中。不同的是在提交的时候，如果vCorfu发现这个Buffer为空，则事务执行成功，为一个只读事务；
 * 如果Buffer不空，则客户端通知Sequener它使用的Token，如果设计到的Stream没有更改，则Sequencer发放Token。客户端通过提交Write Buffer来提交事务。否则事务Sequencer不发放Token，事务会abort。这样的方法就可以确保在vCorfu中Log只有确认可以提交的日志，而不同和前面的Tango一样使用验证的方法。
 
-
-
 ### 0x12 可组合的复制状态机
 
   在vCorfu中，一个对象可能是其它的对象组成的，这个给开发带来了很多的便利。
@@ -169,8 +163,6 @@ Figure 3: TangoRegister: a linearizable, highly available and persistent registe
     }
  }
 ```
-
-.
 
 ### 0x13 评估
 

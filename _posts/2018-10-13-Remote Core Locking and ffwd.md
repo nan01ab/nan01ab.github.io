@@ -19,27 +19,19 @@ typora-root-url: ../
 * 快速的控制转移，没有同步也没有全局变量；
 * 共享的数据保持在server核心上(即用来执行临界区的代码的核心)，这意味着更加少的cache miss。
 
-.
-
 ### 0x01 Remote Core Locking(RCL)
 
  RCL的基本原理：
 
 ![rcl-critical](/assets/img/rcl-critical.png)
 
-
-
  在RCL中，执行临界区的代码编程了一种远程方法调用。为了实现这个“RPC"调用，客户端和服务段使用一个请求结构的数组来进行交互。这个数组一共有C项，这个C代表了能够请求服务的客户端的数量。一般而言都要大于CPU 核心的数量。这个数组每一项的长度为L bytes，这个L一般是CPU缓存行的大小。第i项记为req-i，代表了一个client-i和服务端和交互的结构。
 
-![rcl-requests](/assets/img/rcl-requests.png)
-
- req-i包含了以下的几个字段：
+![rcl-requests](/assets/img/rcl-requests.png) req-i包含了以下的几个字段：
 
 1. 这个临界区相关的lock的地址；
 2. 一个context结构的地址，包含了一些会由临界区引用or更新的一些变量之类的东西；
 3. 包含了临界区代码的函数的地址，如果没有临界区，这个字段就是NULL；
-
-.
 
 ##### 操作过程
 
@@ -52,8 +44,6 @@ typora-root-url: ../
 For the applications that spend 20-70% of their time in critical sections when using POSIX locks (Raytrace/Balls4, String Match, and Memcached/Set), RCL gives significantly better performance than POSIX locks, but in most cases it gives about the same performance as MCS and Flat Combining, as predicted by our microbenchmark. For Memcached/Set, however, which spends only 54% of the time in critical sections when using POSIX locks, RCL gives a large improvement over all other approaches, because it sig- nificantly improves cache locality. When using POSIX locks, Memcached/Set critical sections have on average 32.7 cache misses, which roughly correspond to accesses to 30 shared cache lines, plus the cache misses incurred for the management of POSIX locks. Using RCL, the 30 shared cache lines remain in the server cache.
 ```
 
-.
-
 ### 0x02 ffwd 
 
   ffwd的基本原理和RCL是一样的，不过它实现了更加好的性能：
@@ -62,7 +52,7 @@ For the applications that spend 20-70% of their time in critical sections when u
 Our system: fast, fly-weight delegation (ffwd, pronounced “fast-forward”), is a stripped-down implementation of delegation that is highly optimized for low latency and high throughput. ffwd offers up to 10× the throughput of the state-of-the-art in delegation, RCL [53], in microbenchmarks, or up to 100% in application-level benchmarks. With respect to locking and other methods, ffwd is often able to improve performance by 10× or more, for data structures suitable to delegation.
 ```
 
-ffwd实现这样的性能的主要方式就是有效的隐藏在服务线程和客户现场之间互联产生的延时。方法综合了指令级的并行和小心地安排内存访问。ffwd中避免了原子指令的使用，允许服务线程重排序指令，此外还有将请求和响应打包到接近客户端的cache line pairs中，缓冲响应以减少维持缓存一致性带来的数据流量。
+  ffwd实现这样的性能的主要方式就是有效的隐藏在服务线程和客户现场之间互联产生的延时。方法综合了指令级的并行和小心地安排内存访问。ffwd中避免了原子指令的使用，允许服务线程重排序指令，此外还有将请求和响应打包到接近客户端的cache line pairs中，缓冲响应以减少维持缓存一致性带来的数据流量。
 
 ```
 The primary contributions of this paper are as follows:
@@ -84,8 +74,6 @@ FFWD Delegate(s, f, retvar, argc, args...)
  This macro delegates function f to server s, with specified arguments. Stores return value in retvar.
 ```
 
-.
-
 ####  Lock and Delegation Performance Bounds 
 
 ffwd之类的基于委托的同步方式都特别适合临界区比较小的情况。这里先分析一下影响这些同步方式性能的主要因素。先来考虑一个理想的情况，对于一个one-way 互联延时为L的，临界区执行时间为C-lock的情况，理想的吞吐为T-lock =  1 / (l + C-lock)，这是如何如优化的一个指导。
@@ -94,13 +82,9 @@ ffwd之类的基于委托的同步方式都特别适合临界区比较小的情�
 Consider an idealized system. Assuming no back-to-back acquisitions, the maximum single-lock throughput is T-lock =  1 / (l + C-lock), where l is the mean one-way interconnect latency, and C-C-lock is the mean duration of the critical section. When (C-lock → 0), lock throughput is dominated by bus latency.
 ```
 
-.
-
 ##### Interconnect Bandwidth & Interconnect Latency  
 
- 在Paper中测试的系统中，Interconnect Bandwidth一般为150 - 390 million缓存行每秒，由于在ffwd使用了2个缓存行，这里去最小的值的话就是75Mops，又系统上面有2条这样的通道，所以就是150Mops。
-
-  委托失的执行方式需要一个请求一个响应，使用这里最大的吞吐就是1 / 2*L，着Paper中的系统上面大概就是2.5Mops。
+ 在Paper中测试的系统中，Interconnect Bandwidth一般为150 - 390 million缓存行每秒，由于在ffwd使用了2个缓存行，这里去最小的值的话就是75Mops，又系统上面有2条这样的通道，所以就是150Mops。委托失的执行方式需要一个请求一个响应，使用这里最大的吞吐就是1 / 2*L，着Paper中的系统上面大概就是2.5Mops。
 
 ##### Interconnect Parallelism: Store Buffers 
 
@@ -115,19 +99,13 @@ Consider an idealized system. Assuming no back-to-back acquisitions, the maximum
   In summary, with locking, throughput is limited to 5 Mops per lock, or 12.5 Mops when running on a single socket. With delegation, performance is limited primarily by server processing capacity, and the number of processor cycles spent on each delegated function.
 ```
 
-.
-
 #### fast, fly-weight delegation (ffwd) 
 
 基本工作方式示意图:
 
 ![rcl-ffwd](/assets/img/rcl-ffwd.png)
 
-  ffwd中每一个客户端都有一个128byte的的请求cache line pair，这个pair只能被运行在特定一个硬件线程上面运行的线程使用，只能被服务端读取。当一个客户端线程写入请求cache line pair之后，它就在特定的响应cache line pair上面子旋转。这个响应cache line pair能读和写的对象和请求的相反。服务方也像RCL一样轮询请求，不过它一次性处理一组之后在写回结果。
-
-  每个请求结构与前面的RCL有所区别，有一个toggle bit，一个函数指针，一个参数数量值和最多6个参数组成。在一个socket上面(CPU的socket)，响应行最多由15个线程共享，也包含了一个toggle bit，8byte的返回值。toggle bit指示了每个单独请求/响应通道的状态。如果与给定客户端对应的请求和响应toggle bit不同, 则新请求处于挂起状态。如果它们相等, 则服务方已经处理完成，响应已准备就绪。服务方处理请求, 就是加载提供给相应的参数, 并调用指定的函数。
-
-
+  ffwd中每一个客户端都有一个128byte的的请求cache line pair，这个pair只能被运行在特定一个硬件线程上面运行的线程使用，只能被服务端读取。当一个客户端线程写入请求cache line pair之后，它就在特定的响应cache line pair上面子旋转。这个响应cache line pair能读和写的对象和请求的相反。服务方也像RCL一样轮询请求，不过它一次性处理一组之后在写回结果。每个请求结构与前面的RCL有所区别，有一个toggle bit，一个函数指针，一个参数数量值和最多6个参数组成。在一个socket上面(CPU的socket)，响应行最多由15个线程共享，也包含了一个toggle bit，8byte的返回值。toggle bit指示了每个单独请求/响应通道的状态。如果与给定客户端对应的请求和响应toggle bit不同, 则新请求处于挂起状态。如果它们相等, 则服务方已经处理完成，响应已准备就绪。服务方处理请求, 就是加载提供给相应的参数, 并调用指定的函数。
 
 #### ffwd的优化策略
 

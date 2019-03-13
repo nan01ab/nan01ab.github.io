@@ -12,8 +12,6 @@ typora-root-url: ../
 
    来看一篇关于图计算的Paper，这篇Paper来自上海交通大学。PowerLyra要解决的问题主要就是现在的一些图分区的方式不能很好地处理现实中的数据发布不均匀的问题。现在使用edge-cuts或者是vertex-cuts的方法均存在不足，PowerLyra提出了一种混合的分区的方式，利用好两种分区方式适应不同情况的优点。
 
-
-
 ### 背景
 
    现在的图计算为了处理大规模的图，往往不可避免地要对图进行分区。分区的一个最直观的思路就是类型Pregel的方式，将顶点根据一定的规则划分到不同的分区，这样的一个效果就是有些边是跨越了分区。另外一种就是类似在GraphLab中采用的方法，分区的时候对于跨越了分区(机器)的边的顶点，就复制顶点一份，而且边也复制一份。PowerGraph的思路与前的两种存在又存在一些区别，它也存在顶点的副本，但是边没有。
@@ -23,8 +21,6 @@ typora-root-url: ../
 #### 存在的问题
 
   Pregel中和GraphLab中采用的方法被称为edge-cut的方法，它的优点就是有更加好的局部性。可以试图将可能地降低跨越了分区的边的数量，缺点就是由于顶点的度数在很多自然的数据中是发布不平衡的，少数的顶点拥有大量的边，而其它的部分的顶点的边的数量比较少，这种情况下就会导致负载不均衡的现象。而PowerGraph、GrpahX之类的系统采用的vertex-cut的方法好处就是解决了一些数据分布不均衡的问题，能获得更高的并行性。缺点就是会造成比较大的复制因子(the average number of replicas for a vertex)，另外就是增加通信量，对于一些低度数的点这样的分区更多是无用的。所以，既然不同的分区方式有不同的优缺点，PowerLyra就应用一种混合的方法。
-
-
 
 ### PowerLyra
 
@@ -58,8 +54,6 @@ As shown in the right part of Fig. 4, since all edges required by gathering has 
 * hybrid-cut能够很好地处理边和顶点的均衡性；
 
 另外，为了进一步将少low-degree顶点的复制因子，PowerLyra还采用了Heuristic Hybrid-Cut的方法[1]。
-
-
 
 #### 构建
 

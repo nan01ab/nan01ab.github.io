@@ -71,8 +71,6 @@ fn onReport(...) {
 }
 ```
 
-.
-
 ### 0x02 实现
 
   Paper中实现的CCP agent使用Rust语言实现，运行在用户空间之中。一个数据面实现了对CCP的支持之后，它就可以使用在CCP中实现的所有的算法。实现一个支持CCP的数据面要做下面的一些事情，
@@ -85,8 +83,6 @@ fn onReport(...) {
 ```
 To use libccp, the datapath must provide callbacks to functions that: (1) set the window and rate, (2) provide a notion of time, and (3) send an IPC message to CCP. Upon reading a message from CCP, the datapath calls ccp_recv_msg(), which automatically de-multiplexes the message for the correct flow. 
 ```
-
-.
 
 ### 0x03 评估
 

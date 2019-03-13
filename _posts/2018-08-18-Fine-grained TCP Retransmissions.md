@@ -54,8 +54,6 @@ timeout = (RTO + (rand(0.5) × RTO)) × 2 ^ backoff
 With the TCP timestamp option enabled, RTT estimates are calculated based on the difference between the timestamp option in an earlier packet and the corresponding ACK. We convert the time from nanoseconds to microseconds and store the value in the TCP timestamp option.2 This change can be accomplished entirely on the sender—receivers already echo back the value in the TCP timestamp option.
 ```
 
-.
-
 ### 安全否?
 
   其实上面减小RTOmin能带来的效果是很显然的，主要是安全问题？是否会导致大量的假的超时，从而导致重传反而降低了性能呢？Paper的观点当然是很安全啦。RTO本来就有很大的随机性的元素，选择什么样的RTOmin，是一个取舍的问题。

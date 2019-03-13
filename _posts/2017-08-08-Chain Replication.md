@@ -28,8 +28,6 @@ typora-root-url: ../
 PendingobjID is defined as the set of requests received by any server in the chain and not yet processed by the tail, so deleting server H from the chain has the effect of removing from PendingobjID those requests received by H but not yet forwarded to a successor. Removing a request from PendingobjID is consistent with transition T2, so deleting H from the chain is consistent with the specification in Figure 1.
 ```
 
-,
-
 #### middle-server故障
 
   master通知故障服务器s下一个服务器s+和s的上一个服务器chain的变化。这里要处理的问题稍微多一个点，因为中间服务器故障的话可能导致一些更新丢失。这里使用的方式是一个服务器保存一些状态消息，以便于它的下一个服务器更改是能够补充发送没有传递到后面的请求。	
@@ -38,8 +36,6 @@ PendingobjID is defined as the set of requests received by any server in the cha
 This, however, could cause the Update Propagation Invariant to be invalidated unless some means is employed to ensure update requests that S received before failing will still be forwarded along the chain. The obvious candidate to perform this forwarding is S−, but some bookkeeping and coordination are now required.
 ```
 
-,
-
 #### tail 故障
 
  tail的上一个服务器称为新的tail。
@@ -47,8 +43,6 @@ This, however, could cause the Update Propagation Invariant to be invalidated un
 ```
  ... so changing the tail from T to T− potentially increases the set of requests completed by the tail which, by definition, decreases the set of requests in Pending objID . 
 ```
-
-,
 
 #### chain 拓展
 
@@ -65,13 +59,9 @@ Inprocess Requests Invariant is established and T+ can begin serving as the chai
 * Clients are notified that query requests should be directed to T+.
 ```
 
-.
-
 ### 其它
 
 ​     论文中还讨论了其它很对东西，比如这里还可以不只有一条链，可以有多条。故障之后对处理请求的影响，性能评估等等。总的来说Chain Replication是一个比较简单明了的 Replica方式，不过感觉不是很实用。
-
-
 
 ## 参考
 

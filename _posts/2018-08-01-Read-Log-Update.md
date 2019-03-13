@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Read-Log-Update
+title: Read-Log-Update and Interval-Based Memory Reclamation
 tags: [Synchronization]
 excerpt_separator: <!--more-->
 typora-root-url: ../
@@ -16,8 +16,6 @@ typora-root-url: ../
 RLU provides support for multiple object updates in a single operation by combining the quiescence mechanism of RCU with a global clock and per thread object-level logs.
 ```
 
-.
-
 ### 0x01 基本思路 
 
    通过使用综合了结合global clock的RCU的quiescence机制和 thread直接独立的object logs，RLU一个操作支持多个对象更新。RLU有以下的基本思路，这一部分先假设写都是顺序进行的:
@@ -32,7 +30,7 @@ RLU provides support for multiple object updates in a single operation by combin
 
 下面以一个图来一步步解释：
 
-  ![rlu-principle](/assets/img/rlu-principle.png)
+![rlu-principle](/assets/img/rlu-principle.png)
 
 ##### 第1部分
 
@@ -45,8 +43,6 @@ RLU provides support for multiple object updates in a single operation by combin
 ##### 第3部分
 
    T2完成了自己的更新操作，准备提交这次更新。它先递增clock，写到自己的w-clock，然后就是将递增之后的写到g-clock。不过此时T2要等到之前的操作都完成，这里是T1的操作。等到T1完成，T2就可以将对象安全写回，然后释放lock(s)。对于T3，由于它是属于之后的操作，就可以不用管了。对于T3的读取，如果T2次时没有将更新写回，它就比较T2的w-clock，发现T3的 l-clock >= T2的w-clock，他就可以去T2的log里面读取数据。
-
-
 
 ### 0x02 Synchronizing Write Operations  
 
@@ -68,9 +64,24 @@ Another approach is to use fine-grained locks. In RLU, each object that a writer
 On commit, instead of incrementing the global clock and executing RLU synchronize, the RLU writer simply saves the current write-log and generates a new log for the next writer. In this way, RLU writers execute without blocking on RLU synchronize calls, while aggregating write-logs and locks of objects being modified. 
 ```
 
-  推迟操作，这里可以复习一下The Scalable Commutativity Rule讲的东西了[2].
+## Interval-Based Memory Reclamation
+
+### 0x10 引言
+
+   和前面的RLU一样，Interval-Based Memory Reclamation(IBR)也是一种多线程并发控制的一种机制。它要解决的问题和RCU一样，也是在并发访问的情况下，如何在合适的时候回收内存。
+
+### 0x11 基本思路
+
+Interval-Based Reclamation和Epoch-Based Reclamation很类似。EBR是一种基于时间的方式，记录线程回访问的最早数据的Epoch，之前的数据就可以安全地进行数据回收的操作。这个方式是很多KVS、数据系统中常用的一种方式。但是这种的一个缺点在于一个停顿的线程可能给内存的回收带来严重的负面影响。与EBR一样，IBR也会记录一个全局的Epoch。另外还会记录一个对象的birth epoch和retire epoch，这两个epoch代表了这个对象的生命周期。下面是一个示例的伪代码。和EBR不同的是，它记录分配内存的次数，每经过若干的次数，会增加epoch的计数。对象要释放的时候使用retier喊出，这里就会记录这个对象retire的epoch。在之后合适的时候进行内存回收的操作。
+
+![ibr-psudocode](/assets/img/ibr-psudocode.png)
+
+### 0x11 评估
+
+  这里的具体信息可以参看[3],
 
 ## 参考
 
 1. Read-Log-Update: A Lightweight Synchronization Mechanism for Concurrent Programming, SOSP 2015.
 2. Austin T. Clements, M. Frans Kaashoek, Nickolai Zeldovich, Robert T. Morris, and Eddie Kohler. 2015. The scalable commutativity rule: Designing scalable software for multicore processors. ACM Trans. Comput. Syst. 32, 4, Article 10 (January 2015), 47 pages.  DOI: http://dx.doi.org/10.1145/2699681.
+3. Interval-Based Memory Reclamation, PPoPP'18.

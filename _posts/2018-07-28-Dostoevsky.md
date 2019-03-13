@@ -17,8 +17,6 @@ typora-root-url: ../
 We put everything together to design Dostoevsky, a key-value store that adaptively removes superfluous merging by navigating the Fluid LSM-tree design space based on the application workload and hardware. 
 ```
 
-.
-
 ### 0x01 基本思路
 
 了就下面的LSM-tree的复杂度对理解Paper的内容很重要，

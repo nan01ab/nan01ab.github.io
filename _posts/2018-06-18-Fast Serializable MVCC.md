@@ -16,8 +16,6 @@ typora-root-url: ../
 Compared to our single-version concurrency control implementation, our MVCC implementation costs around 20% of performance. Still, more than 100k transactions/s are processed. This is true for our column- and a row-based storage backends. We also compared these numbers to a 2PL implementation in HyPer and a MVCC model similar to Hekaton. 2PL is prohibitively expensive and achieves a ∼5× smaller throughput.
 ```
 
-.
-
 ### 0x01 基本设计
 
   Hyper的MVCC的设计没有采用每次创建一个新的版本的方法，而是使用delta链的方法。但是这里的delta链不同的地方在于不是记录向前的更新的delta，而是要访问后面的数据的时候undo的delta。Hyper的MVCC使用的是就地更新的方式，这样的方法对于一些场景特别是表扫描这样的OLAP任务特别有利。在事务提交的时候，这些delta的信息会被重新标记时间戳的信息用于确定存活的时间区间。另外Hyper通过将一个事务相关的delta数据保存在它的Undo Buffer来加快数据处理，也可以利用其来减少存储空间的使用。另外，对于一条记录的Delta的信息在数据库中使用VersionVector指明，这些信息从新到旧排序。下面的图是一个事务执行的例子，

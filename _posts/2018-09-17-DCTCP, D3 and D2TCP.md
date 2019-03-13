@@ -12,8 +12,6 @@ typora-root-url: ../
 
   这篇总结包含了3篇Paper的内容，一篇是SIGCOMM 2010上的DCTCP，一篇是SIGCOMM 2011上的Deadline Driven Delivery，还有一篇是SIGCOMM 2012上面的D2TCP。前者将的是如何利用**Explicit Congestion Notification** (**ECN**)解决数据中心网络中TCP的一些问题，第二个是如何加入deadline的优化，后者是前2者的优化。这里只是简单地介绍。
 
-
-
 ### 0x01 ECN
 
  ECN就是显示的拥塞通知。对于IPv4，它使用了DiffServ字段最右边的两个bits来标示(在一些早一点的书上，可以发现说这里是预留给以后的功能的，目前没有使用，当然现在是已经使用了)，在IPv6上Traffic Class字段的最后两个bits。
@@ -29,8 +27,6 @@ typora-root-url: ../
 
 ECN还有更多的细节，可参考相关资料。
 
-.
-
 ### 0x02 问题
 
 1. incast 问题，在Partition/Aggregate模式中比较常见，服务器同时回复请求端导致某个地方的包突然大量增加，从而导致丢包；
@@ -38,8 +34,6 @@ ECN还有更多的细节，可参考相关资料。
 3. buffer的问题，不同的流使用不同的交换机短空，长时间的流占用了共享的buffer。
 
 ![dctcp-problems](/assets/img/dctcp-problems.png)
-
-
 
 ### 0x03 DCTCP
 

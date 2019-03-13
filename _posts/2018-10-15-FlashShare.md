@@ -22,8 +22,6 @@ typora-root-url: ../
 We also revise the memory controller and I/O bridge model of the framework, and validate the simulator with a real 800GB Z-SSD prototype. The evaluation results show that FLASHSHARE can reduce the latency of I/O stack and the number of system context switch by 73% and 42%, respectively, while improving SSD internal cache hit rate by 37% in the co-located workload execution. These in turn shorten the average and 99th percentile request turnaround response times of the servers co-running multiple applications (from an end-user viewpoint) by 22% and 31%, respectively.
 ```
 
-.
-
 ### 0x01 背景知识
 
  这里的背景知识和Paper内容是强相关的而且内容比较多，所以了解这里相关的一些知识。
@@ -40,8 +38,6 @@ We also revise the memory controller and I/O bridge model of the framework, and 
 When the I/O request is completed by the SSD, it sends a message signaled interrupt (MSI) that directly writes the interrupt vector of each core’s programmable interrupt controller. The interrupted core executes an ISR associated with the vector’s interrupt request (IRQ). Subsequently, the NVMe driver cleans up the corresponding entry of the target SQ/CQ and returns the completion results to its upper layers, such as blk-mq and filesystem.
 ```
 
-.
-
 #### 设备固件栈
 
   SSD的内部其实就是一个特殊的小型计算机系统，其中一个重要的部分就是NVMe Controller，它控制下吗的内置的Cache和FTL。内核的Cache其实就是DRAM，高端的SSD会有数GB的Cache。NVMe Controller即可用接收主机推送的请求，也可以直接自己去拉取。
@@ -49,8 +45,6 @@ When the I/O request is completed by the SSD, it sends a message signaled interr
 ![fshare-firmware](/assets/img/fshare-firmware.png)
 
  这里来描述一下一个请求到NVMe驱动然后执行完成的过程比较复杂，Paper中有具体的描述。与这里相关的一个就是SQ和CQ。这两个队列本质是就是一个生产者消费者的队列。SQ的生产者时主机，任务通过写入到SQ的tail，SSD这里就是消费者，从head中读取请求。CQ中的内容就是请求完成的学习，生产者和消费者相反。SSD中的Doorbell Register也与这里的过程直接相关，可以参看相关资料。
-
-
 
 ### 0x02 Kernel Layer Enhancement 
 
@@ -67,8 +61,6 @@ When the I/O request is completed by the SSD, it sends a message signaled interr
     这里这样简单的bypass的方式但来的问题就是可能导致冒险(hazard)，一个例子就是一个非敏感性的IO请求正在blk-mq中处理中，这个时候一个延时敏感性的IO请求到来了，它们会对同一个逻辑块进行操作。对于这样的情况就不能简单地bypass了。这里要处理一下，如何这两个请求是不同的操作类型(读写)，blk-mq就一前一后地提交这两个请求，如果是相同的类型的，就将其合并处理然后转发到NVMe的驱动。
 
 * NVMe driver，这里要解决的一个问题是由于NVMe对的head/tail是由NVMe的驱动和NVMe控制器共同处理的。这里即使通过改动blk-mq使得这些延时敏感的IO请求先于其它请求到达了SQ，但是NVMe控制器并不会去提前处理这些请求。这里的解决方式就是使用两个SQ，不同类型的IO请求放到不同的SQ中，避免了相互的影响。在图4中就表示出了添加的bypass的SQ。同时为了避免产生饥饿的问题，这里如果原来的SQ上面的IO请求达到一定的阈值的之后or等待了一定的时间之后，FlashShare就会去处理这个SQ上面的请求。
-
-
 
 ### 0x03 Selective Interrupt Service Routine 
 
@@ -96,11 +88,7 @@ With Select-ISR, the CPU core can be released from the NVMe driver through a con
 In addition, the I/O patterns and locality of online applications are typically different from those of offline applications. That is, a single generic cache access policy cannot efficiently manage I/O requests from both online and offline applications.
 ```
 
- 同样地，这里也使用的是分开处理的方式。FlashShare将这些Cache分为两部分，各个部分由相同的缓存项的数量(这里个人猜测由相同的项数时为了方便处理)，但是由不同的关联度(可以类比CPU Cache的组相联)。固定的划分时很难使用不同的使用情况的，所以这里FlashShare使用了动态的处理方式。在这一个epoch内，FlashShare会统计不同类型IO请求的数量，根据这些请求的变化来动态调整。
-
-  此外，FlashShare为了处理不佳的数据预取导致的污染Cache的问题，这里使用了一种叫做“ghost caching” 的机制，它会评估不同的预取配置的“好坏"。这些“ghost caching”只是一个Cache的标示，并不实际上预取数据。每一个epoch内，FlashShare会计算出那一个方式是最好的，就使用这种预取的配置。
-
-
+ 同样地，这里也使用的是分开处理的方式。FlashShare将这些Cache分为两部分，各个部分由相同的缓存项的数量(这里个人猜测由相同的项数时为了方便处理)，但是由不同的关联度(可以类比CPU Cache的组相联)。固定的划分时很难使用不同的使用情况的，所以这里FlashShare使用了动态的处理方式。在这一个epoch内，FlashShare会统计不同类型IO请求的数量，根据这些请求的变化来动态调整。此外，FlashShare为了处理不佳的数据预取导致的污染Cache的问题，这里使用了一种叫做“ghost caching” 的机制，它会评估不同的预取配置的“好坏"。这些“ghost caching”只是一个Cache的标示，并不实际上预取数据。每一个epoch内，FlashShare会计算出那一个方式是最好的，就使用这种预取的配置。
 
 ### 0x05 评估
 

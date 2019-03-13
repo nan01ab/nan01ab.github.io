@@ -6,11 +6,7 @@ excerpt_separator: <!--more-->
 typora-root-url: ../
 ---
 
-
-
 ## Tree Indexing on Solid State Drives
-
-
 
 ### 0x00 引言
 
@@ -23,8 +19,6 @@ typora-root-url: ../
 ```
 ... shows that the FD-tree captures the best of both search and insertion performance among all competitors. In particular, it is 5.7-27.9X, 1.4- 1.6X and 3.7-5.5X faster than B+-tree, LSM-tree and BFTL, respectively, under various mixed workloads on an Mtron SSD, and it is 1.7-3.6X, 1.4-1.8X, and 1.9-3.4X faster than B+-tree, LSM-tree and BFTL, respectively, on an Intel SSD. Additionally, on the hard disk, FD-tree achieves a similar search performance to B+-tree under read-intensive workloads and outperforms all others under update-intensive workloads.
 ```
-
-.
 
 ### 0x01 基本思路
 
@@ -51,8 +45,6 @@ typora-root-url: ../
   ```
 
  这里这样的设计于fraction cascading很相似。
-
-.
 
 ### 0x02 操作
 
@@ -84,21 +76,15 @@ typora-root-url: ../
 
 * 更新，就相当于删除原来的数据在添加新的数据。
 
-.
-
 ### 0x03 成本分析和成本模型
 
 关于复杂度等的分析可以参考[1].
 
 ![fdtree-log](/assets/img/fdtree-log.png)
 
-.
-
 ### 0x04 评估
 
   这条咸鱼认为FD-tree看起来没有特别的长处，还有不少的缺点。具体的评估数据可以参考[1].
-
-
 
 ## 参考
 

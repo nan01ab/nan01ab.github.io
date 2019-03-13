@@ -23,8 +23,6 @@ the cuckoo filter, a practical data structure that provides four major advantage
 4. It uses less space than Bloom filters in many practical applications, if the target false positive rate ε is less than 3%.
 ```
 
-.
-
 ### 0x02 基本思路
 
    这个类似的思路在SOSP‘11上面的一篇文章就出现了[2]。这里在一般的的cuckoo hash table上面的一些修改就是：只存储fingerprints就可以了，为了支持cuckoo hash多个hash函数的操作，这里使用了`partial-key cuckoo hashing`的方法。
@@ -73,8 +71,6 @@ Algorithm 2: Lookup(x)
     return False;
 ```
 
-.
-
 #### Delete操作
 
 这里删除的操作也非常简单，
@@ -98,8 +94,6 @@ Note that, to delete an item x safely, it must have been previously inserted. Ot
 
 这里在实际的应用中的解决办法就是在Cuckoo Filter返回可能存在时，在去实际保存数据的结构里面查找(比如在LSM-tree里面就是保存在SSTeabls里面)，在确认存在之后才去删除操作，这样就可以做到安全删除了。
 
-
-
 ### 0x03 一些证明
 
  算法是很简单容易理解的，这里主要是要证明一些东西。下面是会使用到的一些符号：
@@ -113,8 +107,6 @@ n 	number of items
 C 	average bits per item
 f   bits number of footprint
 ```
-
-.
 
 #### Minimum Fingerprint Size
 
@@ -161,8 +153,6 @@ $$
 $$
 C\leq \lceil\log_{2}(1/\epsilon)+log_{2}(2b)\rceil\;/\;\alpha, \quad Eq. (7)
 $$
-.
-
 ```
 where α increases with b. For example, when b = 4 so 1/α ≈ 1.05, Eq. (7) shows cuckoo filters are asymptotically better (by a constant factor) than Bloom filters, which require 1.44 log2 (1/ε) bits or more for each item.
 ```
@@ -195,21 +185,11 @@ for i in range(0, 16):
 print(len(s))
 ```
 
-.
-
 ### 0x04 评估
 
 具体的信息参考[1]
 
 ![cuckoo-filter-space](/assets/img/cuckoo-filter-space.png)
-
-
-
-## Scalable, High Performance Ethernet Forwarding with CUCKOOSWITCH
-
-### 0x00 引言
-
-
 
 ## 参考
 

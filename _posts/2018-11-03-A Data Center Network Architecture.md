@@ -16,8 +16,6 @@ typora-root-url: ../
 Specifically, one instance of our architecture employs 48-port Ethernet switches capable of providing full bandwidth to up 27,648 hosts. By leveraging strictly commodity switches, we achieve lower cost than existing solutions while simultaneously delivering more bandwidth. Our solution requires no changes to end hosts, is fully TCP/IP compatible, and imposes only moderate modifications to the forwarding functions of the switches themselves.
 ```
 
-.
-
 ### 0x01 基本架构
 
 下面的图是一个k叉的fat-tree的topology。设交换机的端口数量为k，核心交换机的数量为(k/2)^2，pods的数量数k，在下面的图中的接近正方形的矩形的虚线框就是一个pod。每一个核心交换机都和每一个pod相连接。在一个pod里面，存在的交换机分为2层，下面的一层的一半的端口连接主机，一半的端口连接上一层的交换机，上一层(aggregation layerz)的交换机连接k/2个核心交换机。这里假设端口为k，则：
@@ -25,8 +23,6 @@ $$
 \\ PODs的数量为k，Aggregation的交换机为k/2, Edge的交换机为k/2，则可以支持的hosts的数量为 \frac{k^{3}}{4}. \\
 在论文的假设k = 48， 则N = 27648.
 $$
-.
-
 在端口数量为k的情况下，有上面的计算可知支持的hosts的数量的27648。支持的子网的数量为1,152。每个子网24台主机，即端口数量的一半。在不同pods里面的主机存在576条((k/2)^2)不同联通的线路。
 
 ![fattree-topology](/assets/img/fattree-topology.png)
@@ -91,8 +87,6 @@ $$
 Note that for simultaneous communication from 10.0.1.3 to another host 10.2.0.2, traditional single-path IP routing would follow the same path as the flow above because both destinations are on the same subnet. Unfortunately, this would eliminate all of the fan-out benefits of the fat-tree topology. Instead, our two-level table lookup allows switch 10.0.1.1 to forward the second flow to 10.0.3.1 based on right-handed matching in the two-level table.
 ```
 
-.
-
 ### 0x05 Flow Classification & Flow Scheduling
 
   这里将的主要是如果利用识别流的类型和对这些流进行调度，这样可以获得减少局部的阻塞等的好处。Pod的交换机可以这样做：
@@ -114,8 +108,6 @@ pod switches:
   ```
   A similar search is performed for intra-pod large flows; this time for an uncontended path through an upper-layer pod switch. The scheduler garbage collects flows whose last update is older than a given time, clearing their reservations. Note that the edge switches do not block and wait for the scheduler to perform this computation, but initially treat a large flow like any other.
   ```
-
-.
 
 ### 0x06 Fault-Tolerance
 

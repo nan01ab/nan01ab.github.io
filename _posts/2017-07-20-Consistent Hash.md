@@ -139,8 +139,6 @@ int ch(int key, int num_buckets) {
   }
 ```
 
-.
-
 ### 有界负载一致性Hash算法
 
 #### 基本思想

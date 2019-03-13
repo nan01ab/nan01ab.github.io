@@ -16,8 +16,6 @@ typora-root-url: ../
 Using this logging method, the DBMS can flush the changes to the database before recording them in the log. By ordering writes to NVM correctly, the DBMS can guarantee that all transactions are durable and atomic. This allows the DBMS to write less data per transaction, thereby improving an NVM device’s lifetime.
 ```
 
-.
-
 ### 基本思路
 
   WAL应该都很熟悉了:
@@ -81,8 +79,6 @@ In other words, if a tuple’s begin timestamp falls within the (cp , cd) pair, 
 ```
 This is because each WBL log record contains all the information needed for recovery: the list of commit timestamp gaps and the commit timestamps of long running transactions that span across a group commit operation. The DBMS only needs to retrieve this information during the analysis phase of the recovery process. It can safely remove all the log records located before the most recent log record. This ensures that the log’s size is always bounded.
 ```
-
-.
 
 ### Replication 
 

@@ -12,8 +12,6 @@ typora-root-url: ../
 
   这篇Fastsocket的文章是最近的关于Linux网络栈优化的第3篇，出自清华大学和新浪。所以要解决的问题和前面的2个差不多，还是要解决Linux内核网络栈存在的一些可拓展性的问题。和前面的两篇的最大的一个区别就是这篇文章里面讲的Fastsocket被实际使用了。
 
-
-
 ### 基本思路
 
 1. 将导致竞争的全局结构分区处理；
@@ -40,8 +38,6 @@ We refer to the copied listen socket as the local listen socket and the original
 In Fastsocket,Figure2 shows,when a SYN packetcannot match a local listen socket in the local listen table, the kernel will set up a new connection with the global listen socket in the global listen table (11). When any application process calls accept() (6), the ready connection in the global listen socket will be found since the accept queue of the global listen socket is checked first (7). The kernel can then accept() the connection from the global listen socket to the applica- tion process, just what the legacy TCP stack does (12).
 ```
 
-.
-
 #### Local Established Table 
 
 Local Established Table是在内核初始化的时候就准备好的。
@@ -53,8 +49,6 @@ Local Established Table是在内核初始化的时候就准备好的。
 
 • In NET RX SoftIRQ , the kernel checks the local estab- lished table to match an established socket for any incoming packet.
 ```
-
-.
 
 #### Active Connection Locality
 
@@ -84,8 +78,6 @@ When the application running on CPU core c attempts to establish an active conne
 ```
 In short, Fastsocket-aware VFS internally customizes VFS for sockets to improve scalability while externally keeping VFS compatibility for socket applications and system tools.
 ```
-
-.
 
 ### 评估
 

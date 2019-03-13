@@ -18,8 +18,6 @@ To cost-efficiently resize this hash table, level hashing leverages an in- place
 
 这里关于NVM之类的特点都不提了，可参考相关资料。这里只关注Lelvel Hasing的设计以及如何解决现在的问题。
 
-
-
 ### 0x01 基本思路
 
 基本结构:
@@ -51,11 +49,8 @@ To cost-efficiently resize this hash table, level hashing leverages an in- place
 
 ```
 Lt 1 = hash1 (K)%N, Lt 2 = hash2 (K)%N (1) 
-
 Lb 1 = hash1 (K)%(N/2), Lb 2 = hash2 (K)%(N/2) (2)
 ```
-
-.
 
 ### 0x02  Cost-efficient In-place Resizing 
 
@@ -77,9 +72,6 @@ Lb 1 = hash1 (K)%(N/2), Lb 2 = hash2 (K)%(N/2) (2)
    Thus after resizing, the items in the bottom level are more than those in the top level and hence we first probe the bottom level, thus improving the search performance. 
    ```
 
-
-.
-
 ### 0x03 Low-overhead Consistency Guarantee 
 
    为了标示一个slot是否为空，这里使用了一个标志位.
@@ -92,8 +84,6 @@ Lb 1 = hash1 (K)%(N/2), Lb 2 = hash2 (K)%(N/2) (2)
 To reduce the overhead of guaranteeing consistency in level hashing, we propose log-free consistency guarantee schemes for deletion, insertion, and resizing operations, and an opportunistic log-free guarantee scheme for update operation, by leveraging the tokens to be performed in the atomic-write manner.
 ```
 
-.
-
 #####  Log-free Deletion 
 
   只需要改变solt的对应的标志位即可；
@@ -102,8 +92,6 @@ To reduce the overhead of guaranteeing consistency in level hashing, we propose 
  since the item becomes valid until the token is set to ‘1’. If a system failure occurs during writing the item, this item may be partially written but invalid since the current token is ‘0’ and this slot is still available. Hence, the hash table is in a consistent state when system failures occur.
 ```
 
-.
-
 #####  Log-free Insertion 
 
   没有项移动的情况下，先写入数据，然后改变标志位。然后通过MFENCE来保证数据更新到NVM上面了。在有数据项移动的情况下，先拷贝要移动的数据到可选的位置，然后将这个位置(被移动对象目前的位置)的标志位置为 1，然后将原来的位置置为0，然后执行插入操作。
@@ -111,8 +99,6 @@ To reduce the overhead of guaranteeing consistency in level hashing, we propose 
 ```
  If a system failure occurs after changing the token of slot-alt before changing the token of slot-cur, the hash table contains two duplicate key-value items, which however does not impact on the data consistency. It is because when searching this key-value item, the returned value is always correct whichever one of the two items is queried.
 ```
-
-.
 
 ##### Log-free Resizing 
 
@@ -124,8 +110,6 @@ we first copy the key-value item of slotold into slotnew, and then modifies the 
 
  这里要处理的一个问题就是在一些crash的情况下，可能导致已经rehash的项没有被标记为删除，这里只需要检查是否已经存在相同的项即可。
 
-.
-
 ##### Opportunistic Log-free Update 
 
   为了避免使用log保证一致性，这里使用了Opportunistic Log-free Update的方式，具体是:
@@ -136,8 +120,6 @@ we first copy the key-value item of slotold into slotnew, and then modifies the 
 ```
 When updating an existing key-value item, if the updated item has two copies in the hash table, we first delete one and then update the other.
 ```
-
-.
 
 ### 0x04 评估
 

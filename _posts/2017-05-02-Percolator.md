@@ -18,8 +18,6 @@ By replacing a batch-based indexing system with an indexing system based on incr
 
 Percolator的设计非常巧妙，硬是在一个只支持单行事务的Bigtable上面实现了跨行跨表事务的支持。
 
-.
-
 ### 基本架构
 
   Percolator时为更新索引之类的任务设计的，它的设计原则就是必须能够运行在大规模的系统之上，另外一个就是不要求很低的延时。在Percolator中，一个事务的提交可能被延迟几十秒，这个在OLTP中不可接受的。所以这里要注意Percolator适应的环境。Percolator依赖于Google的其它的常见的基础设施，比如Chubby，Bigtable和GFS，此外，Percolator的提供的是基于时间戳实现的SI级别的隔离，未来整个系统获取单调递增的时间戳，它这里使用了一个时间戳服务，叫做`timestamp oracle`,
@@ -242,8 +240,6 @@ Percolator handles this by designating one cell in every transaction as a synchr
  A transaction that encounters a lock can distinguish between the two cases by inspecting the primary lock: if the primary lock has been replaced by a write record, the transaction which wrote the lock must have committed and the lock must be rolled forward, otherwise it should be rolled back (since we always commit the primary first, we can be sure that it is safe to roll back if the primary is not committed). 
 ```
 
- .
-
 #### 例子
 
  这里先以一个转账的例子来大概说明执行的过程：
@@ -290,8 +286,6 @@ Percolator handles this by designating one cell in every transaction as a synchr
 ```
 Since T-W < T-R, we know that the timestamp oracle gave out TW before or in the same batch as TR ; hence, W requested TW before R received TR . We know that R can’t do reads before receiving its start timestamp TR and that W wrote locks before requesting its commit timestamp TW . Therefore, the above property guarantees that W must have at least written all its locks before R did any reads; R’s Get() will see either the fully-committed write record or the lock, in which case W will block until the lock is released. Either way, W’s write is visible to R’s Get().
 ```
-
-.
 
 ### 通知
 

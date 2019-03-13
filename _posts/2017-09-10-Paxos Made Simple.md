@@ -60,8 +60,6 @@ typora-root-url: ../
     b: S中的所有Acceptor接受过的最大编号的Proposal中，值为v。
 ```
 
-.
-
 ### Proposal生成
 
    为了保证P2c，一个Proposer想要提出一个编号为n的Proposal必须要知道在多数Acceptor以及接受or将要被接受的编号小于n的Proposal的且有最高编号的Proposal。知道过去的情况是比较简单的，但是这里未来的情况是不能预测，所以Proposer不会尝试预测未来，而是要求Acceptor不会接受任何编号小于n的Proposal，这样就可以得到以下的Proposal提出算法：
@@ -93,13 +91,12 @@ Phase 2.
   (b) If an acceptor receives an accept request for a proposal numbered n, it accepts the proposal unless it has already responded to a prepare request having a number greater than n. 
 ```
 
-.
-
 ### Learner
 
   一个值被选定之后，就想要发送给Learner，这里的方法是整个算法中任意理解的部分。一般来说有以下几种方法:
-           1.  一个Acceptor接受一个Proposal就把值发送给所有的Learner;
-           2.  把值发送给一部分Learner，如果这些Learner发送给其它的Learner；
+
+1. 一个Acceptor接受一个Proposal就把值发送给所有的Learner;
+2.  把值发送给一部分Learner，如果这些Learner发送给其它的Learner；
 
 由于信息会丢失，一个值可能没有被Learner接受到，Learner可以直接询问Acceptor，但是Acceptor可能失败导致无法获取到这个消息，如果Learner想要得到这个value，可以用上面描述的算法发出Proposal。
 

@@ -51,8 +51,6 @@ typora-root-url: ../
 
   这里的详细信息可以参看[1],
 
-
-
 ## Duet: Cloud Scale Load Balancing with Hardware and Software
 
 ### 0x10 引言
@@ -62,8 +60,6 @@ typora-root-url: ../
 ```
  Our evaluation shows that DUET provides 10x more capacity than a software load balancer, at a fraction of a cost, while reducing latency by a factor of 10 or more, and is able to quickly adapt to network dynamics including failures.
 ```
-
-.
 
 ### 0x11 基本架构
 
@@ -99,8 +95,6 @@ $$
 
   这里的详细信息可以参看[2],
 
-
-
 ## SilkRoad: Making Stateful Layer-4 Load Balancing Fast and Cheap Using Switching ASICs
 ### 0x20 引言
 
@@ -119,8 +113,6 @@ $$
 ```
 .. Since we introduce another level of indirection (pool version between connections and DIPs), we maintain the version-to-pool mappings in a new table called DIPPoolTable. DIPPoolTable incurs an extra memory consumption to maintain a set of multiple (active) DIP pools for each VIP. 
 ```
-
-.
 
 ### 0x22 Ensuring Per-Connection Consistency
 
