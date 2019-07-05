@@ -1,6 +1,6 @@
 ---
 layout: page
-title: BAST, FAST and Superblock-Based FTL
+title: BAST, FAST and Superblock-Based Hybrid FTLs
 tags: [Storage]
 excerpt_separator: <!--more-->
 typora-root-url: ../

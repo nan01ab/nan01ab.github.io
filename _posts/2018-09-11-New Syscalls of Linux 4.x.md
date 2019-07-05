@@ -6,8 +6,6 @@ excerpt_separator: <!--more-->
 typora-root-url: ../
 ---
 
-
-
 ## New Syscalls of Linux 4.x
 
 ### 引言
