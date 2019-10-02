@@ -96,8 +96,39 @@ SWIN包含两个主要的组件，1. Failure Detector Component，用于探测�
 
   这里的具体信息可以参看[2].
 
+### HyParView: A Membership Protocol for Reliable Gossip-Based Broadcast
+
+### 0x20 引言
+
+  这篇Paper也是描述了一种Membership Protocol ，也是基本常见的Gossip的思路。这里的一个重要的概念是Partial Views，表示一个节点本地保存的一部分关于所有成员节点的信息。在HyParView中，维护了两个不同的节点集合，一个小一点的集合称之为active view，大小为fanout + 1，这个集合中的节点知道彼此的存在，一个大一些的passive view，大于 log(n)数量，
+
+```
+ A small active view of size fanout+1, as links are symmetric and thus each node must avoid relaying each message back to the sender. A larger passive view, that ensures connectivity despite a large number of faults and must be larger than log(n). Note that the overhead of the passive view is minimal, as no connections are kept open.
+```
+
+### 0x21 基本思路
+
+ 在Active View中的节点，会保持一个连接用于消息传输。这里的连接是对称的，意味着节点q的active view中包含了p，那么p的active view中也包含了q。这里默认使用连接方式是TCP。在active view之外，有一个大小更大的passive view，这个view里面的节点不用于消息传播，这里面的节点可以用于在active view里面的节点故障的时候替代active view里面的节点。
+
+* 一个节点打算加入一个集群的时候，它必须知道一个已经在集群中的节点。这个节点称之为contact node。想要加入的时候，这个节点和contact node建立一个TCP连接，并发送一个JOIN请求给contact node。contact node在收到了JOIN请求之后，contact node会将这个节点加入到active view中，即使会导致contact node会将一个active view中的节点drop掉。这种想要drop的情况下，contact node会发送一个DISCONNECT通知个一个从active view中随机选择的节点。contact node然后发送一个FORWARDJOIN请求给这个contract node的active view中其它节点，FORWARDJOIN会被一个步伐长度传播，实际上就是跳过一部分然后发送一个。这里涉及到两个 Walk Length (ARWL)，第一个称之为Active Random Walk Length (ARWL)，表示这个FORWARDJOIN被最大传播的距离，一个Passive Random Walk Length (PRWL)表示哪些节点会加入到一个passive view中，后面解释。
+
+* 一个节点p接受到FORWARDJOIN请求的时候，执行下面的操作步骤，1. 如果消息的time to live等于0的时候，或者是p的active view中的节点数量为1的时候，将新的节点加入到active view中。在必要的时候执行前面描述的DISCONNECT操作。2. 如果time to live等于PRWL，将这个新的节点加入到其passive view中，3. 递减这个消息的time to live值，4. 如果没有添加到p的active view中，从p的active view中随机选择一个传播这个请求。
+
+* Avctive view使用reactive测量管理。当一个节点p认为其active view中的一个节点故障的时候，会从其passive view中随机选择一个节点q，与其建立一个TCP连接。如果这个连接建立失败，则考虑这个节点q已经故障，则将这个节点q从p的passive view中移除，另外选择一个节点q‘。连接成功建立的时候，p向q发送一个NEIGHBOR请求，请求保护了它的标识符和优先级。这个优先级取决于p的active view中元素的数量，越少优先级越高。高的优先级会使得q更大可能接受这个请求，即使可能造成需要将一个节点从q的avtive view中移除。q在接受了这个请求的时候，p将q从passive view中移除，加入到actvie view中。如果q拒绝了这个请求，重新选择一个重复操作。
+
+* Passive view使用 cyclic测量管理。每个节点周期性地进行shuffle操作。节点发送一个SHUFFLE请求，带有自己的标识符，active view中的ka个节点，passive view中的kb个节点。这里的两个参数为需要设置的值。节点q在接受到这个请求之后，减少这个请求的time to live。如果这个请求的time to live大于0且q的active view的大小大于1，这个节点会直接从active view随机选择一个节点转发这个请求，这个随机选择的节点不能是消息来的节点。否则则接受这个请求，然后使用一个临时的TCP连接发送一个回复。SHUFFLEREPLY消息中包含了从passive view中随机选择的一些节点，
+
+  ```
+  Then, both nodes integrate the elements they received in the SHUFFLE/SHUFFLEREPLY message into their passive views (naturally, they exclude their own identifier and nodes that are part of the active or passive views). Because the passive view has a fixed length, it might get full; in that case, some identifiers will have to be removed in order to free space to include the new ones.
+  ```
+
+### 0x22 评估
+
+  这里的具体信息可以参看[3].
+
 ## 参考
 
 1. The φ Accrual Failure Detector, SRDS ’04.
 2. SWIM: Scalable Weakly-consistent Infection-style Process Group Membership Protocol, DSN '02.
+3. HyParView: A Membership Protocol for Reliable Gossip-Based Broadcast, DSN '07.
 

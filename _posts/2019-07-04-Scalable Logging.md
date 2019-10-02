@@ -10,7 +10,7 @@ typora-root-url: ../
 
 ### 0x00 引言
 
-  这篇Paper讨论的也是早多核环境下面的WAL的优化策略。这里的优化的思路主要是消除中心化的日志方式中，为了保存日志顺序写入和Log Buffer中没有空洞而采用的锁。这些锁在多核的情况下面对性能造成来比较多的性能影响。之前的一些系统提出优化策略有非中心化的思路，比如SiloR那样，每个工作线程只会将自己产生的日志写入到自己本地的Log Buffer中，消除这里不同线程之间的差距。这里的思路还是在原来的方式上面优化，
+  这篇Paper讨论的也是早多核环境下面的WAL的优化策略。这里的优化的思路主要是消除中心化的日志方式中，为了保存日志顺序写入和Log Buffer中没有空洞而采用的锁。这些锁在多核的情况下面对性能造成了较大的影响。之前的一些系统提出优化策略有非中心化的思路，比如SiloR那样，每个工作线程只会将自己产生的日志写入到自己本地的Log Buffer中，消除这里不同线程之间的差距。这里的思路还是在原来的方式上面优化，
 
 ```
 Our efficient implementation of ELEDA is enabled by a highly concurrent data structure, GRASSHOPPER, that eliminates a multicore scalability problem of centralized logging ... Our evaluation showed that ELEDA-based transaction systems improve performance up to 71ˆ, thus showing the applicability of ELEDA.
