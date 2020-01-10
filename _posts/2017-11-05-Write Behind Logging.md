@@ -20,7 +20,7 @@ Using this logging method, the DBMS can flush the changes to the database before
 
   WAL应该都很熟悉了:
 
-![wbl-wal](/assets/img/wbl-wal.png)
+<img src="/assets/img/wbl-wal.png" alt="wbl-wal" style="zoom: 50%;" />
 
  WBL和WAL有着非常大的区别，熟悉它利用的是NVM持久化保存数据和byte-addressable的特点。首先，WBL的日志记录不包含tuple的修改消息，因为事务的修改在事务提交之前已经持久化了。对于修改操作，DB生成一个dirty tuple table (DTT) 中的一条记录来保存修改的消息，这里的消息包含事务id，表修改和一些额外的元数据。对于insert和delete的操作，这个记录只包含了新的or被删除的tuple的位置消息。在MVCC的数据库中，update操作可以看作是delete的操作后面跟着一个insert操作，这些消息记录里面都包含了新的和旧的tuple的位置消息。都是DTT从来不保存inserted or deleteed的tuples本身。
 
@@ -42,7 +42,7 @@ As in the case of WAL, the DBMS uses this information to ensure failure atomicit
 
   为了避免这里的问题，在log中，记录了两个额外的时间戳，第一个是时间戳是最后一个事务将它的数据都安全持久化到NVM上面的时间，第二个是一个提交时间戳，在随后的事务组提交之前，这个时间戳由DB保证不会赋予给给其它任何的事务。基本log结构如下:
 
-![wbl-log](/assets/img/wbl-log.png)
+<img src="/assets/img/wbl-log.png" alt="wbl-log" style="zoom:67%;" />
 
   当DB失败重启之后，它就认为时间戳早于C-p的已经提交，而在C-p和C-d之间的相关操作和数据会被忽略，也就是认为这些都是失败的事务。
 
@@ -58,7 +58,7 @@ In other words, if a tuple’s begin timestamp falls within the (cp , cd) pair, 
 
   对于abort的事务，DB使用DTT里面的记录来查明这个事务做了什么样的修改，它会撤销这些修改然后回收空间。
 
-![wbl-commit](/assets/img/wbl-commit.png)
+<img src="/assets/img/wbl-commit.png" alt="wbl-commit" style="zoom: 50%;" />
 
   所以这里的基本过程是：DB先将修改在易失性存储(DRAM)上面的table heap，然后在提交的时候，将这些修改刷到非易失的设备上(NVM)，最后，记录log。
 
@@ -70,9 +70,7 @@ In other words, if a tuple’s begin timestamp falls within the (cp , cd) pair, 
  Once all the modifications in a gap have been removed by the garbage collector, the DBMS stops checking for the gap in tuple visibility checks and no longer records it in the log.
 ```
 
-
-
-![wbl-gap](/assets/img/wbl-gap.png)
+<img src="/assets/img/wbl-gap.png" alt="wbl-gap" style="zoom:50%;" />
 
  在WBL中，不必要想在WAL中一样周期性的创建checkpoint。因为在WBL的日志记录中包含了足够多的信息实现类型的功能。
 
@@ -94,7 +92,7 @@ But since WBL’s log records only contain timestamps and not the actual data (e
 
   详细数据参看论文[1].
 
-![wbl-performance](/assets/img/wbl-performance.png) 
+<img src="/assets/img/wbl-performance.png" alt="wbl-performance" style="zoom: 50%;" /> 
 
 ## 参考
 

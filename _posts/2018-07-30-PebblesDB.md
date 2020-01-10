@@ -22,7 +22,7 @@ We evaluate PebblesDB using micro-benchmarks and show that for write-intensive w
 
 FLSM的存储布局：
 
-![flsm-layout](/assets/img/flsm-layout.png)
+<img src="/assets/img/flsm-layout.png" alt="flsm-layout" style="zoom:50%;" />
 
  LSM-Tree写入放大一个很重要的原因就是上层的更少的数据合并到下层更加大的数据的时候，下层所有的数据都会被重写。为了解决这个问题，FLSM把每层的sstable分割成更小的单元。FLSM compaction的时候，不是将上层下层的合并重新，而是简单地在下一层合适的位置添加一个新的fragment。FLSM可以做到数据在大部分的层中只会被写入一次。
 
@@ -62,29 +62,17 @@ During compaction, guard G is deleted and sstables belonging to guard G will be 
 
 ### 0x03 FLSM Operations 
 
-#### get()操作
+* get()操作；在memtable里面的查找操作和一般的LSM没有区别。在memtable没有查到的话，想要到各层sstables。在下面的任何一层查到了就直接返回。在具体的一层查找的时候，先对Guards进行二分查询，定位到一个Guard下面的sstabls，然后在这个Guard下面的sstables里面查着，注意这里是这个Guard下面所有的sstabls都要查找。
 
-  在memtable里面的查找操作和一般的LSM没有区别。在memtable没有查到的话，想要到各层sstables。在下面的任何一层查到了就直接返回。在具体的一层查找的时候，先对Guards进行二分查询，定位到一个Guard下面的sstabls，然后在这个Guard下面的sstables里面查着，注意这里是这个Guard下面所有的sstabls都要查找。
+* 范围查询这里要处理的问题就是一个Guard里面的sstables的值的范围存在重叠的问题，这里使用的是类似merge sort的方法解决。
 
-#### 范围查询
+  ```
+  ...  a binary search is performed on each sstable to identify the smallest key overall in the range. Identifying the next smallest key in the range is similar to the merge procedure in merge sort; however, a full sort does not need to be performed. When the end of range query interval is reached, the operation is complete, and the result is returned to the user. 
+  ```
 
-  这里要处理的问题就是一个Guard里面的sstables的值的范围存在重叠的问题，这里使用的是类似merge sort的方法解决。
-
-```
-...  a binary search is performed on each sstable to identify the smallest key overall in the range. Identifying the next smallest key in the range is similar to the merge procedure in merge sort; however, a full sort does not need to be performed. When the end of range query interval is reached, the operation is complete, and the result is returned to the user. 
-```
-
-#### put()操作
-
-  也是先添加到memtable，在memtable满了之后，先被添加到level 0，需要的时候进行compaction操作。这里FLSM会避免进行合并重写的操作，而是直接attach到下面一层合适的Guard下。
-
-#### 更新 & 删除  
-
-  这里和LSM的操作没有很大的区别，也是添加一个包含新的updated sequence number的数据(update) 后者是一个删除的标志(delete).
-
-#### Compaction 
-
-  这里当一个Guard下面的sstabls数量达到一定的阈值的时候，就会进行compaction操作。这些sstales首先会被归并，然后根据下面一层的Guars进行拆分，然后就是attach到正确的Guard下面。
+* put()操作，也是先添加到memtable，在memtable满了之后，先被添加到level 0，需要的时候进行compaction操作。这里FLSM会避免进行合并重写的操作，而是直接attach到下面一层合适的Guard下。
+* 更新 & 删除，这里和LSM的操作没有很大的区别，也是添加一个包含新的updated sequence number的数据(update) 后者是一个删除的标志(delete).
+* Compaction，这里当一个Guard下面的sstabls数量达到一定的阈值的时候，就会进行compaction操作。这些sstales首先会被归并，然后根据下面一层的Guars进行拆分，然后就是attach到正确的Guard下面。
 
 ```
  For example, assume a guard at Level 1 contains keys {1, 20, 45, 101, 245}. If the next level has guards 1, 40, and 200, the sstable will be partitioned into three sstables containing {1, 20}, {45, 101}, and {245} and attached to guards 1, 40, and 200 respectively.
@@ -111,7 +99,7 @@ During compaction, guard G is deleted and sstables belonging to guard G will be 
 
 一个基本的性能信息:
 
-![flsm-performance](/assets/img/flsm-performance.png)
+<img src="/assets/img/flsm-performance.png" alt="flsm-performance" style="zoom:50%;" />
 
 ## 参考
 

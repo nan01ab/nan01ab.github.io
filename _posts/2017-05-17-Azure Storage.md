@@ -30,7 +30,7 @@ typora-root-url: ../
 The LS then updates DNS to allow requests to now route from the name https://AccountName.service.core.windows.net/ to that storage stamp’s virtual IP (VIP, an IP address the storage stamp exposes for external traffic).
 ```
 
-![was-architecture](/assets/img/was-architecture.png)
+<img src="/assets/img/was-architecture.png" alt="was-architecture" style="zoom:50%;" />
 
  WAS由三层组成：
 
@@ -57,7 +57,7 @@ The LS then updates DNS to allow requests to now route from the name https://Acc
 
   Stream Layer为Partition Layer提供类似文件相同的API，但是知识类似。其文件操作和很多的分布式存储系统一样，也是append-only的。
 
-![was-stram](/assets/img/was-stram.png)
+<img src="/assets/img/was-stram.png" alt="was-stram" style="zoom:50%;" />
 
  ```
 ... which contains (pointers to) four extents (E1, E2, E3, and E4). Each extent contains a set of blocks that were appended to it. E1, E2 and E3 are sealed extents. It means that they can no longer be appended to; only the last extent in a stream (E4) can be appended to. If an application reads the data of the stream from beginning to end, it would get the block contents of the extents in the order of E1, E2, E3 and E4.
@@ -71,7 +71,7 @@ The LS then updates DNS to allow requests to now route from the name https://Acc
 
 Stream Layer具体还有个更加复杂的架构，它有Stream Manager (SM)和Extent Node (EN)两个主要部分组成。
 
-![was-stream-layer-arch](/assets/img/was-stream-layer-arch.png)
+<img src="/assets/img/was-stream-layer-arch.png" alt="was-stream-layer-arch" style="zoom:50%;" />
 
 * Stream Manager是一个Paxos集群。它负责下面的一些任务：
 
@@ -148,7 +148,7 @@ Once the sealing is done, the commit length of the extent will never be changed.
 
   在这里的一个重要的内部结构就是Object Table (OT)，可能是一个数PB级别的一个巨大的表。这么大的表是必须分区保存的。OT会被动态地划分为RangePartition。Partition Map Table 负责保存RangePartitions到partition server得映射关系，用于路由Front End的请求。架构图：
 
-![was-partition-layer](/assets/img/was-partition-layer.png)
+<img src="/assets/img/was-partition-layer.png" alt="was-partition-layer" style="zoom:50%;" />
 
 * Partition Manager (PM)，负责将Object Tables划分为RangePartitions，在交给Partition Server保存。这些信息会被PM保存到Partition Map Table中。PM会保证每一个RangePartition同一时刻只会被分配到一个PS，这里就要利用到Lock Service，不同的RangePartition之间是不会有重叠的。这里还负责处理负载均衡的问题。
 

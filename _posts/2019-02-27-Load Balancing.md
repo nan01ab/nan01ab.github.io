@@ -19,7 +19,7 @@ typora-root-url: ../
 * Primary load balancing，Dispatcher在有任务需要分发的时候，询问其对应的I-queue，这个queue如果存在数据，则移除其中的第一个Processor。然后将其分发给对应的Processor。如果这个queue里面没有数据，则选择一个随机的Processor分发。在一个Processor处理完它的任务的或者是接近处理完之后，它将其它的信息添加到一个I-queue中。
 * Secondary load balancing，这里主要就是处理一个Processor变成空闲的之后，它如何选择I-queue的方法。这里就使用之前的一些方法，比如随机选择一个后者是挑选几个选择其中队列最短的。
 
-![jiq-arch](/assets/images/jiq-arch.png)
+<img src="/assets/images/jiq-arch.png" alt="jiq-arch" style="zoom:67%;" />
 
 ### 0x02 评估
 
@@ -30,7 +30,7 @@ typora-root-url: ../
 
   DistCache是一种为存储系统设计的一种缓存方式。它的基本方式是使用一个两层的Cache结构，不同的层使用不同的Hash函数，用于将热点的数据尽可能的分散到不同机器上面，
 
-![distcache-idea](/assets/images/distcache-idea.png)
+<img src="/assets/images/distcache-idea.png" alt="distcache-idea" style="zoom:67%;" />
 
 ### 0x11 基本思路
 
@@ -38,7 +38,7 @@ typora-root-url: ../
 
   Paper中实现了类似于NetCache的一个基于交换机的DistCache的一个实现。上面架构是在一个two-layer leaf-spine架构中的数据中心网络中的一个实现。在这个实现中，会有一个Cache Controller管理处理缓存交换机、处理设备故障。Cache交换机负责缓存热点数据，同时负责分发它的load的信息，这个load的状态会用于如何路由这个查询。于客户端相连的ToR交换机负责处理查询路由的问题(使用power-of-two-choices的测量)。后端的存储节点可以就是一个一般的KVS。下图是一个处理流程的例子。S6与客户端相连，S6使用power-of-two-choices选择了S1 S3，根据负载信息从中选择一个。缓存命中的时候直接返回即可。缓存缺失的时候，操作会被直接转发到存储节点。
 
-![distcache-switch](/assets/images/distcache-switch.png)
+<img src="/assets/images/distcache-switch.png" alt="distcache-switch" style="zoom:67%;" />
 
   这里另外要处理的一个比较重要的问题就是缓存一致性和缓存更新的处理。对于缓存一致性，它使用了一种一般两阶段更新的方式，就是会先处理缓存让其失效，然后在更新操作，
 
@@ -62,7 +62,7 @@ typora-root-url: ../
 we prove an O(n log n) lower-bound on the necessary cache size and show that this size depends only on the total number of back-end nodes n, not the number of items stored in the system. We validate our analysis through simulation and empirical results running a key-value storage system on an 85-node cluster.
 ```
 
-![smallcache-arch](/assets/images/smallcache-arch.png)
+<img src="/assets/images/smallcache-arch.png" alt="smallcache-arch" style="zoom:67%;" />
 
 ### 0x21 证明
 
@@ -85,9 +85,9 @@ $$
 如果缓存大小为c，则p_{c+1}之前的数据都在缓存中，其它的在后面的存储节点中。\\
 我们假设有 S: p_1 = p_2 =···= p_c = h≥ p_ c+1 ≥ ··· ≥ p_ m ≥0.
 $$
-  由于前面的c个的热点数据被Cache。要想在后面的存储节点中造成热点，最好的情况就是前面的c个Key。的访问平均分配(因为这些反正被Cache了，访问偏斜反而会导致其它的Key访问频率降低)，且都不小于后面的Key。这样后面的访问频率会是一个“你消我涨"的情况，这里Paper中给出了具体的证明，示例如下图，
+  由于前面的c个的热点数据被Cache。要想在后面的存储节点中造成热点，最好的情况就是前面的c个Key的访问平均分配(因为这些反正被Cache了，访问偏斜反而会导致其它的Key访问频率降低)，且都不小于后面的Key。这样后面的访问频率会是一个“你消我涨"的情况，这里Paper中给出了具体的证明，示例如下图，
 
-![smallcache-theorem1](/assets/images/smallcache-theorem1.png)
+<img src="/assets/images/smallcache-theorem1.png" alt="smallcache-theorem1" style="zoom:67%;" />
 
   这样的最极端的情况所有的查询都是就是前面的x个Key(x <= m)，后面的Key都没有访问，也就是说
 $$
@@ -111,7 +111,7 @@ $$
 $$
   从而得到上面的结论。
 
-![smallcache-simulations](/assets/images/smallcache-simulations.png)
+<img src="/assets/images/smallcache-simulations.png" alt="smallcache-simulations" style="zoom:67%;" />
 
 ### 0x22 评估
 

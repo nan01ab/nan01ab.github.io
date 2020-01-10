@@ -19,7 +19,7 @@ For example, a predominantly random-write dominant I/O trace from an OLTP applic
 
  DFTL的思路是比较简单的。SSD容量增长之后，整个的Mapping Table不能保存到SSD中的SRAM中。Hybrid的做法是将Mapping Table减小，而DFTL的想法是将放在SRAM中的部分减小。DFTL将大部分的Mapping Table的数据都保存在SSD上面，而只将最频繁被使用的放到DRAM里面。这样看来，DFTL就类似于一个SSD中TLB。而TLB这个已经被研究了很久了(应该可以将TLB中的很多思路应用到这里)。DFTL的基本架构如下图所示。DFTL将SSD中的Page分为保存数据的Page和保存Mapping Table的Page。DFTL将整个的Mapping Table称之为Global Mapping Table，缓存在SDRAM中的称之为Cached Mapping Table (CMT)，另外那些保存映射关系的Translation Pages的映射关系保存到一个Global Translation Directory (GTD)，GTD一直保存在SRAM中，它占用的空间比较小。这样设计DFTL要解决的问题就是TLB、Cache之类要解决的问题是很类似的：1. 怎么样保证SRAM里面保存的都是热点的映射，2. “脏”数据的写会策略，3. SRAM中的数据替换策略等。
 
-![dftl-arch](/assets/images/dftl-arch.png)
+<img src="/assets/images/dftl-arch.png" alt="dftl-arch" style="zoom:50%;" />
 
   这里DFTL的实现也没有什么和现在的一些类似问题的解决有什么很大不同的地方。一些DFTL中的地址转换操作可以引起三次的Page读写，一次读Mapping Table的数据，获取映射关系，一次为读取数据，另外一次就是写入更新之后的Mapping Table的数据。在垃圾回收方面，它采用了一种基于一个GC-threshold阈值的策略，即可写Page和失效Page之间的一个比例，超过了这个阈值之后，会引发GC操作。对于数据Page的回收操作只要拷贝没有实现的Page，更新Mapping Table，擦除Block即可。而对于Translation Block，还要更新GTD。DFTL使用一些优化的来减少GC的Overhead，比如lazy-copying，即选择已经Cache在SDRAM中的映射部分更新，选择批量操作的方式。
 

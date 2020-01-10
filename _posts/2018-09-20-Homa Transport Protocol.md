@@ -82,7 +82,7 @@ Homa这么设计出于一下的考虑：
 
 先来一张论文中的图：
 
-![homa-arch](/assets/img/homa-arch.png)
+<img src="/assets/img/homa-arch.png" alt="homa-arch" style="zoom: 33%;" />
 
 Homa有以下特点：
 
@@ -99,7 +99,7 @@ and it implements at-least-once semantics, rather than the more traditional at-m
 
  Homa是无连接的，一个来讲client的request message 对应一个来自server的 response message。由一个全局唯一的RPCid表示(id由客户端生成)。有以下的packet类型：
 
-![homa-packet-types](/assets/img/homa-packet-types.png)
+<img src="/assets/img/homa-packet-types.png" alt="homa-packet-types" style="zoom: 33%;" />
 
 #### Basic sender behavior 
 
@@ -115,7 +115,7 @@ The most novel feature in Homa, and the key to its performance, is its use of pr
 
   对于unscheduled 的包，receiver提前根据最近的流量模式决定优先级，然后会将顺带地这些信息发送给sender(by piggybacking it on other packets )，sender会报送最近的每一个receiver的相关信息。
 
-![homa-unscheduled](/assets/img/homa-unscheduled.png)
+<img src="/assets/img/homa-unscheduled.png" alt="homa-unscheduled" style="zoom: 33%;" />
 
   对于scheduled 的包，receiver在GRANT包中给其分配优先级，sender使用这个优先级发送DATA包。这样的好处就是可以实时地适应目前的状况。这些主要是根据SRPT 。
 

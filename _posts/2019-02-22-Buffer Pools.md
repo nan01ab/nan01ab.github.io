@@ -70,7 +70,7 @@ In BP-Wrapper, we use batching and prefetching techniques to reduce lock content
 
  这里的基本设计如下图，箭头表示了数据流。这里总的来说是作为一个Multi-Tier的设计。所以这里读取的时候会，先从SSD中读取，然后转移到NVM中，最后再到内存中。一个规规矩矩的多层的设计。这样其实可以发现可以有不少优化的地方。这个也是这篇Paper会讨论的一些内容。默认的写入路径是将内存中的数据写入到NVM，最后写入SSD中。另外的7、8、9和10的路径是为优化而存在的。
 
-![](/assets/images/mtbm-dataflow.png)
+<img src="/assets/images/mtbm-dataflow.png" style="zoom:67%;" />
 
 * 读取时Bypass  DRAM，路径7，这里利用了NVM可以字节寻址的特性。路径7可以使得数据库选择一个lazy migration的思路，即可以判断一个数据是否得立即读取到内存中，在做处理。一些情况下，直接从NVM读取就可以了，不同在将数据读取到内存中，这样的节省了一些内存和NVM之间的数据转移操作。这样的策略在内存的大小显著小于NVM的时候更加有效果，可以保持最热的数据在内存中。这里使用Dr表示读取操作的时候数据拷贝到内存的概率。
 * 同样地，写入数据的时候也可以选择Bypass内存。在使用NVM的时候，不用像现在的数据库系统将要写入的日志、数据积累到一定的量之后在写入SSD。NVM可以直接写入需要持久化的数据，这个称之为synchronous persistence，这样可以避免一些额外的内存数据的操作，也可以使得内存中保持的数据为热度最高的。这里使用Dw表示写数据的时候写入内存的概率。

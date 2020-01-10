@@ -69,7 +69,7 @@ FIFO client order: all requests from a given client are executed in the order th
 
   Chubby和Zookeeper提供的都是类似Unix文件系统的抽象：
 
-![chubby-zookeeper-fs](/assets/img/chubby-zookeeper-fs.png)
+<img src="/assets/img/chubby-zookeeper-fs.png" alt="chubby-zookeeper-fs" style="zoom:50%;" />
 
   这里两个之间一个不同的地方就是Chubby更加像一个文件系统上面的操作，每次操作文件之前先打开，使用完毕之后要关闭，而Zookeeper都是使用完整的路径直接处理，不用打开关闭之类的操作，Chubby将打开的文件描述叫做据柄(handle)，其它的操作都是在这个句柄上面完成的:
 
@@ -153,9 +153,7 @@ A Chubby session is a relationship between a Chubby cell and a Chubby client; it
 
   关于故障切换的部分在Chubby的论文中是有专门的一节，在Zookeeper的论文中是没有专门去将这个问题，应该它的意思是这个事共识协议处理的吧。下面这幅图显示来Chubby处理Master失败的过程:
 
-![chubby-fail-over](/assets/img/chubby-fail-over.png)
-
-
+<img src="/assets/img/chubby-fail-over.png" alt="chubby-fail-over" style="zoom:67%;" />
 
   在旧的Master出现故障不能正常服务之后，keepalives的请求将会无法正常完成，这个时候客户端就会发现异常(但是这里要主要keepalives请求无法正常完成并不代表一定是Master故障了，也可能是这个client和Master之间的网络不通了)，这个时候client就会进入一个`grace period `,这个时候client并不能完全确定它的租约在主机上已经过期了。Client在这里会暂停处理应用的请求，同时会给应用发送一个` jeopardy `事件。这里Chubby处理的整个过程的步骤有9步，很多内容，这里最好参看原论文比较好。
 

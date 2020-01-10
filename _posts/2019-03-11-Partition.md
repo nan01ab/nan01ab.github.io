@@ -64,7 +64,7 @@ typora-root-url: ../
 * 在目的节点上面执行操作的时候，数据可能还在原来的节点上面。这个时候Squall会Block这个操作，主动向源节点去拉去数据。注意这个会Block在这个节点上全部的食物，而不是只是要去拉去数据的事务，这样可以避免一些数据一致性的问题。Squall通过向源节点发送一个Pull请求来获取数据，这个请求就就像一个事务操作，会要求在源节点和目的节点两个加排他锁。Pull请求这样的工作方式会影响到数据库的性能，所以这里Squall会将这类请求作为高优先级的任务来处理。这个使用优先级的方式来处理不同类型的迁移请求也在[5]中使用了类似的思路。这里操作的死锁检测依赖于数据库中实现。
 * 如果解决依赖于Pull拉取数据的lazy是的做法，可能会对一些事务执行的性能造成比较大的影响。Suqall在上面所说的reactive migration之外，还使用了asynchronous migration的方式。即在后台异步拉取数据，这里可以看作是一个主动获取数据的方式。源节点收到目的节点这样的请求之后，会将对应分区的状态标记为部分迁移，同时将数据划分为固定大小的Chunk。这里Suqall只会在同一个时间启动一个异步拉取的请求，而且在启动的时候，会检查数据是否已经都被被动拉取的方式拉取过来了。
 
-![squall-arch](/assets/images/squall-arch.png)
+<img src="/assets/images/squall-arch.png" alt="squall-arch" style="zoom:67%;" />
 
 ### 0x12 优化和容错
 
@@ -104,7 +104,7 @@ typora-root-url: ../
 
  如下图，Clay通过基于数据之间的co-accessed的信息，建立一个图。以热点数据存在的Partition为基础，建立clumps。Clay要做的就是Clump的组织以最小化分布式的事务，实现节点之间的负载均衡。Clay前面两篇Paper的继续优化的做法，
 
- ![clay-arch](/assets/images/clay-arch.png)
+ <img src="/assets/images/clay-arch.png" alt="clay-arch" style="zoom:67%;" />
 
   在Clay中，核心的就是clump migration algorithm。此算法的从识别一个overload的分区开始。对于这个Partition，迁移算法会动态定义和迁移Clumps，直到这个Partition的负载达到一个想要的负载的范围中。依次构建的Clump会包含这个Partition中的一些元组，也可能包含来自其它Partition的一些元组。而一个move操作就是将这个clump移动到一个指定的节点上面。算法会从一个空的Clump开始，初始化的时候会加入一个Partition中的最“热点”的数据；初始化之后如果Clump不为空，则之后会根据算法来想其中加入经常一次访问的数据。在有合适目的节点的时候，执行move操作。//.......
 

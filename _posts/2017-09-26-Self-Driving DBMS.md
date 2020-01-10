@@ -35,13 +35,13 @@ typora-root-url: ../
 * 另外，由于自治数据库会根据系统运行的情况不断自我挑战，所以数据库必须要能在不明显增加overhead的情况下应用这些调整；
 * 还需要的考虑的是另外的两点限制：1.  必须与现在的一些系统的使用方式相容。也就是自治数据的行为必须都是自我实现的，不需要人工参与。或者是需要修改现在的代码的话，这个是不可以接受的；2. 必须能够使用各种各样的环境；
 
-![peloton-self-driving](/assets/img/peloton-self-driving.png)
+<img src="/assets/img/peloton-self-driving.png" alt="peloton-self-driving" style="zoom:50%;" />
 
 ### 系统架构
 
   作为一个关系型数据库，关系型数据库需要有的组件peloton也得有。除此之外，未来支持自治，peloton还必须添加额外的组件来支持其自治的操作：
 
-![peloton-arch](/assets/img/peloton-arch.png)
+<img src="/assets/img/peloton-arch.png" alt="peloton-arch" style="zoom:67%;" />
 
 这部分主要包含了三个组件：
 
@@ -70,7 +70,7 @@ Lastly, it may be necessary to provide an override mechanism for DBAs. ... To pr
 
   这个具体信息参看[1]
 
-![peloton-preliminary-result](/assets/img/peloton-preliminary-result.png) 
+<img src="/assets/img/peloton-preliminary-result.png" alt="peloton-preliminary-result" style="zoom:50%;" /> 
 
 ## 参考
 

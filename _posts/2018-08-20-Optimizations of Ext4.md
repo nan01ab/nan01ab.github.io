@@ -45,7 +45,7 @@ typora-root-url: ../
 
   在Linux中ext4文件系统的日志提交的一个示例如下图，这个示例的应该是工作在ext4默认的ordered的模式下面。一个fsync操作在这里执行的大概步骤是，1. 更新对应文件的元数据，并添加到一个JBD2的事务中，并将对用的数据Blocks刷到磁盘上面，2. 如果对用JBD2事务仍然处于运行的状态，则向其发送一个提交的操作。这里存在这样的基本影响到性能的问题，1. JBD2使用一个线程执行提交的操作，也就是说同一时间只会有一个事务提交，2. 一个事务在执行提交操作的时候，阻塞后面的提交操作。这种情况在多个线程(进程)都执行fsync操作的时候变得更加严重。
 
-![ijournaling-dependency](/assets/img/ijournaling-dependency.png)
+<img src="/assets/img/ijournaling-dependency.png" alt="ijournaling-dependency" style="zoom:67%;" />
 
   iJournaling的主要思路就是引入另外的一个日志区域，相关的操作称之为i-transaction。在iJournaling中，日志只会包含最小能够从故障中恢复的对于被修改文件系统的元数据，这里应该是基于ext4的ordered的模式。不像JBD2中提交可能涉及到多个文件，这里是单个文件系统上的操作，
 
@@ -55,7 +55,7 @@ Only file-level metadata such as an inode entry and the external extent structur
 
 i-transaction这样做的优点就是完全兼容了fysnc的语义以及之前文件系统修改部分的实现，只是相当于额外的一个功能增强的Patch。这个i-transaction的日志区域是每一个CPU核心一个单独的区域。这个方式在现在的一些SSD上面对更加有利一些。由于一些文件的修改与目录是相关的，这里还需要记录相关目录的改动。另外，在一些情况下仍然使用原来的fsync实现的逻辑，由于简化iJournaling的实现，比如对目录进行操作、对有hard-link的inode上面的操作的情况。日志的基本格式如下图，
 
-![ijourmaling-format](/assets/img/ijourmaling-format.png)
+<img src="/assets/img/ijourmaling-format.png" alt="ijourmaling-format" style="zoom:67%;" />
 
   在系统崩溃之后，其中包含的数据可以让系统恢复到一个正确的状态。具体的操作在Paper中有详细说明。
 
@@ -63,7 +63,7 @@ i-transaction这样做的优点就是完全兼容了fysnc的语义以及之前�
 
   这里的详细信息可以参看[2],
 
-![ijournaling-perf](/assets/img/ijournaling-perf.png)
+<img src="/assets/img/ijournaling-perf.png" alt="ijournaling-perf" style="zoom:67%;" />
 
 ## High-Performance Transaction Processing in Journaling File Systems
 
@@ -75,11 +75,11 @@ i-transaction这样做的优点就是完全兼容了fysnc的语义以及之前�
 
   这篇Paper要优化的第一个点就是就是ext4文件系统中的这个几个环形链表中的几个锁。
 
-![hjournaling-locks](/assets/img/hjournaling-locks.png)
+<img src="/assets/img/hjournaling-locks.png" alt="hjournaling-locks" style="zoom:67%;" />
 
  这里优化的基本思路就是把这些列表操作变成lock-free的。这个算是一种实现中编程上面的一种优化。有环形链表实现lock-free的操作比较困难，在这里将其变成了一种普通的double-linked的链表。而对于移除操作，就可以与到一些并发编程中invalid reference的问题，即尝试去释放一块内存的时候，实际上这个时候还有其它的线程正在持有这个块内存做一些操作。这里就是使用了一个两阶段释放的方法，即现将这个区域的state置为无效，然后在后面合适的时候进行实际的移除操作。
 
-![hjounaling-pio](/assets/img/hjounaling-pio.png)
+<img src="/assets/img/hjounaling-pio.png" alt="hjounaling-pio" style="zoom: 67%;" />
 
   另外的一个主要的优化就是改变这里都是串行操作带来的并发性的问题。比这里的实现中，如果一个IO操作不能获取一个running transaction，可以通过添加IO操作到这个事务中的方式[3]。这篇Paper对这些方法具体的实现思路有详细的面试[3]。
 

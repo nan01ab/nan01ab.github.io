@@ -30,7 +30,7 @@ We also revise the memory controller and I/O bridge model of the framework, and 
 
 下面是现在的Linux的Storage Stack的Overview。这里使用的blk-mq，这里之前有一篇总结专门讲了这个。
 
-![fshare-io-stack](/assets/img/fshare-io-stack.png)
+<img src="/assets/img/fshare-io-stack.png" alt="fshare-io-stack" style="zoom:50%;" />
 
   一个IO请求要到达NVMe 去佛那个由两条路径，区别只有Page Buffer这里。在NVMe的驱动中，会有多个的NVMe Queque。这其中连个队列比较核心，一个就是 submission queue (SQ)，另外一个就是completion queue (CQ)。与其它一般的存储栈不同，这里NVMe的SSD可以直接从主机的内存里面拉取数据和命令。当一个IO请求完成的时候，SSD发送一个 message signaled interrupt (MSI)直接写入每一个core的可编程中断控制器的中断向量，
 
@@ -42,7 +42,7 @@ When the I/O request is completed by the SSD, it sends a message signaled interr
 
   SSD的内部其实就是一个特殊的小型计算机系统，其中一个重要的部分就是NVMe Controller，它控制下吗的内置的Cache和FTL。内核的Cache其实就是DRAM，高端的SSD会有数GB的Cache。NVMe Controller即可用接收主机推送的请求，也可以直接自己去拉取。
 
-![fshare-firmware](/assets/img/fshare-firmware.png)
+<img src="/assets/img/fshare-firmware.png" alt="fshare-firmware" style="zoom:67%;" />
 
  这里来描述一下一个请求到NVMe驱动然后执行完成的过程比较复杂，Paper中有具体的描述。与这里相关的一个就是SQ和CQ。这两个队列本质是就是一个生产者消费者的队列。SQ的生产者时主机，任务通过写入到SQ的tail，SSD这里就是消费者，从head中读取请求。CQ中的内容就是请求完成的学习，生产者和消费者相反。SSD中的Doorbell Register也与这里的过程直接相关，可以参看相关资料。
 
@@ -50,7 +50,7 @@ When the I/O request is completed by the SSD, it sends a message signaled interr
 
   FlashShare认为之间让kernel去识别IO请求的延迟敏感性是很难的，所以FlashShare这里直接吧这个工作交给了应用程序，它在添加了两个Linux的系统调用，在Linux进程的PCB `struct task_struct`中添加了相关的属性值来标示。
 
-![fshare-kernel-optimizations](/assets/img/fshare-kernel-optimizations.png)
+<img src="/assets/img/fshare-kernel-optimizations.png" alt="fshare-kernel-optimizations" style="zoom:50%;" />
 
   上面的图中很清晰的标示了这个属性值的传递过程。这里也就同时显示出一般的请求经历的过程和改进之后的之间就bypass了这些层，直接达到了驱动。在使用FlashShare添加的chworkload_attr设置了相关的熟悉之后，当一个使用了`O DIRECT`参数的IO请求达到kernel的时候，FS先从`struct task_struct`中取到相关的属性值放到`bio`结构中，其它情况会考虑到文件缓存，这里就会将`struct task_struct`复制到`address_space`结构中，这样就可以将这个属性值一种传递下去，以便于使用这个属性值。
 
@@ -78,7 +78,7 @@ With Select-ISR, the CPU core can be released from the NVMe driver through a con
 
  这样从旁边开一个accelerator减少了一半的tag查找和合并bio的请求的消耗。这里具体时如何实现的是Paper中4.2节的内容。
 
- ![fshare-accelerator](/assets/img/fshare-accelerator.png)
+ <img src="/assets/img/fshare-accelerator.png" alt="fshare-accelerator" style="zoom: 67%;" />
 
 ### 0x04 Firmware-Level Enhancement 
 
@@ -94,7 +94,7 @@ In addition, the I/O patterns and locality of online applications are typically 
 
  一些基本的性能数据。
 
-![fshare-performance](/assets/img/fshare-performance.png)
+<img src="/assets/img/fshare-performance.png" alt="fshare-performance" style="zoom:67%;" />
 
  更加详细的分析可以参看原论文。
 

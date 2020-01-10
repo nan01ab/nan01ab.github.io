@@ -42,7 +42,7 @@ $$
 
   这篇Paper也是一篇关于利用Deep Reinforcement Learning来自动化调优数据库的文章。不过这篇Paper里面讲到实际有价值的内容远比前面的一篇要多。这里提出的主要的方法就是利用Double-State Deep Deterministic Policy Gradient (DS-DDPG)模型，Double-State这里主要是既利用数据的状态，有利用了query的信息。且提供了从query-level，workload-level到cluster-level粒度的调优。Qtune的基本架构如下，客户端通过和Controller交互来发送调优请求。Query2Vector组负责将查找转化为一个vector来表示，有点word2vec的意味。Query2Vector将查询转化为Vector的时候，会利用上数据的查询计划和优化器的信息。Tuner负责设置一个合适的knobs集合的值，数据库在这个配置下面运行。另外Vector2Pattern组件为优化Tuner生成配置信息时候的性能，通过使用一种deep learning model来产生配置的值，也指导Tuner如何改变之前配置的值。Pattern2Cluster负责将查询聚类/分类。
 
-![](/assets/images/qtune-arch.png)
+<img src="/assets/images/qtune-arch.png" style="zoom:67%;" />
 
 ### 0x11 Query Featurization
 
@@ -72,17 +72,17 @@ $$
 |     Actor     |   A neural network for making actions   |
 |    Critic     |  A neural network for evaluating Actor  |
 
-![](/assets/images/qtune-model.png)
+<img src="/assets/images/qtune-model.png" style="zoom:67%;" />
 
  训练这个模型主要涉及到三个部分，Predictor，Actor和Critic，
 
 * Predictor为一个多层感知机的模型。Predictor用于预测在一个配置下面，数据库执行查询的时候，其metrics是否会改变。训练数据为T_P = {⟨v, S, I, ∆S⟩}，v为表示查询的vector，S为输出的metrics，I为数据库内部状态， ∆S为metrics的变化信息。S、I从先数据库中获取，在执行了查找时候去获取∆S的信息。序列的目标是最小化一个error function。基本的算法如下，
 
-  ![](/assets/images/qtune-predictor.png)
+  <img src="/assets/images/qtune-predictor.png" style="zoom:67%;" />
 
 * 序列 Actor-Critic模型。这里对于一个workload，会随机挑选其中的一个查询的子集，然后通过Query2Vector将查询转化为vector，再通过Predictor预测数据库的metrics，计为S1′ 。通过Actor将其应用到数据库，这个时候通过一个奖励函数得到一个奖励R1。这样得到一个数据库新的metrcis信息更新S1'，得到S2'。重复这样的步骤。基本的算法如下，这里还有更多的细节[2]，
 
-  ![](/assets/images/qtune-actor.png)
+  <img src="/assets/images/qtune-actor.png" style="zoom:67%;" />
 
 * 奖励函数，这里的奖励函数和前面的CBTune思路一致。不过处理比前面的CBTune更加精细一些，在每个metric的力度上面给出一个奖励。单个r的计算和CBTune一致，最终的奖励为metrics奖励值的和，
   $$
@@ -116,7 +116,7 @@ Output: Action A
 
   另外，通过只选择被DS-DDPG频繁调优的knobs，避免维度爆炸。具体推荐Configuration Pattern的时候，使用一个5层的网络模型。
 
-  ![](/assets/images/qtune-cpattern.png)
+  <img src="/assets/images/qtune-cpattern.png" style="zoom:67%;" />
 
   ```
   * The input layer takes the feature vector as input and maps it to the target knob space, in order to make the input and output in the same scale.

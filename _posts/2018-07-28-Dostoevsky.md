@@ -21,21 +21,21 @@ We put everything together to design Dostoevsky, a key-value store that adaptive
 
 了就下面的LSM-tree的复杂度对理解Paper的内容很重要，
 
-![dostoevsky-worst-case](/assets/img/dostoevsky-worst-case.png)
+<img src="/assets/img/dostoevsky-worst-case.png" alt="dostoevsky-worst-case" style="zoom: 33%;" />
 
 下面是Paper中出现的一些符号代表的意思，
 
-![dostoevsky-terms](/assets/img/dostoevsky-terms.png)
+<img src="/assets/img/dostoevsky-terms.png" alt="dostoevsky-terms" style="zoom:50%;" />
 
 Dostoevsky的内容主要就是三点：
 
 * Lazy Leveling，第一点是最核心的，基本思路就是结合LSM-tree中leveing和tiering合并策略，在除了最后(也就是最大的一层)使用leaving的方法，在其余的层使用的是tiering的方法。这么做基于这样的考虑：在上面的表格给出的复杂度可以看出，在较小的levels上面使用leveling的方法，会明显的增加更新操作的成本，而对查找的提高却不是很明显。这样Lazy Leveling的思路就是只在largest level使用level的方法。下面的图是使用这种方法的一个复杂度的分析，
 
-![dostovsky-lazy-leveling](/assets/img/dostovsky-lazy-leveling.png)
+<img src="/assets/img/dostovsky-lazy-leveling.png" alt="dostovsky-lazy-leveling" style="zoom:50%;" />
 
  这里的具体的分析可以参看[1]，这部分关于Bloom Filter如何取舍和内存分配等的内容和SIGMOD‘17上的[2]很类似。
 
-![dostoevsky-tradeoff](/assets/img/dostoevsky-tradeoff.png)
+<img src="/assets/img/dostoevsky-tradeoff.png" alt="dostoevsky-tradeoff" style="zoom: 50%;" />
 
   上面的这幅图很好的展示了这样做的一个效果。
 
@@ -47,7 +47,7 @@ Dostoevsky的内容主要就是三点：
 
   这里Paper中也对这样得方式进行了具体得分析，下面是这样的策略的一个复杂度：
 
-![dostoevsky-fluid](/assets/img/dostoevsky-fluid.png)
+<img src="/assets/img/dostoevsky-fluid.png" alt="dostoevsky-fluid" style="zoom: 33%;" />
 
  这里的Z和K根据系统情况进行调整，这个是Fluid LSM-tree一个核心的地方，这里就是三个参数的调整：K、Z和T。
 
@@ -85,7 +85,7 @@ Dostoevsky的内容主要就是三点：
 
  具体可参看[1].
 
-![dostoevsky-performance](/assets/img/dostoevsky-performance.png)
+<img src="/assets/img/dostoevsky-performance.png" alt="dostoevsky-performance" style="zoom: 33%;" />
 
 ## 参考
 

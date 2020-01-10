@@ -12,13 +12,13 @@ typora-root-url: ../
 
   这篇Paper讲的是Linux Multi-Queue Block Layer。Linux Multi-Queue Block Layer主要是为了解决现在的Linux Block Layer不能很好地使用新的高速的存储硬件(比如4k读写能得到100W的超高速的NVMe的SSD)。Multi-Queue Block Layer在Linux 3.x的后期合并到了Linux内核主线，在Linux 4.x变化比较大。 硬件性能的快速变化，这里还只是2012年的数据，实际上现在的SSD的性能比这些数据高出很多。
 
-![mq-blk-ssd](/assets/img/mq-blk-ssd.png)
+<img src="/assets/img/mq-blk-ssd.png" alt="mq-blk-ssd" style="zoom: 33%;" />
 
 ### 0x02 目前的问题
 
    Linux目前的Block Layer都是为HHD优化设计的。
 
-![mq-blk-single](/assets/img/mq-blk-single.png)
+<img src="/assets/img/mq-blk-single.png" alt="mq-blk-single" style="zoom: 33%;" />
 
    IO操作在Block Layer中会经过复杂的操作才会被执行，在高速的存储硬件目前暴露出了以下的缺点：
 
@@ -30,7 +30,7 @@ typora-root-url: ../
 
   顾名思义，Mutil-Queue就是由对个队列，不过不是简单的拆分而言，还要考虑到block layer上层和block layer下层各自的特性。这里使用两级队列的结构，上层的软件队列和下层的硬队列，两个队列实现不同的功能，对应不同的优化策略。
 
-![mq-blk-multi](/assets/img/mq-blk-multi.png)
+<img src="/assets/img/mq-blk-multi.png" alt="mq-blk-multi" style="zoom: 33%;" />
 
 #### Software Staging Queues 
 

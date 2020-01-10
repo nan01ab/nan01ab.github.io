@@ -57,7 +57,7 @@ For I/O-intensive benchmarks such as Postmark and an Andrew-style build, the per
 
   这里具体的信息可以参看[1],
 
- ![esync-perf](/assets/img/esync-perf.png)
+ <img src="/assets/img/esync-perf.png" alt="esync-perf" style="zoom:50%;" />
 
 ## 参考
 

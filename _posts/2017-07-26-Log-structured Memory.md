@@ -16,7 +16,7 @@ typora-root-url: ../
 
    通用的使用malloc(or类似方式)的内存管理方式的一个缺点就是低的内存利用率:
 
-![lsm-memory-utilization](/assets/img/lsm-memory-utilization.png)
+<img src="/assets/img/lsm-memory-utilization.png" alt="lsm-memory-utilization" style="zoom:40%;" />
 
   从这个图标来看，各个的利用率都很不好看。
 
@@ -24,7 +24,7 @@ typora-root-url: ../
 
    在看这里之前需要对Log-Structured File System有些了家，如果没有，可以看看论文[2]。这里的allocator时为RAMCloud设计的，这里就可以把它看作是一个Key-Value Service。基本情况如下:
 
-![lsm-arch](/assets/img/lsm-arch.png)
+<img src="/assets/img/lsm-arch.png" alt="lsm-arch" style="zoom:50%;" />
 
 LFS中log包含了很多额外的索引的信息，为的是方便读取。由于DRAM的特点以及这个allocator不会存在文件系统那样的结构，所以log的结构上会简单很多。每一个object必须包含了以下的数据(paper中还讨论了很多关于从持久化的存储中recovery的内容，这里只关注这个内存分配器的设计，RAMCloud关于recovery有另外的论文):
 

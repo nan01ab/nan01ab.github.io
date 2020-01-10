@@ -24,21 +24,21 @@ We show that it is possible to design an accelerator with a high throughput, cap
 
  第一个版本的事没有任何优化的朴素实现。下面的这个优化主要是访问局部性的优化。基本的思路就是将参与其中的矩阵-向量发片，常见的分片大小根据CPU的Cache Line大小，Cache大小，以及SIMD宽带等的因素决定。这个在很多的高性能计算中是常见的优化思路。在朴素版本的实现中，内存上面的数据传输量主要来自于input loaded + synapses loaded + outputs written 三个部分。Ni × Nn + Ni × Nn + Nn。通过下面tiling的优化方式，在Paper中测试的一个CLASS1 case中，内存的使用的带宽有原来的120GB/s可以下降到大约几个GB/s。
 
-![](/assets/images/diannao-tiling-classifier.png)
+<img src="/assets/images/diannao-tiling-classifier.png" style="zoom:67%;" />
 
 卷积层和持久化层这样的局部性优化思路是一样的，不过具体的复杂程度高了很多。卷积层这里会有多个卷积和，卷积核以滑动窗口的方式可以输入矩阵的部分依次相乘，不同卷积核求得的结构在求和。这个是很多个的循环，在进行了tiling的优化之后，这个循环就更加复杂了。这个如果先给出一个矩阵乘法的这样的优化思路，然后给出一份矩阵乘法的这样的优化代码，在拓展到这个卷积计算可能看上去会更加清晰一些，
 
-![](/assets/images/diannao-conv.png)
+<img src="/assets/images/diannao-conv.png" style="zoom:67%;" />
 
  池化层在没有优化之前的代码就是矩阵上面的字矩阵的运算，也是类似滑动窗口的方式。这里的例子是最大池化和平均池化的例子。不过优化之后的优点复杂了，¯\_(ツ)_/¯
 
-![](/assets/images/diannao-pool.png)
+<img src="/assets/images/diannao-pool.png" style="zoom:67%;" />
 
 ### 0x02 基本设计
 
   上面的的卷积、池化以及分类代码的优化就是DianNao加速器设计的思路。其想法是，和CPU相比，尽可能地一次性计算更加多的运行。这些基本的矩阵-矩阵，矩阵-向量，向量-向量运行模式比较固定，优化起来相对来说要简单一些。下图就是DianNao加速器的基本设计，有这样的基本组件：1. NBin，NBout分别为输入、输出神经元的缓冲区，2.  保存突触权重的缓冲区SB、synaptic weights，3. 计算部分Neural Functional Unit (NFU)，4. 控制逻辑部分Neural Functional Unit (NFU)。
 
-![](/assets/images/diannao-accelerator.png)
+<img src="/assets/images/diannao-accelerator.png" style="zoom:67%;" />
 
   NFU部分主要是三个子部分。不同的操作被分为2-3个阶段完成。比如对于分类层来说，就是矩阵乘法 加上 最后的乘法以及sigmoid函数的计算。卷积层的运算和分类层的运算时类似的。池化层不同的是会有多个结果值求和的运行，所以还要用到加法。NFU的NFU-1部分是16x16的乘法器，这256个乘法器可以同时运算。NFU-2是加法树的结构。NFU-2主要对用到池化的一些操作，所以这里会包含shifters和max之类的操作。第三层主要对应到网络中的激活操作，比如使用sigmoid函数。这里sigmoid可以可以使用一个piecewise linear interpolation 的方式实现( f (x) = ai × x + bi,x ∈ [xi;xi+1])，而且只会损失很少的精度。这样在硬件上面就是实际对应到两个16 × 1 16-bit multiplexers，一个16-bit multiplier和一个16-bit adder 。16-segment的两个系数(ai , bi)保存在一个小的RAM中。通过改变这些系数，这里不仅仅可以实现sigmoid函数。其它的函数也同样方便实现，比如hyperbolic tangent, linear functions等。计算使用16bit的顶点数，实际上不会比32bit的浮点数损失很多的精度，但是可以大大减少计算量。
 
@@ -61,11 +61,11 @@ We show that it is possible to design an accelerator with a high throughput, cap
 
  内存带宽作为主要的瓶颈给DaDianNao设计的影响就是， 将参数(也就是SB保存的数据)放在靠近使用其的NFU的地方，减少访问延迟和数据移动。而且这里不要有主存参与，为一种分布式的结构。 一种根据存储而非计算的非对称结构。还有其它的一些内存带宽的优化等。下图是其中一些结构的基本设计。DaDianNao是一种分片式的设计，在下图中式有16个分片，每个分片内部的结构如图5右所示。中间是NFU，和前面的DianNao的NFU是同一个东西，不同的地方在于其周围的存储介质。在DaDianNao中，SB的数据就保存在这些eDRAM中。而在DianNao中，使用的SDRAM保存。DaDianNao认为虽然eDRAM比起SDRAM性能差一些，但是有更高的存储密度，更低的功耗。而eDRAM也需要和DRAM一样，要定期刷新来保证数据不丢失，这里将eDRAM分为4块，可以可以降低周期性的刷新操作的影响，而且可以使得其位置于NFU更加靠近。又通过分片的设计降低了不同计算部分的相互影响。
 
-![](/assets/images/dadiannao-arch.png)
+<img src="/assets/images/dadiannao-arch.png" style="zoom:67%;" />
 
  DaDianNao Paper中给出了下面的一些eDRAM和NFU流水线操作的例子。上面的DianNao的论文中只是文件描述，这里表示地更加清晰一些。总结下来就是DaDianNao中NBin和NBout保存在中心的一个eDRAM中，而SB发布在16个eDRAM中。这样可以看出来DaDianNao和DianNao两个差异看出DaDianNao改变的思路：分片设计，使用多个NFU，每个NFU使用自己的保存SB的eDRAM；根据带宽要求的不同分别保存不同的数据等。
 
-![](/assets/images/dadiannao-pipeline.png)
+<img src="/assets/images/dadiannao-pipeline.png" style="zoom:67%;" />
 
  另外，在DaDianNao基本的设计上面，还提出了通过HyperTransport (HT)来多片互联的架构。
 
@@ -144,11 +144,11 @@ Paper中先分析了从体系结构的角度来优化的机器学习算法的思
 
  PuDianNao的主要思路是在DianNao的思路上面添加可以可以支持更加通用计算的单元，以达到可以实现更多算法的目的。其主要的结构是多个的FU/功能单元，每个功能单元是一个MLU和ALU的结合。三个数据缓存组件，分别用于输出、热数据和冷数据。另外还有一个指令缓存和控制门口以及DMA控制器等。FU中MLU主要是用于机器学习算法的加速计算，而ALU应用于普通计算。
 
-![](/assets/images/pudiannao-arch.png)
+<img src="/assets/images/pudiannao-arch.png" style="zoom:67%;" />
 
  MLU中为一个六级的流水线(Counter, Adder, Multiplier, Adder tree, Acc, 和 Misc)，当然不会所有个计算类似都会用到流水线的每一级。其中，Counter主要就是一个数，一个ACC有两个数据。ACC的输出会直接输出，而不会经过流水线。这里的用处是可以用于朴素贝叶斯、分类树等的计数操作。如果没有这类的操作，这一个stage会跳过；Adder执行向量加法运算；Multiplier则是向量乘法运算；Adder tree将多个Multiplier求和，和DianNao中的Adder Tree类似；Acc用于在一些情况喜爱部分结果的缓存；Misc实现一些非线性激活函数之类的功能。PuDianNao使用混合精度的设计，其中Adder、Multiplier和Adder tree使用16为复电，而其它的部分使用32为浮点。
 
-![](/assets/images/pudiannao-mlu.png)
+<img src="/assets/images/pudiannao-mlu.png" style="zoom:67%;" />
 
  Buf设计采用了类似DianNao中的分离设计。另外控制门口使用了一些抽象的操作指令。指令这部分可以看看Cambricon的论文。
 

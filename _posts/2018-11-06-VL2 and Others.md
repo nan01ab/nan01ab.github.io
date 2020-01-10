@@ -14,9 +14,7 @@ typora-root-url: ../
 
 ```
 (1) flat addressing to allow service instances to be placed anywhere in the network, 
-
 (2) Valiant Load Balancing to spread traffic uniformly across network paths, and 
-
 (3) end-system based address resolution to scale to large server
 ```
 
@@ -58,11 +56,7 @@ typora-root-url: ../
 Our current design uses 1G server links and 10G switch links, and the next design point will probably be 10G server links with 40G switch links. By leveraging this gap, we reduce the number of cables required to implement the Clos (as compared with a fat-tree), and we simplify the task of spreading load over the links 
 ```
 
-
-
-![vl2-topology](/assets/img/vl2-topology.png)
-
-
+<img src="/assets/img/vl2-topology.png" alt="vl2-topology" style="zoom:67%;" />
 
 #### VL2的寻址和路由
 
@@ -165,7 +159,7 @@ ElasticTree本质上还是从FlatTree上面优化而来的，下面是一个Elas
 
   这部分可以参看[4]
 
-![elastictree-power](/assets/img/elastictree-power.png)
+<img src="/assets/img/elastictree-power.png" alt="elastictree-power" style="zoom:67%;" />
 
 ## 参考
 

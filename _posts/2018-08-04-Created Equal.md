@@ -23,11 +23,11 @@ typora-root-url: ../
 
  这个看上去直观的操作在操作的过程中系统发生Crash的情况下最终文件中的结果却不是很直观。这里将写入操作都是为append操作。系统在操作中间发生Crash可能出现的一些情况。如果添加的操作不是原子的，如果文件系统先修改元数据，在修改了文件的元数据之后，就可能出现A、B的情况，A出数据没有实际写入，文件中的数据是垃圾数据，B中则是没有写入完整。另外，现在的文件系统(整个IO栈都是)一般都是乱序的，也就是说上面代码中写入f2在后面，而实际可能是f2先完成操作。保证A情况不出现的性质叫做 size-atomicity，保证B情况不出现的content-atomicity。而乱序，是现在的IO栈默认的情况，谈不上正不正确，只是进行文件操作的时候也特别注意这样的可能的乱序的现象。
 
-![cequal-crash-states](/assets/img/cequal-crash-states.png)
+<img src="/assets/img/cequal-crash-states.png" alt="cequal-crash-states" style="zoom:67%;" />
 
   作者开发了Block Order Breaker (BOB)的工具检测现在的文件系统的持久化特性，下面是一个总结的表，
 
-![cequal-persistence](/assets/img/cequal-persistence.png)
+<img src="/assets/img/cequal-persistence.png" alt="cequal-persistence" style="zoom:67%;" />
 
 * 原子性，在上面的表中，所有的文件系统所有的配置情况都提供了单个扇区的覆盖写的一致性，一些文件系统的这个性质依赖于底层存储设备写入一个扇区的原子性(现在的存储设备应该都支持这个特性)。在一些新的存储介质上面，比如非易失性内存，它提供byte级别的写入原子性(一般最多为8bytes)，而不是扇区级别。由于添加一个扇区涉及到数据块的写入和文件元数据的修改，所以这里有些文件系统是不能保证原子性的。对于一个or多个块的覆盖写，则比一个or多个块的追加更加难以处理，这个一般地使用日志、CoW等的机制来保障。支持这2个特性的文件系统就少多了。而文件系统的操作一般都能保证一致性(处理ext2)，这个主要得益于日志or CoW技术地使用。
 * 顺序，在数据日志的模or sync模式下面，几个文件系统的顺序都是保证，但是结果就是较低的性能。文件系统的延迟分配技术会影响都最佳操作的顺序。
@@ -36,7 +36,7 @@ typora-root-url: ../
 
  ALICE会将文件的操作抽象为逻辑操作，例如write(), pwrite(), writev(), pwritev(),和 mmap()等的操作都会被转化为overwrite 或者是 append这样的逻辑操作。基于Abstract Persistence Model(APM)，利用这些逻辑操作构建依赖关系。
 
-![cequal-apm](/assets/img/cequal-apm.png)
+<img src="/assets/img/cequal-apm.png" alt="cequal-apm" style="zoom:67%;" />
 
   这些逻辑操作会被拆分为微操作，
 
@@ -98,7 +98,7 @@ ALICE is not complete, in that there may be vulnerabilities that are not detecte
 
   Paper中测试多个的应用，发现了不少的问题，
 
-![cequal-diagram](/assets/img/cequal-diagram.png)
+<img src="/assets/img/cequal-diagram.png" alt="cequal-diagram" style="zoom:50%;" />
 
 ```
 Figure 4: Protocol Diagrams. The diagram shows the modularized update protocol for all applications. For applications with more than one configuration (or versions), only a single configuration is shown (SQLite: Rollback, LevelDB: 1.15). Uninteresting parts of the protocol and a few vulnerabilities (similar to those already shown) are omitted. Repeated operations in a protocol are shown as ‘N ×’ next to the operation, and portions of the protocol executed conditionally are shown as ‘? ×’. Blue-colored text simply highlights such annotations and sync calls. Ordering and durability dependencies are indicated with arrows, and dependencies between modules are indicated by the numbers on the arrows, corresponding to line numbers in modules. Durability dependency arrows end in an stdout micro-op; additionally, the two dependencies marked with * in HSQLDB are also durability dependencies. Dotted arrows correspond to safe rename or safe file flush vulnerabilities discussed in Section 4.4. Operations inside brackets must be persisted together atomically.

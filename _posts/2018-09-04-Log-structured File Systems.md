@@ -52,7 +52,7 @@ How can a file system transform all writes into sequential writes? For reads, th
 
    上面的方案看上去是讲所有的写操作都顺序化了。但是来考虑一种case，就是当写入了一点数据(一个block)的时候，等待了一小段时间，写入另外的数据。这个时候会发现由于磁盘在旋转，原来写入的tail还要等待一段时间才能到达写入的位置，这样导致的问题就是写入的效率降低了。 解决方案就是write buffering，这个在文件系统中是很常用的方法了。LFS讲一次写入更新的chunk叫做segment。在前面的动机中提到，现在的系统内存越来越大，所以合理利用内存能有效地提升性能。多个在一起之后layout看上去就是这样：
 
-![lfs-semgent](/assets/img/lfs-semgent.png)
+<img src="/assets/img/lfs-semgent.png" alt="lfs-semgent" style="zoom:33%;" />
 
 ### 0x02 The Inode Map  
 
@@ -64,7 +64,7 @@ People often say that the solution to all problems in Computer Science is simply
 
   这样的一个问题就是这个map必须是固定的吗？固定的话是不是又会导致非顺序写的问题。这里LFS使用的方法如inode的方法一样。问题还没有完，这样的话是不是进入了无穷的循环了。imap这么寻址？无论如何，FS中必须有一些东西是固定，要不然没法操作。LFS使用的方法是check- point region (CR)，CR保存了最新imap片段的指针。CR被周期性地更新，降低对系统性能的影响。
 
-![lfs-cr](/assets/img/lfs-cr.png)
+<img src="/assets/img/lfs-cr.png" alt="lfs-cr" style="zoom:33%;" />
 
 ### 0x03 读操作
 
@@ -82,7 +82,7 @@ People often say that the solution to all problems in Computer Science is simply
 
   解决方案也是讲目录信息每次都更新写入，就想下面一样：
 
-![lfs-dir](/assets/img/lfs-dir.png)
+<img src="/assets/img/lfs-dir.png" alt="lfs-dir" style="zoom:33%;" />
 
 
 

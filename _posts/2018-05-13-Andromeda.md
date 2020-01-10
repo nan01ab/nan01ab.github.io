@@ -86,7 +86,7 @@ The Andromeda VM host stack sends all packets for which it does not have a route
 
  Fast Path的架构类似于Click一样，有一些可重用的Elements组成。这里也利用了批量处理这种很常用的方法。这些Elements可以采用Pull或者是Push的方式。Fast Path分为egress 和 ingress两个Engine，下图是ingress的一个示例图。
 
-![androme-ingress](/assets/img/androme-ingress.png)
+<img src="/assets/img/androme-ingress.png" alt="androme-ingress" style="zoom: 67%;" />
 
 #### Coprocessor Path
 
@@ -102,7 +102,7 @@ Andromeda 2.0 consolidated prior VMM and host kernel packet processing into a ne
 Andromeda 2.2 uses Intel QuickData DMA Engines to offload larger packet copies, improving throughput. DMA engines use an IOMMU for safety and are directly accessed by the dataplane via OS bypass. Tracking async packet copies and maintaining order caused a slight latency increase over Andromeda 2.1 for small packets.
 ```
 
-![andromeda-perf](/assets/img/andromeda-perf.png)
+<img src="/assets/img/andromeda-perf.png" alt="andromeda-perf" style="zoom:67%;" />
 
 ## 参考
 

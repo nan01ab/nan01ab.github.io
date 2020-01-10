@@ -32,7 +32,7 @@ $$
 
  在有了上面的基本思路之后，iBtune系统的架构如下图。系统主要有4个组件，1. Data collection，用于收集数据库的一些信息，2. Data processing，收集的数据会进入MQ，经过Stream Processing System处理，处理之后保存到存储系统中。3. Decision Making，之后，根据数据和算法计算出要调整之后的Buffer Pool Size。4. Execution，执行调整操作。在时间中使用的时候，要考虑更多的事情，要避免错误的决策对线上的允许造成影响。比如微软的自动添加索引的方式选择了在另外一个镜像实例中操作的方式。这里主要是这样的一些措施，1. 使用保守的调整方式，2. 灰度策略，3. 出现问题及时回滚等。
 
-![](/assets/images/ibtune-arch.png)
+<img src="/assets/images/ibtune-arch.png" style="zoom:67%;" />
 
 ### 0x02 评估
 
@@ -52,7 +52,7 @@ BestConfig can improve the throughput of Tomcat by 75%, that of Cassandra by 63%
 
  BestConfig的基本架构如下。不过感觉这个图根本就没啥用。总体而言，BestConfig基于搜索的方式，其目标是优化了utility function。比如如何只是为了优化吞吐，可以将这个函数设置为f(x) = x。如果是向提高吞吐，降低延迟，可以将设置为f(xt,xl) = xt/xl。在提高吞吐的同时限制内存的使用量，可以设置为f(xt,xm)=xt × S(cm−xm−5)。cm为使用内存阈值，S为sigmod函数。BestConfig这里主要就是解决两个子问题，1. The subproblem of sampling，采样系统运行时候的数据，2. The subproblem of performance optimization (PO)，如何去优化这些参数。为了解决这两个子问题，这里使用的方式是divide-and-diverge sampling (DDS)方法和 the recursive bound-and-search (RBS) 算法。
 
-![](/assets/images/bestc-arch.png)
+<img src="/assets/images/bestc-arch.png" style="zoom:67%;" />
 
 #### The subproblem of sampling
 
@@ -74,7 +74,7 @@ After dividing parameter ranges into k intervals, we do not make a full combinat
 
    BestConfig通过Recursive Bound & Search，即RBS的方式尝试的出更优的解。如下图，BestConfig将不同参数组合得到的性能可视化为面的方式。在通过前面采样方式得到的最优解中，以及从下图中性能面都是连续的，这里就可以猜想在这个采样取得的周围可以找到更优的解。初始采样得到的点称之为C0，BestConfig会在C0周围的一个bounded space进行采样，取到不同的参数取值。在这些采样得到的之后，进行参数调整，得出性能结构。选择其中最好的点，递归进行上面过程就是这里的方法。
 
-![](/assets/images/bestf-perf.png)
+<img src="/assets/images/bestf-perf.png" style="zoom:67%;" />
 
   这里要处理的问题就是这个bounded space具体是多大，采样的点数量选择多少合适，以及递归到什么样的程度之后更加合适.
 

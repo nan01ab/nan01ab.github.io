@@ -39,7 +39,7 @@ How can we organize file system data structures so as to improve per- formance? 
 
    FFS第一个思路就是将磁盘的空间分组，主要是安照块在磁盘上的位置，它们有着到磁片中心相同的距离。
 
-![ffs-cylinder](/assets/img/ffs-cylinder.png)
+<img src="/assets/img/ffs-cylinder.png" alt="ffs-cylinder" style="zoom:33%;" />
 
 ​    [2]中的这一幅图很好的表达了这种思想。值得注意的是现在的磁盘已经获取不到相关的物理信息了，所以现在的一些FS使用的方法是将磁盘分为block group，每一个group是在磁盘上是连续的。
 

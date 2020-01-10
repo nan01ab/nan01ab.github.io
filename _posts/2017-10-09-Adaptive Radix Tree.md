@@ -16,7 +16,7 @@ typora-root-url: ../
 
  前面提到，ART的内部Node有不同的大小。一般而言，离root比较远的Node里面保护的数据项时比较小的。一般的Radix Tree使用完整的Node的话，会浪费很多的内存，而ART就解决了这个问题：
 
-![art-node](/assets/img/art-node.png)
+<img src="/assets/img/art-node.png" alt="art-node" style="zoom: 67%;" />
 
 ART可以做到 With 32 bit keys, for example, a radix tree using s = 1 has 32 levels, while a span of 8 results in only 4 levels.内部 Node描述：
 
@@ -86,7 +86,7 @@ search (node, key, depth)
 
   这里具体的信息可以参看[1],
 
-![art-perf](/assets/img/art-perf.png)
+<img src="/assets/img/art-perf.png" alt="art-perf" style="zoom: 67%;" />
 
 ### 参考
 

@@ -10,9 +10,7 @@ typora-root-url: ../
 
 ### 0x00 引言
 
-  这篇总结包含了2篇Paper的内容，一篇是ATC‘12上面的Remote Core Locking，一篇是SOSP 2017上面的ffwd。两者将的都是利用另外的核心来执行临界区代码的一个并发控制的思路。
-
-  对于一段程序，多核真的能加快运行速度？答案显然是不一定的。对于那种能够存在多个同时操作的结构，比如B-tree，很多时候是能起到加速的效果。但对于临界区多个线程就只能顺序的执行，实际上在这段临界区的代码中就运行多线程就可能比单核还慢，特别是核心数很多 or NUMA架构的情况下，前者是因为维持缓存一致性带来的巨大的开销，后者一般是访问远端的内存的高成本(大概就是这个意思了)。这个时候还不如直接使用单核了。Remote Core Locking 和 ffwd 就是这样一种访问临界区的方式，基本思想都是将这段访问的任务都交个另外一个核心来运行，也就是一种代理的方式。基本的思路：
+  这篇总结包含了2篇Paper的内容，一篇是ATC‘12上面的Remote Core Locking，一篇是SOSP 2017上面的ffwd。两者将的都是利用另外的核心来执行临界区代码的一个并发控制的思路。对于一段程序，多核真的能加快运行速度？答案显然是不一定的。对于那种能够存在多个同时操作的结构，比如B-tree，很多时候是能起到加速的效果。但对于临界区多个线程就只能顺序的执行，实际上在这段临界区的代码中就运行多线程就可能比单核还慢，特别是核心数很多 or NUMA架构的情况下，前者是因为维持缓存一致性带来的巨大的开销，后者一般是访问远端的内存的高成本(大概就是这个意思了)。这个时候还不如直接使用单核了。Remote Core Locking 和 ffwd 就是这样一种访问临界区的方式，基本思想都是将这段访问的任务都交个另外一个核心来运行，也就是一种代理的方式。基本的思路：
 
 * 减少原子指令的使用，降低cache miss率；
 * 在另外的一个指定的核心上执行临界区代码；
@@ -23,11 +21,13 @@ typora-root-url: ../
 
  RCL的基本原理：
 
-![rcl-critical](/assets/img/rcl-critical.png)
+<img src="/assets/img/rcl-critical.png" alt="rcl-critical" style="zoom:50%;" />
 
  在RCL中，执行临界区的代码编程了一种远程方法调用。为了实现这个“RPC"调用，客户端和服务段使用一个请求结构的数组来进行交互。这个数组一共有C项，这个C代表了能够请求服务的客户端的数量。一般而言都要大于CPU 核心的数量。这个数组每一项的长度为L bytes，这个L一般是CPU缓存行的大小。第i项记为req-i，代表了一个client-i和服务端和交互的结构。
 
-![rcl-requests](/assets/img/rcl-requests.png) req-i包含了以下的几个字段：
+<img src="/assets/img/rcl-requests.png" alt="rcl-requests" style="zoom:50%;" /> 
+
+req-i包含了以下的几个字段：
 
 1. 这个临界区相关的lock的地址；
 2. 一个context结构的地址，包含了一些会由临界区引用or更新的一些变量之类的东西；
@@ -103,7 +103,7 @@ Consider an idealized system. Assuming no back-to-back acquisitions, the maximum
 
 基本工作方式示意图:
 
-![rcl-ffwd](/assets/img/rcl-ffwd.png)
+<img src="/assets/img/rcl-ffwd.png" alt="rcl-ffwd" style="zoom:50%;" />
 
   ffwd中每一个客户端都有一个128byte的的请求cache line pair，这个pair只能被运行在特定一个硬件线程上面运行的线程使用，只能被服务端读取。当一个客户端线程写入请求cache line pair之后，它就在特定的响应cache line pair上面子旋转。这个响应cache line pair能读和写的对象和请求的相反。服务方也像RCL一样轮询请求，不过它一次性处理一组之后在写回结果。每个请求结构与前面的RCL有所区别，有一个toggle bit，一个函数指针，一个参数数量值和最多6个参数组成。在一个socket上面(CPU的socket)，响应行最多由15个线程共享，也包含了一个toggle bit，8byte的返回值。toggle bit指示了每个单独请求/响应通道的状态。如果与给定客户端对应的请求和响应toggle bit不同, 则新请求处于挂起状态。如果它们相等, 则服务方已经处理完成，响应已准备就绪。服务方处理请求, 就是加载提供给相应的参数, 并调用指定的函数。
 
@@ -135,7 +135,7 @@ Consider an idealized system. Assuming no back-to-back acquisitions, the maximum
 
 性能表现:
 
-![rcl-ffwd-performance](/assets/img/rcl-ffwd-performance.png)
+<img src="/assets/img/rcl-ffwd-performance.png" alt="rcl-ffwd-performance" style="zoom:50%;" />
 
 ## 参考
 

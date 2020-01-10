@@ -28,7 +28,7 @@ NOVA-Fortis’ reliability features consume 14.8% of the storage for redundancy 
 
 * 快照管理，NOVA-Fortis使用Snapshot Manifest来保存一些关于快照的一些信息。这个Manifest都会有指向log项的指针，另外还包含了[create snapshot ID, delete snapshot ID)这样一个结构代表来这个快照存在的时间。下面的例子说明了NVOA-Fortis采用的思路：初始的时候快照ID为0，写入了2块8KB的数据。之后建了一个快照，覆写了0-4K的数据，这个log被本地的快照ID就为1。之前的数据由于创立的快照ID和死亡的快照ID不相同，所以他们之前的数据不能删除。(c)中有建了一个快照。并覆写了之前两块的数据的内容，使用前面的数据块也要添加上Snapshots Manifest。删除一个快照的时候，只有这个数据所有的可见的快照都删除了之后才能去删除数据，比如图d中的最开始的0-4K的数据块。为了提高性能，这些Snapshots Manifest信息是保存到内存里面的，在关机的时候这些数据会被写入到NVMM中，但是如果是掉电之类引起的关机，就需要从文件系统中重新构建这些信息(或许也可以采用lazy的方法)；
 
-![novaf-snapshots](/assets/img/novaf-snapshots.png)
+<img src="/assets/img/novaf-snapshots.png" alt="novaf-snapshots" style="zoom: 50%;" />
 
 * 快照与DAX mmap()’d Files，这里要处理的问题就是memory-mapped file直接使用load store的一段操作的完整性。这里处理的一个简单的思路就是COW，不过仅仅是这样也会存在问题。主要的原因就是标记数据只读，标记相关元数据(一些标记位)只读，和一个标记操作的顺序的问题，
 
@@ -50,15 +50,14 @@ NOVA-Fortis’ reliability features consume 14.8% of the storage for redundancy 
   To reliably access a metadata structure NOVA-Fortis copies the primary and replica into DRAM buffers using memcpy_mcsafe() to detect media errors. If it finds none, it verifies the checksums for both copies. If it detects that one copy is corrupt due to a media error or checksum mismatch, it restores it by copying the other.
   ```
 
-
-![novaf-layout](/assets/img/novaf-layout.png)
+<img src="/assets/img/novaf-layout.png" alt="novaf-layout" style="zoom:67%;" />
 
 * NOVA-Fortis采用了RAID-4的方式来保存文件的数据。另外对于DAX-mmap’d 的数据使用Caveat DAXor的保护方式。
 
 * Relaxing Data and Metadata Protection，为了提高性能，也可以在一些情况下使用一些放松保护的方式，
 
   ```
-  In relaxed mode, write operations modify existing data directly rather than using copy-on-write, and metadata operations modify the most recent log entry for an inode directly rather than appending a new entry. Relaxed mode guaran- tees metadata atomicity by journaling the modified pieces of metadata.
+  In relaxed mode, write operations modify existing data directly rather than using copy-on-write, and metadata operations modify the most recent log entry for an inode directly rather than appending a new entry. Relaxed mode guarantees metadata atomicity by journaling the modified pieces of metadata.
   ```
 
 * NOVA-Fortis对于内存中大部分的数据结构也使用了checksum的方式来保证正确性；
@@ -69,7 +68,7 @@ NOVA-Fortis’ reliability features consume 14.8% of the storage for redundancy 
 
   这里的具体信息可以参看[1]，这部分这篇Paper做得非常精美了鸭🦆。
 
-![novaf-perf](/assets/img/novaf-perf.png)
+<img src="/assets/img/novaf-perf.png" alt="novaf-perf" style="zoom:50%;" />
 
 ## 参考
 

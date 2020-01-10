@@ -32,7 +32,7 @@ typora-root-url: ../
 * Finally, all mirrors execute the scatter function to activate their neighbors, and the master will similarly receive notification from activated mirrors. 
 ```
 
-![powerlyra-hybird](/assets/img/powerlyra-hybird.png)
+<img src="/assets/img/powerlyra-hybird.png" alt="powerlyra-hybird" style="zoom:50%;" />
 
  处理low-degree的顶点时，为了获取更好的局部性，PowerLyra又采用了类似GraphLab的方式，但是并没有想GrapgLab那些双向边都考虑，而是注意到实际的算法中，这个局部性往往只体现在一个方向，所以PowerLyra提出了一种单向的局部性。还有PowerLyra根据一个自适应的策略来处理不同算法在gathering和scattering数据的时候在应用在不同类型的边的问题(出边，入边),
 
@@ -40,7 +40,7 @@ typora-root-url: ../
 As shown in the right part of Fig. 4, since all edges required by gathering has been placed locally, both the Gather and Apply phases can be done locally by the master without help of its mirrors. The message to activate mirrors (that further scatter their neighbors along out-edges) are combined with the message for updating vertex data (sent from master to mirrors).
 ```
 
-![powerlyra-inout](/assets/img/powerlyra-inout.png)
+<img src="/assets/img/powerlyra-inout.png" alt="powerlyra-inout" style="zoom:50%;" />
 
 ### 分区
 
@@ -59,13 +59,13 @@ As shown in the right part of Fig. 4, since all edges required by gathering has 
 
   一个通用的结构hybrid-cut的方法就是在初始的streaming graph partitioning方法上加上一个re-assignment的步骤。一个用户定义的阈值来区分是low-degree还是high-degree。开始时使用low-cut的方式分区，之后对于识别为high-degree顶点的入边会被重新分区，最后创建顶点的副本。
 
-![powerlyra-construction](/assets/img/powerlyra-construction.png)
+<img src="/assets/img/powerlyra-construction.png" alt="powerlyra-construction" style="zoom:67%;" />
 
 ### 评估
 
   这里的具体的信息可以参看[1].
 
-![powerlyra-perf](/assets/img/powerlyra-perf.png)
+<img src="/assets/img/powerlyra-perf.png" alt="powerlyra-perf" style="zoom: 67%;" />
 
 ## 参考
 

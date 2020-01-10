@@ -15,11 +15,8 @@ typora-root-url: ../
 ```
 the cuckoo filter, a practical data structure that provides four major advantages.
 1. It supports adding and removing items dynamically;
-
 2. It provides higher lookup performance than traditional Bloom filters, even when close to full (e.g., 95% space utilized);
-
 3. It is easier to implement than alternatives such as the quotient filter; and
-
 4. It uses less space than Bloom filters in many practical applications, if the target false positive rate ε is less than 3%.
 ```
 
@@ -157,7 +154,7 @@ $$
 where α increases with b. For example, when b = 4 so 1/α ≈ 1.05, Eq. (7) shows cuckoo filters are asymptotically better (by a constant factor) than Bloom filters, which require 1.44 log2 (1/ε) bits or more for each item.
 ```
 
-![cuckoo-filter-fpr](/assets/img/cuckoo-filter-fpr.png)
+<img src="/assets/img/cuckoo-filter-fpr.png" alt="cuckoo-filter-fpr" style="zoom:50%;" />
 
 这里的结论:
 

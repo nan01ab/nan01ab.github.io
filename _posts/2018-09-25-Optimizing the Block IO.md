@@ -18,7 +18,7 @@ In this article, we explore six optimizations for the block I/O subsystem: polli
 
 另外，这篇Paper长达48页，所以这里这会总结改进方案的基本原理以及能获取到的好处，和存在的缺点，不具体讨论细节。 Linux内核基本的Block IO处理示意图:
 
-![optimizing-io-iopath](/assets/img/optimizing-io-iopath.png)
+<img src="/assets/img/optimizing-io-iopath.png" alt="optimizing-io-iopath" style="zoom:40%;" />
 
 ### 0x02 目前存在的问题
 
@@ -100,7 +100,7 @@ On the contrary, the sequential write throughput drops from 479MB/s to 309MB/s, 
 Figure 7 depicts the difference between Spatial Merge and Temporal Merge. When 5 contiguous and 3 discontiguous I/O requests enter the block I/O subsystem, Spatial Merge would combine them into one large I/O request and three small I/O requests, while Temporal Merge would build one I/O request with 8 request descriptors.
 ```
 
-![optimizeing-blk-tm](/assets/img/optimizeing-blk-tm.png)
+<img src="/assets/img/optimizeing-blk-tm.png" alt="optimizeing-blk-tm" style="zoom:40%;" />
 
  Synchronous Temporal Merge基于上面的O1 O2和O3。当一些IO请求并发地到达的时候，其中的一个被挑选为Winner，其它的请求则跟随Winner的操作路径。步骤如下：
 
@@ -126,7 +126,7 @@ Figure 7 depicts the difference between Spatial Merge and Temporal Merge. When 5
 
   Asynchronous Temporal Merge可以看作是STM的一个改进版本，ATM基于上面的O1 O2和O4。不同于STM，它使用请求队列阻塞机制来积累IO请求。在将IO请求插入到IO调度队列之前，先将IO请求的kernel buffer映射到DMA buffer，这一步叫做queue bouncing。在收到一个unplugging(疏通)事件时，先Temporal Merge，然后一次性地将这些请求发送出去。在检测到IO操作完成的时候，使用每个CPU的软件中断，让之前的阻塞的CPU核心参与之后的工作。
 
-![optimizing-io-atm](/assets/img/optimizing-io-atm.png)
+<img src="/assets/img/optimizing-io-atm.png" alt="optimizing-io-atm" style="zoom:50%;" />
 
  这样是不够的，还需要修改IO调度器的配置，默认的CFQ不能适应这里的情况，这里修改为NOOP之后才能发挥出来。这里涉及到2个参数的设置：unplug thresh 和 unplug delay。
 
@@ -148,7 +148,7 @@ HTM achieves 100% of the device bandwidth under the sequential read and the sequ
 
  HTM对顺序读写、随机写有着非常好的性能。但是对于随机读和混合读写，性能比较差。这里认为主要是ATM和STM之间的相互干扰造成的。
 
-![optimizing-io-htm](/assets/img/optimizing-io-htm.png)
+<img src="/assets/img/optimizing-io-htm.png" alt="optimizing-io-htm" style="zoom:33%;" />
 
 ### 0x09 VFS-HTM: Integrating the VFS Layer with HTM 
 
@@ -160,7 +160,7 @@ It clones the I/O path in the VFS layer and directs a system call to execute the
 
 这样就很好地解决了之前的问题。
 
-![optimizing-io-vfs](/assets/img/optimizing-io-vfs.png)
+<img src="/assets/img/optimizing-io-vfs.png" alt="optimizing-io-vfs" style="zoom:33%;" />
 
 ### 0x0A SQ: Using Double Buffering to Avoid Lock Contention 
 
@@ -182,7 +182,7 @@ In the case of ext3, the synchronous writes issued by a jour- naling thread prev
 
 总体性能:
 
-![optimizing-io-performance](/assets/img/optimizing-io-performance.png)
+<img src="/assets/img/optimizing-io-performance.png" alt="optimizing-io-performance" style="zoom:33%;" />
 
 论文中还有一大堆的其它的内容。
 

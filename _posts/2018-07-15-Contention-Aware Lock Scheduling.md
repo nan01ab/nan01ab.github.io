@@ -24,11 +24,11 @@ Our goal is to find a lock scheduling algorithm under which the expected transac
 
 #### Dependency Graph
 
-![cals-concept](/assets/img/cals-concept.png)
+<img src="/assets/img/cals-concept.png" alt="cals-concept" style="zoom: 40%;" />
 
  这里定义了这么多的东西，就是为了描述txn之间通过lock而形成的依赖关系。这个依赖图是理解后面算法的核心。这个本身比不复杂。 下面是两个例子，
 
-![cals-graph](/assets/img/cals-graph.png)
+<img src="/assets/img/cals-graph.png" alt="cals-graph" style="zoom: 67%;" />
 
 ### 0x02 算法
 
@@ -64,7 +64,7 @@ DDF使用了dependency graph的深度来决定那个txn最先运行，就有可�
 
  算法描述，这里涉及到太多的数学符号，直接使用Paper中的一张图，
 
-![cals-ldsf](/assets/img/cals-ldsf.png)
+<img src="/assets/img/cals-ldsf.png" alt="cals-ldsf" style="zoom: 67%;" />
 
 ​    思路如下：
 
@@ -80,13 +80,13 @@ Consider two transactions t1 and t2 in the system. If there is a path from t1 to
 
    bLDSF Algorithm解决这个问题的方式是：首先，找到一个等待一个X lock的txn，这个txn有最大的dependency set，记这个度量的值为p(具体的定义可以参考下面论文片段or直接看原论文) 。然后，找到在等待一些shared lock的事务，这些事务使得综合的等待最长，记这个度量为q。根据p q的大小关系决定那个先运行。简单的一个理解就是区分X 和 S锁，当要准许一个lock是，X只能给一个txn，计算一个度量值，S可以给一些txn，计算一个度量值，谁有利于事务平均等待时间更加少就准许那个lock。这个度量的值具体可以参考下面的论文片段，这里有是很多的符号，不好写到Markdown里面：
 
-![cals-bldsf](/assets/img/cals-bldsf.png)
+<img src="/assets/img/cals-bldsf.png" alt="cals-bldsf" style="zoom:67%;" />
 
 ### 0x05 评估
 
   这里的具体信息可以参看[1],
 
-![cals-perf](/assets/img/cals-perf.png)
+<img src="/assets/img/cals-perf.png" alt="cals-perf" style="zoom:67%;" />
 
 ## 参考
 

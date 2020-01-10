@@ -36,7 +36,7 @@ PNUTS provides a consistency model that is between the two extremes of general s
 
 PNUTS这里的一致性模型是基于`per-record timeline consistency`，即一个记录上面的更新的操作都是以相同的顺序应用到所有的副本上面的。实现这种模型的基本的方式就是指定副本中的一个为Master。对于一条记录的Master根据workload自动调整。一条记录会携带一个sequence number，在每一次更新操作的时候就会递增，
 
-![pnuts-version](/assets/img/pnuts-version.png)
+<img src="/assets/img/pnuts-version.png" alt="pnuts-version" style="zoom:50%;" />
 
  如上面的图所示，这个 sequence number是由两个部分组成的，一个是添加删除操作导致的`generation`的变化，一个是更新操作导致的`version`的变化。这里只会保存一个version。在此的基础之上有以下的一致性的支持：
 
@@ -72,7 +72,7 @@ Each record maintains, in a hidden metadata field, the identity of the current m
 
  在PNUTS中，数据可以按照字典顺心和Hash两种方式来分布。Table的数据被水平切分为tablet，这些tablets被保存到若干的服务器上面，这一个服务器上面可能保存数千的tablets。当然同一个tablet在一个服务器上面只会被保存一份。一般的tablet大小到MB到小几GB的级别。为了负载平衡，tablet的分布可以被动态地调整。
 
-![pnuts-mappings](/assets/img/pnuts-mappings.png)
+<img src="/assets/img/pnuts-mappings.png" alt="pnuts-mappings" style="zoom:50%;" />
 
   下面的图大概表示了PNUTS的架构。这里主要是3个足迹，一个存储单元负责保存数据，负责处理set get之类的请求。一个写的操作在提交之前会被先写入到message broker中。这里的storage unit可以使用雅虎自己实现的一种hash table，也可以只用MySQL，
 
@@ -82,7 +82,7 @@ The storage unit can use any physical storage layer that is appropriate. For has
 
   为了知道一条记录被保存在哪一个storage unit上面，这里使用的就是router。对于sorted的存储方式，这里就使用primary的分区方式找到对应的区间。对于Hash的存储方式，使用的使用hash分区。这些那一个storage unit保存哪些tablet的信息只是被缓存在routers的内存中(这样操作的时候就可以获得很好的性能)。真正拥有这些数据的是tablet controller，这些tablet的分裂和移动也都是tablet controller决定的。这里Massage Broker就是前面已经提到的过的pub/sub系统。
 
-![pnuts-arch](/assets/img/pnuts-arch.png)
+<img src="/assets/img/pnuts-arch.png" alt="pnuts-arch" style="zoom:50%;" />
 
  与PNUTS的分区方式不同，Cassandra使用的方式更加像Dynamo的方式，使用的是基于一致性hash的方式。在Dynamo中，一个物理的结点会对应多个虚拟上的环的位置。而在Cassandra中，为了实现更加好的负载均衡，使用的方式是分析结点负载来决定的方法，
 
@@ -92,7 +92,7 @@ The basic consistent hashing algorithm presents some challenges. First, the rand
 
 Cassandra的写入操作的过程与PNUTS的相差比较大，
 
-![cassandra-wirte-path](/assets/img/cassandra-wirte-path.png)
+<img src="/assets/img/cassandra-wirte-path.png" alt="cassandra-wirte-path" style="zoom:50%;" />
 
 (上面图片来自[3])
 

@@ -78,7 +78,7 @@ typora-root-url: ../
 
 关于复杂度等的分析可以参考[1].
 
-![fdtree-log](/assets/img/fdtree-log.png)
+<img src="/assets/img/fdtree-log.png" alt="fdtree-log" style="zoom:67%;" />
 
 ### 0x04 评估
 
@@ -98,7 +98,7 @@ typora-root-url: ../
 
 下面是LSbM-tree的一个基本的结构图。从图中可以看出来这里的compaction buffer是在每一次层是一个list。
 
-![lsbm-arch](/assets/img/lsbm-arch.png)
+<img src="/assets/img/lsbm-arch.png" alt="lsbm-arch" style="zoom:50%;" />
 
   这里的compaction buffer期望保存的数据是频繁访问的数据。使用这里的第一个问题就是如何找出这些数据。这里使用了一个buffered merge的算法：首先，当一层的数据merge到下面的一层的时候，与此同时，这写数据会被当作下面一层的compaction buffer中的第一个。这里是直接利用的原来上面一层的数据，使用不会导致额外的IO操作。这个时候就可以将上面一层的compaction budder删除了，因为已经没什么用了。当合并的时候，如果发现了重复的key，就可能这一层的数据保护了重复的key，也就意味着这里的buffer可能有的数据已经过时了。LSbM-tree会将这一层的compaction buffer冻结，知道这一层合并到下一层之后重新启用，
 
@@ -108,21 +108,21 @@ If the size of Ci+1 is smaller than the data compacted into it, there must exist
 
 合并的时候会删除Bi。突然的删除可能导致突然性的性能降低和延时增加。未来解决这个问题，这里采用了类似bLSM-tree的方法。在这里LSbM-tree在一层主要的数据Ci分为了两个部分Ci和Ci'。当Ci中被添加了多少数据，Ci‘中就会有多少数据被合并到下面一层，这两个数据的和是相等的的。这样，到Ci满了的时候，Ci‘就会是空的。之后就像回到了之前。基本的算法如下：
 
-![lsbm-buffer](/assets/img/lsbm-buffer.png)
+<img src="/assets/img/lsbm-buffer.png" alt="lsbm-buffer" style="zoom:50%;" />
 
  Buffer毕竟是冗余的数据，不会被一直保留。当一层里面的buffer的一个文件的被cache的数据小于一定的阈值的时候，这个文件就会删除：
 
-![lsbm-trim](/assets/img/lsbm-trim.png)
+<img src="/assets/img/lsbm-trim.png" alt="lsbm-trim" style="zoom:50%;" />
 
 ### 0x02 算法上面的改变
 
   在添加了Compaction Buffer之后，LSM-tree的其它的一些方法如查找的操作也要有相应的变化。对于点查询来说，添加的就是在一层查找的时候要先看一下Compaction Buffer里面的有木有：
 
-![lsbm-find](/assets/img/lsbm-find.png)
+<img src="/assets/img/lsbm-find.png" alt="lsbm-find" style="zoom:50%;" />
 
  对于范围查询，也是差不多的改动，这里要注意的是Compaction Buffer的数据是不完整的,
 
-![lsbm-range](/assets/img/lsbm-range.png)
+<img src="/assets/img/lsbm-range.png" alt="lsbm-range" style="zoom:50%;" />
 
 ### 0x13 评估
 

@@ -22,7 +22,7 @@ we find that hybrid indexes meet the goals, achieving performance comparable to 
 
  先给一幅图，基本说明了这个idea的设计思路：
 
-![hybrid-index-arch](/assets/img/hybrid-index-arch.png)
+<img src="/assets/img/hybrid-index-arch.png" alt="hybrid-index-arch" style="zoom:50%;" />
 
   新的数据已开始加入到Dynamic Stage中，此stage只保存少量的数据项，就好比普通的一个数据结构。随着数据的增长，Dynamic Stage增长到一定程度的时候，将变旧的数据批量的迁移到Static Stage。由于这里是只读，这样就可以做很多的优化，之后会提到。此外，对于delete，在Dynamic Stage中的时候和普通的删除没有差别，在Static Stage的时候，先标记为deleted，下一次merge的时候会将其真正的删除。这个设计支持多种的数据结构，讲一个传统的数据结构变为这种Daul-Stage的策略只需要4步：
 
@@ -39,7 +39,7 @@ as shown in Figure 1.
 
   这样先来一幅paper的图，很好的解释了思路：
 
-![hybrid-index-rules](/assets/img/hybrid-index-rules.png)
+<img src="/assets/img/hybrid-index-rules.png" alt="hybrid-index-rules" style="zoom: 33%;" />
 
   由于是只读的，一般节点中都会为后来要添加的数据预留了空间，这也是造成内存浪费的一个主要原因。这里就可以直接将其去除了。此外，由于结构不会被更新，是固定的，就可以去除很多的冗余的结构，让结构更加紧凑。此外，还可以对数据进行压缩:
 

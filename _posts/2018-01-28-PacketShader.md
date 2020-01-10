@@ -29,7 +29,7 @@ typora-root-url: ../
 
   与此同时，skb结构里面的很多的字段是很少用到的。这里的应用是software routers，所以这里就不要的完全删除，这样的结构就是元数据的大小只有8byts，直接就减少了200bytes。
 
-![packetshader-buffer](/assets/img/packetshader-buffer.png)
+<img src="/assets/img/packetshader-buffer.png" alt="packetshader-buffer" style="zoom:50%;" />
 
 #### Batch Processing
 
@@ -45,7 +45,7 @@ typora-root-url: ../
 
 这里将批处理的方式应用的很彻底，从硬件到应用层面都使用了这样的方法。为了充分利用前面的huge packet buffers 。这里的IO Engine使用激进的预取方式，用来消除一些Cache Miss带来得开销。下面的图表示出在一次批量的packet数量在32以下的时候，提升是很明显的，
 
-![packetshader-batch](/assets/img/packetshader-batch.png)
+<img src="/assets/img/packetshader-batch.png" alt="packetshader-batch" style="zoom:50%;" />
 
 #### Multi-core Scalability & NUMA Scalability
 
@@ -59,7 +59,7 @@ With RX and TX together, the minimal forwarding performance (without IP table lo
 
 基本架构如下：
 
-![packetshader-arch](/assets/img/packetshader-arch.png)
+<img src="/assets/img/packetshader-arch.png" alt="packetshader-arch" style="zoom:50%;" />
 
  
 
@@ -75,7 +75,7 @@ Those workers communicate only with the local master to avoid expensive node-cro
 * **Shading**，Master Thread将这些数据传输到GPU的内存中，启动GPU kernel处理数据，然后取回结构。将其放入output queue，以转发给Worker Thread；
 * **Post-shading**，Worker处理结果，然后将数据包传到对应的端口。
 
-![packetshader-workflow](/assets/img/packetshader-workflow.png)
+<img src="/assets/img/packetshader-workflow.png" alt="packetshader-workflow" style="zoom:50%;" />
 
 #### 优化方法
 
@@ -93,7 +93,7 @@ Those workers communicate only with the local master to avoid expensive node-cro
 
 具体的内容参考[1]
 
-![packetshader-performance](/assets/img/packetshader-performance.png)
+<img src="/assets/img/packetshader-performance.png" alt="packetshader-performance" style="zoom:50%;" />
 
 ## 参考
 

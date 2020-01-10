@@ -38,7 +38,7 @@ The typical lifetime of a block is currently not well known. Manufac- turers rat
 
 ​    一个常用的方法就是Log-Structured的 FTL，思路和Log-Structured File System相似(都是这里要解决的问题不同)。基本操作都是写入下一个空闲的page，然后更新mapping table。这里就可以想象，SSD的主控就是一个功能专用的计算机。Mapping Table是保存在内存里面的(SSD的内存)，那么这里就遇到了一个和很多存储系统相同的问题：掉电了怎么办？解决办法当然也和很村存储系统一样，使用logging加上checkpoint机制。
 
- ![flash-ssd-maping-table](/assets/img/flash-ssd-maping-table.png)
+ <img src="/assets/img/flash-ssd-maping-table.png" alt="flash-ssd-maping-table" style="zoom:50%;" />
 
 #### Mapping Table Size 
 

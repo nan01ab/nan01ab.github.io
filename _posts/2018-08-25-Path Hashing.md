@@ -100,7 +100,7 @@ New item insertions can be classified into three cases, i.e.,v+2,v+1,and v+0. As
 
   在SmartCuckoo的实现上，subgraph的操作主要就是利用并查集来实现的，
 
-![smartcuckoo-algorithms](/assets/img/smartcuckoo-algorithms.png)
+<img src="/assets/img/smartcuckoo-algorithms.png" alt="smartcuckoo-algorithms" style="zoom:67%;" />
 
   另外，SmartCuckoo有在Github上面开源，不过这个开源的代码看起来写的比较差，emmmmm。
 
@@ -108,7 +108,7 @@ New item insertions can be classified into three cases, i.e.,v+2,v+1,and v+0. As
 
   这里的具体信息可以参看[2],
 
-![smartcuckoo-perf](/assets/img/smartcuckoo-perf.png)
+<img src="/assets/img/smartcuckoo-perf.png" alt="smartcuckoo-perf" style="zoom:67%;" />
 
 ## 参考
 

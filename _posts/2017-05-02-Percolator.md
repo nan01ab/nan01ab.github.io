@@ -26,7 +26,7 @@ Percolator的设计非常巧妙，硬是在一个只支持单行事务的Bigtabl
 The observers perform transactions by sending read/write RPCs to Bigtable tablet servers, which in turn send read/write RPCs to GFS chunkservers. The system also depends on two small services: the timestamp oracle and the lightweight lock service. The timestamp oracle provides strictly increasing timestamps: a property required for correct operation of the snapshot isolation protocol. Workers use the lightweight lock service to make the search for dirty notifications more efficient.
 ```
 
-![percolator-arch](/assets/img/percolator-arch.png)
+<img src="/assets/img/percolator-arch.png" alt="percolator-arch" style="zoom:50%;" />
 
 ### 事务
 

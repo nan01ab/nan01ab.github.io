@@ -16,11 +16,11 @@ typora-root-url: ../
 
   在这种模式下，到达一个数据Block中的一个Page的更新操作的时候，一个提前擦除了的日志Block被分配，之后每次这个数据Block的写入操作，就是写入到这个对应的日志Block中。同时，这个逻辑Page和这个物理Page的映射关系会被保存到另外的一个区域。这样的模式下，一个读请求达到的时候，如果请求的Page在日志Block中，就选择返回这个日志Block中的Page，否则返回数据Block中对应的Page。
 
-![bast-merge](/assets/img/bast-merge.png)
+<img src="/assets/img/bast-merge.png" alt="bast-merge" style="zoom:67%;" />
 
   随着日志Block的写入，当这个日志的Blok被写满时，这个之后就要进行Merge操作，即将日志Block的数据写入到数据Block中。这里的操作很直观，首先从空闲的Block中选择一块，将数据Block和日志Block里面的数据选择每个Page最新的写入到新的Block中，而原来的日志Block和数据Block就会归还到空闲Block池子中。之后这些Block会被擦除。这里如果刚好是一个Block里面顺序写入Page，那么这里合并的操作是不需要的，直接用日志Block代替数据Block即可，这样的操作在这里称之为switch操作。这里有些类似于日志式文件系统的一些垃圾回收的操作，不同点在于这里的Block是有限定的等。
 
-![bast-mapping](/assets/img/bast-mapping.png)
+<img src="/assets/img/bast-mapping.png" alt="bast-mapping" style="zoom:67%;" />
 
   在Merge操作或者是Switch操作之后，都需要去更新一些映射关系。在之前的一些系统中，这些映射关系需要全部保存到SRAM里面。而在这里，Mapping Table保存在指定的一些Blocks中，在需要的时候取出来，这些Blocks称之为Map Blocks。Map Blocks的组织类似于日志Blocks，这些Mapping Tables的映射称之为Map Directory，保存在SRAM中。这样看起来就类似于两级的Page-Table。上图表示了一次Merge操作之后，Mapping Table之前和之后的情况。一个Merge操作实际上会有三个Blocks参与操作，需要更新三个Blocks的映射关系。同样地，Mapping Table使用的数据也要被回收，这里使用了RR的方式来管理，
 
@@ -43,7 +43,7 @@ typora-root-url: ../
 
   FAST认为BAST的思路存在两个缺点，1. 类似于CPU中Cache的直接映射，这样的方式会导致更加大的“Cache Miss”，这个可能导致Block-Thrashing问题，2. 就是空间不能有效利用的问题，比如一个日志Block被写满的时候，另外一个可能还是很空，但是基于BAST的方法，这个很空的日志Block不能被使用。FAST的方法就是利用了CPU Cache中全相联的思想，一个数据Block对应的日志Block不限制为指定的一个，而是可以是全部的日志Block。基本的思路如下图所示。由于一个数据Block可以关联到多个日志Block，FAST这里引入了一个Sector-Mapping Table，这里的Sector应该就和上面的Page是同一个意思。这个Sector-Mapping Table保存了逻辑Sector和物理Sector之间的映射关系。
 
-![fast-assoc](/assets/img/fast-assoc.png)
+<img src="/assets/img/fast-assoc.png" alt="fast-assoc" style="zoom:67%;" />
 
    在FAST中，将日志Blocks分为两种类型，一个是用于顺序写的SW Blocks，一个用于随机写的RW Blocks。 在FAST中，一个Sector要被写入的时候，FAST先检查将其写入SW 日志块是否可以看作Switch操作的条件，如果满足，显然就是写入到对应的Sector中。否则写入到RW Block中。这里的Merge的操作基本的处理流程和前面的BAST是一样的，也是拷贝原有的有效数据到新的Block，然后更改映射表，然后将原来的Blocks放回空闲Block池子。这里要分为几种情况，
 
@@ -51,7 +51,7 @@ typora-root-url: ../
 * SW日志Block合并。由于FAST在这里做了顺序写的优化。这里可以不请求一个新的Block。比如下图中的a，如果SW Block中，只是Sector 5美元被更新，则将原数据Block的Sector 5拷贝到SW的Block中。接下来就是Switch操作即可。
 * 另外一个的处理是FAST合并操作中最麻烦的。它需要将原数据Block和设计到多个RW日志Block的数据拷贝到新的Block。
 
-![fast-merge](/assets/img/fast-merge.png)
+<img src="/assets/img/fast-merge.png" alt="fast-merge" style="zoom:50%;" />
 
 ### 0x03 评估
 
@@ -67,7 +67,7 @@ Superblock FTL可以看作是在BAST 和 FAST的基础上面的一个优化。�
 
   Superblock FTL模式是将N + M给物理Blocks映射为一个逻辑上为N个Blocks。虽然Superblock-based模式看起来像是三层是的结构，这里实际上还是一个两层式的结构。如下图所示，Logical Block Number在这里被分为了两个部分，一个是Superblock Number，另外一个是PGD Number。这里实际上就是将原来的Block Number分为了两个部分，一部分用于Superblock寻址，一部分用于Superblock内部的寻址。Superblock模式像是BAST和FAST模式的一个这种，BASR是一个直接映射的关系，FAST是一个全映射的关系，而Superblock模式像是一个将Fully Association限制在一个Superblock的FAST。
 
-![superblock-addr](/assets/img/superblock-addr.png)
+<img src="/assets/img/superblock-addr.png" alt="superblock-addr" style="zoom: 50%;" />
 
   Paper中观察到了时间上的局部性和空间上的局部性。时间上的局部性是指同一个Block里面的Page如果一个被更新，其它的更加可能在不久的将来被更新。空间上的局部性是指相邻逻辑Block里面的Page更加可能在一个更新之后另外的也被更新。Superblock模式可以能够更好地利用这些局部性。这里在一个Superblock里面虽然使用了全相联的方式，但是这里有一些和FAST模式不同的地方。不同于FAST中SW和RW的设计，Superblock模式会将写请求写入到一个更新Block中，而不去关心它属于哪一个逻辑的Block。
 

@@ -35,11 +35,11 @@ Compared to state-of-the-art systems that suffer a write amplification of 2.5× 
 
   Flashield使用CLOCK缓存替换算法。CLOCK算法的好处就是可以避免使用链表实现LRU的链表和维护链表中对象顺序的开销。如下图所示，Clock的信息会被作为Hash Entry的一部分保存下来。另外还会记录使用的Hash函数的ID，这里最多可以使用16个。另外一个就是Segment Number，这里会结合Hash函数ID来定位对象在Flash上面的位置。Ghost bit用于标记一个对象是否已经被删除。与Bitcask记录offset不同，这里是使用Hash函数计算出来的值作为偏移寻址。
 
-![flashield-arch](/assets/images/flashield-arch.png)
+<img src="/assets/images/flashield-arch.png" alt="flashield-arch" style="zoom:67%;" />
 
   Flashield删除Segment也是使用一种FIFO的方式，在此过程中，被标记为Ghost的对象会被直接删除，热点数据会被重新添加。这里同样采用了RIPQ优化热点数据比较多的Segment的思路，
 
-![flashield-eviction](/assets/images/flashield-eviction.png)
+<img src="/assets/images/flashield-eviction.png" alt="flashield-eviction" style="zoom:67%;" />
 
 ### 0x03 评估
 
@@ -63,7 +63,7 @@ Compared to state-of-the-art systems that suffer a write amplification of 2.5× 
 * Tier 2: A Direct Indexing in Flash，第2层用于保存“暖”数据，这里可以理解为将第一层的数据保存到了SSD上面。这里以Block为单元组织数据，按照FIFO的顺序组织。在这里查找数据的时候，先通过hash值确定可能存在的partition，然后使用并行请求的方式值查找。
 * Tier 3: A Dual-mode Linked Hash Table，这里如下图，这里可以立即为2层中用于查找SSD上面的数据又被保存到了此篇上面，造成来一种2级的间接。这里同样也引入了Compaction操作来合并一些索引数据。这里还另外采用了一些优化手段来加快查找[2]。第2层的引入在很多时候还是很有用的，在增加层级意义不大了。
 
-![cascadem-arch](/assets/images/cascadem-arch.png)
+<img src="/assets/images/cascadem-arch.png" alt="cascadem-arch" style="zoom:67%;" />
 
 ### 0x12 评估
 
@@ -89,13 +89,13 @@ DIDACache, based on the Open-Channel SSD platform. Our experiments on real hardw
 * Garbage Collection，DIDACache的GC与数据驱逐关联到一起。驱逐数据这里有两种基本的策略，1. 基于空间的策略，选择过期数据最多的slab进行驱逐，2. 基于局部性的策略，就是利用LRU的思路进行数据驱逐。这里同时使用了这两种方法，在系统不同的运行状态选择执行，在下面的图中有表现。
 * Over-Provisioning Space Management。这里定义了两个值，W-hight和W-low，用于标记系统利用率的阈值状态。这里基本的思路也有两种，第一种的基本思路是基于反馈，系统目前压力的情况。如果系统压力大的时候，提供W-low，会导致系统更快速回收数据，从而预留出更多的OPS空间，反之同理。另外一种方法是基于排队理论[3].
 
-![didacache-modules](/assets/images/didacache-modules.png)
+<img src="/assets/images/didacache-modules.png" alt="didacache-modules" style="zoom:67%;" />
 
 ### 0x22 评估
 
  这里的具体信息可以参看[3],
 
-![didacache-perf](/assets/images/didacache-perf.png)
+<img src="/assets/images/didacache-perf.png" alt="didacache-perf" style="zoom:67%;" />
 
 ## 参考
 

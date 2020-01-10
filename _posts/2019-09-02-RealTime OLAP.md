@@ -20,7 +20,7 @@ typora-root-url: ../
 
  AnalyticDB的基本架构如下。和很多基础架构完善的公司一样，AnalyticDB也是构建在其它的基础服务至上的，这个是和很多的开源的系统的一个很大的区别，开源的系统一般就只能依赖于其它的开源系统 or 基本的操作系统环境。和下面的Procella相比，AnalyticDB的基本架构看上去要简单一些，Coondinator负责处理用户过来的请求，并将这些请求发送给对应的后面的写入/读取节点。这里设计的一个特点是写入和读取的节点是分离的。数据实际保存早Pangu分布式文件系统上面，集群管理使用自己的系统。
 
-![](/assets/images/analyticdb-arch.png)
+<img src="/assets/images/analyticdb-arch.png" style="zoom:67%;" />
 
  对于超大型的表，分区是必然的选择。很多的开源的类似的系统也提高了在建表的时候就指定分区的方式。这里也是类型的方式，AnalyticDB支持两层的分表方式。下面的DDL使用主键的hash作为一级分区方式。二级的subpartition使用时间的方式，可以将同一天 or 同一个周 or 同一年的数据放在同一个subpartition里面，支持指定最大的分区数量，在超过了这个指定的数量之后最老的会被舍弃。
 
@@ -48,7 +48,7 @@ SUBPARTITION OPTIONS (available_partition_num = 12);
 
 AnalyticDB数据保存使用一种行列混合的方式。处理支持基本的类型之外，还支持入json，vector这样的复杂类型。保存的数据分为Meta文件和Detail文件，前者主要保存的就是一些元数据。数据被按一定数量行分成一组，这里可以看作是按照行来保存的，在这一组被，不同的列被保存到一起，放在单独的block中。这种方式对于简单类似的数据保存不错，对于json这样的复杂类似，这里使用了另外的一种方式。一个DataBlock里面不保存实际的数据，而是保存指向另外的称之为FBlock的的信息，一个FBlock的大小固定为32KB。每个DataBlock里面的行的数据依然是固定的，而所有的FBlock被保存到另外的一个单独的文件之中。
 
-![](/assets/images/analyticdb-format.png)
+<img src="/assets/images/analyticdb-format.png" style="zoom:67%;" />
 
  在数据管理上面，AnalyticDB这里使用的是基线数和和增量数据的方式。前者是之前的数据，保存索引和实际的数据，而后者为最近添加的数据，只包含了数据本身。而删除操作也不会立即就执行实际的删除行为，而是将删除的信息添加到一个Delete Bitset中。而Update操作，在AnalyticDB执行的是Delete + Insert操作的组合。在执行查询操作的时候，会同时查询基线数据和增量数据，并将这两个地方的数据合并，合并之后还要减去已经删除的数据，得到最终的结果。执行Insert操作的基本逻辑如下，
 
@@ -67,7 +67,7 @@ delete bitset snap = create snapshot(delete bitset);
 
  在增量数据达到一定量的时候，会启动一个MapReduce任务来合并基线数据和增量数据。增量切换到一个新的，如何将之前的基线数据，增量数据和删除信息合并为新的基线数据。
 
-![](/assets/images/analyticdb-baseline.png)
+<img src="/assets/images/analyticdb-baseline.png" style="zoom:67%;" />
 
  在索引的设计上面，这里没有涉及到很细节的东西。只是说这里传统数据的索引不合适AnalyticDB面临的环境。AnalyticDB默认对所有的列建立索引，如何key就是列的值信息，value为这个值出现的数据的所有的行号。
 
@@ -95,7 +95,7 @@ TODO
 
  和上面的AnalyticDB一样，Procella其存储也是用了一个分布式文件系统，对于Google当然就是大名鼎鼎的Colossus。估计集群调度用的也是Google的Borg系统，在图中没有表现出来。从基本的架构上来看，Procella的组件要要比AnalyticDB多少不少，复杂了一些。在Procella中，客户端连接到RS，向其发送SQL查询请求，RS执行解析SQL、查询重写以及形成查询计划并执行查询优化操作。为了执行上面的操作，RS依赖于从MDS中获取的Schema、分区和索引的信息。RS的查询计划生产是一个复杂的操作。数据处理有DS负责处理，一个DS可能接受到一个查询操作的部分计划。这个请求可能来自RS，也可能来自其它的DS。这里除了常见的保存到Colossus的数据之外，还利用了RDMA来实现Remote RDMA，加速性能。
 
-![](/assets/images/procella-arch.png)
+<img src="/assets/images/procella-arch.png" style="zoom:67%;" />
 
 * Procella的数据保存在Colossus上面。数据以table的逻辑保存，同样被分区为不同的partition or tablet。使用一种列格式文件保存数据。
 * 同样的，Percella也没有使用Btree的索引。而是实现了另外的更加轻量级的索引结果。比如zone map、bitmap和bloom filters，partition， sort keys 之类的。这些数据信息由MDS来处理，直接说保存到Metadata Store中，这个Metadata Store可以基于Bigtable or Spanner。DDL的SQL 语句由registration server (RgS)来处理，其数据同样保存在metadata store中。
@@ -103,7 +103,7 @@ TODO
 * 数据暂时Buffer在内存之中。以WAL的形式写入到Colossus中的数据会周期性地被compaction任务处理。
 * Compaction操作就是将WAL数据转化为一般表结构数据的操作。和前面的AnalyticDB类似。不过这里将地这么麻烦干什么。这里在Compaction的时候还可以执行一些SQL的逻辑，可以取出一些可以必须要的数据，减少数据的大小。
 
-Percella的基本架构部分Paper就是这些，后面更大的一部分都是关于优化的。¯\_(ツ)_/¯。
+Percella的基本架构部分Paper就是这些，后面更大的一部分都是关于优化的。¯\\_(ツ)_/¯。
 
 ### 0x12 优化
 
@@ -116,7 +116,7 @@ Percella讲如何优化的这里话来比较大的篇幅。主要涉及到多个
 * 尾延迟优化，这里的主要思路是，1. 在一个操作明显超出了一般的时间后，发送另外一个请求到另外的一个副本进行操作。2. 限制DS的并发请求量。3. 根据数据量大小，将请求分开处理。小数据量的请求优先级更高。
 * 查询优化，Data Ingestion，Serving Embedded Statistics。TODO
 
-这两篇Paper的感觉就是写了很多，但是。。。(´･_･`)。
+这两篇Paper的感觉就是写了很多，但是。。。(´･\_･\`)。
 
 ### 0x13 评估
 

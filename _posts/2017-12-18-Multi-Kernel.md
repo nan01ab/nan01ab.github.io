@@ -36,7 +36,7 @@ The contributions of this work are as follows:
 
 ### 基本架构
 
-![mkernel-model](/assets/img/mkernel-model.png)
+<img src="/assets/img/mkernel-model.png" alt="mkernel-model" style="zoom: 67%;" />
 
 ### 设计实现
 
@@ -46,7 +46,7 @@ The contributions of this work are as follows:
 The multikernel model calls for multiple independent OS instances communicating via explicit messages.
 ```
 
-![mkernel-barrelfish](/assets/img/mkernel-barrelfish.png)
+<img src="/assets/img/mkernel-barrelfish.png" alt="mkernel-barrelfish" style="zoom:67%;" />
 
   在Barrelfish系统中，一个OS的实例是主要的部分是一个运行在特权态的CPU driver和一个运行在用户态的Monitor组成的， CPU driver运行在一个特点的核心之上，核心之间的通信都是有Monitor来完成的。这些分布式的Monitor和它们对应的CPU driver包含了在传统的monolithic microker-nel的功能，比如调度，通信，底层资源分配等。除此之外，Barrelfish还包含了一些设备驱动和系统服务(如网络栈，内存分配等)，这些部分都像微内核一样运行在用户态。设备驱动被发送到相关的核心，由CPU driver多路分解，然后作为一个消息发送给对应的驱动进程。
 
@@ -80,7 +80,7 @@ Dispatchers on a core are scheduled by the local CPU driver, which invokes an up
 
  Barrelfish也提供了一个线程的库，接口和Posix的线程库的接口很相似。前面说过了Barrelfish是显式的通信的，以及通信实际上发生在dispatcher之间。系统使用消息的方式，为了兼容各类型的硬件，这里使用时一种user-level RPC: 使用一段共享内存当作是点对点传输信息的通道。由于消息通信在Barrelfish是至关重要的一个部分，它使用了多种的优化方式来提高性能(优化通信的性能在很多微内核的设计中也做了很多的尝试，可以参考相关的论文):
 
-![mkernel-urpc](/assets/img/mkernel-urpc.png)
+<img src="/assets/img/mkernel-urpc.png" alt="mkernel-urpc" style="zoom:50%;" />
 
   系统的接口设计也是一个很重要的部分,
 

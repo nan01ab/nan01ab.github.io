@@ -10,11 +10,11 @@ typora-root-url: ../
 
   Chain Replication是一个容易理解的复制方式，primary-backup，N个服务器可以容忍N-1服务器失效。它不处理拜占庭类的错误。
 
-![chian-replication-chain](/assets/img/chian-replication-chain.png)
+<img src="/assets/img/chian-replication-chain.png" alt="chian-replication-chain" style="zoom:33%;" />
 
    上面这幅图就很容易说明了它的工作方式，更新操作发送给head，随着chain传递到tail，而查询等的操作都发送给tail。在client看来:
 
-![chain-replication-client-view](/assets/img/chain-replication-client-view.png)
+<img src="/assets/img/chain-replication-client-view.png" alt="chain-replication-client-view" style="zoom:33%;" />
 
 ### 错误处理
 

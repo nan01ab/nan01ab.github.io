@@ -51,7 +51,7 @@ RAMCloud computes wills using tablet profiles. Each tablet pro- file tracks the 
 
  关于这里时如何处理的，在论文的3.9节。
 
-![fast-recovery-profile](/assets/img/fast-recovery-profile.png)
+<img src="/assets/img/fast-recovery-profile.png" alt="fast-recovery-profile" style="zoom:50%;" />
 
 ### Failure Detection 
 

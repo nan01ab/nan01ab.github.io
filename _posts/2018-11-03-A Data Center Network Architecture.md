@@ -25,7 +25,7 @@ $$
 $$
 在端口数量为k的情况下，有上面的计算可知支持的hosts的数量的27648。支持的子网的数量为1,152。每个子网24台主机，即端口数量的一半。在不同pods里面的主机存在576条((k/2)^2)不同联通的线路。
 
-![fattree-topology](/assets/img/fattree-topology.png)
+<img src="/assets/img/fattree-topology.png" alt="fattree-topology" style="zoom:50%;" />
 
 ### 0x03 Two-Level Routing Table
 
@@ -39,7 +39,7 @@ $$
 
 这样做的一个可能的缺点就是增加路由的延时，但是Paper中认为这个延时是微不足道的。
 
-![fattree-tow-level-table](/assets/img/fattree-tow-level-table.png)  
+<img src="/assets/img/fattree-tow-level-table.png" alt="fattree-tow-level-table" style="zoom:50%;" />  
 
 ### 0x04 Routing Algorithm
 

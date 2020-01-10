@@ -22,7 +22,7 @@ To cost-efficiently resize this hash table, level hashing leverages an in- place
 
 基本结构:
 
-![level-hashing-arch](/assets/img/level-hashing-arch.png)
+<img src="/assets/img/level-hashing-arch.png" alt="level-hashing-arch" style="zoom:67%;" />
 
 ##### Multiple Slots per Bucket 
 

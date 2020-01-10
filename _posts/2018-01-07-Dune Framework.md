@@ -16,7 +16,7 @@ typora-root-url: ../
 
    Dune可以看作是一个虚拟化的一个模块，有内核部分和应用库组成：
 
-![dune-arch](/assets/img/dune-arch.png)
+<img src="/assets/img/dune-arch.png" alt="dune-arch" style="zoom:50%;" />
 
   Dune的基本架构如上图所示，在内核中，添加了一个Dune Module，一个Dune Process，运行在VMX non-root的ring0权限下，再在此之上运行平常的代码。应用不必要一开始在Dune中运行，可以在运行。通过对 /dev/dune/ 进行操作进入Dune状态。不过一旦进入，就不能退出。Dune不同于VMM的一些地方：
 

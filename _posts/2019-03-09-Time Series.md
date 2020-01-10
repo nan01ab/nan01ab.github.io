@@ -33,11 +33,11 @@ Flush(UUID) 保证持久化
 
   BTrDB基本上是一个树形的结构，一棵树表示了一个逻辑的时间范围，这里以Unix Epoch为0点前后的−2^60*ns* 到 3∗2^60*ns*。在纳秒的分辨率下面，这个范围大约是1933到2079年。下吗是一个0 到 16ns范围树结构的一个实例，子节点表示的范围是父节点的一个子范围。节点中可能存在空洞。多版本的设计中，在添加新版本的数据的时候，通过创建新版本的一个节点来实现。树结构中的Link会带有版本信息，一个子节点的指针是null但是带有版本信息的表明这个版本的数据已经被删除。处理子节点的地址和版本信息之外，中间的节点还保存了一些子节点的时间范围、一些聚合统计信息，如*min*, *mean*, *max* 和 *count*,等。这里子节点实际上可以看作是一个更高精度的数据信息，在查询处理的时候，出现中间的一个节点的精度满足查询的精度要求，就可以不去查询下面节点的数据了。BTrDB中间节点使用2 × 8 × *K*大小的中间节点，K为分叉数，2 × 8为一个指针信息和一个版本信息，另外统计信息为4 × 8 × *K* ，记录了min, mean, max和count。
 
-![btrdb-arch](/assets/images/btrdb-arch.png)
+<img src="/assets/images/btrdb-arch.png" alt="btrdb-arch" style="zoom:67%;" />
 
   这样的设计下面可以看出来每个节点都是一个时间范围，其中root节点就代表了整颗树能够表示的范围。中间节点的子节点越多，子节点的精度就更大。而如果在指定的精度下面，节点越小，树的高度酒越大。在这样的结构中，添加操作就是根据时间，从root节点出发，一种找到对应的叶子节点，如果存在中间节点的对应的子节点没有创建，需要创建一个。在一个节点超过了预定义的大小的时候，需要进行分裂的操作。添加操作完成之后，在从底到上更新统计信息。在Request请求的部分，从多个Socket获取到的数据会根据UUID将其各类，然后被放到一个Buffer中，这里经过一个设定的时间后者是积累了一定量的数据之后进入到下一步操作。在COW阶段中需要用到的Block由下吗的Block Storage提供。这个Block Store类似于一个功能增强的Buffer Pool，处理Block Cache的功能之外，还包含数据压缩的功能。数据块压缩的时候使用常见的delta-delta压缩的方式。
 
-![btrdb-impl](/assets/images/btrdb-impl.png)
+<img src="/assets/images/btrdb-impl.png" alt="btrdb-impl" style="zoom:67%;" />
 
 ### 0x02 评估
 
@@ -72,7 +72,7 @@ agg = aggregate(fExpression,aFunction,tLo,tHi)
 remove_index(attribute)
 ```
 
-![confluo-arch](/assets/images/confluo-arch.png)
+<img src="/assets/images/confluo-arch.png" alt="confluo-arch" style="zoom:67%;" />
 
    与这些接口相关的数据最终都会保存在Atomic MultiLog中。Atomic MultiLog的实现利用了现在的CPU提供的原子指令，如 AtomicLoad, AtomicStore, FetchAndAdd 和 CompareAndSwap。Atomic MultiLog另外的基础之一是Concurrent Logs。Concurrent Logs中常见的一种实现方式是维护一个writeTail，用于标记这个log的tail。在追加数据的时候，直接修改这个writetail一个需要的统计的量即可。在readTail的维护上面，也和这个writeTail的维护方式差不多。在单个的Concurrent Logs上面保证原子性相对来说比较简单，但这里使用了多个的Concurrent Logs，要保证在多个这样的结构上的原子性就困难一些。在Confluo中，有这样的一些Log，
 
@@ -80,7 +80,7 @@ remove_index(attribute)
 
 * IndexLog，这里的Index Log 为索引Header中的一些字段，比如IP Header中的srcIP, dstPort。这里使用 k-ary tree来作为索引结构，
 
-  ![confluo-indexlog](/assets/images/confluo-indexlog.png)
+  <img src="/assets/images/confluo-indexlog.png" alt="confluo-indexlog" style="zoom:67%;" />
 
 * FilterLog，是一个时间作为索引条件的结构，这里用于记录满足特定条件的记录位置的数据结构，如果满足srcIP==10.0.0.1 && dstPort==80。
 * AggregateLog，和Index Log类似，不过要在k-ary tree的索引结构上面记录aggregates的值，比如aggregates。但是多个线程同时更新这些信息会导致加锁。这里的解决方式是thread-local的结构，只会在线程本地的结构上面修改这些信息。要查询这些信息的时候要将不同的线程的数据聚合在一起。

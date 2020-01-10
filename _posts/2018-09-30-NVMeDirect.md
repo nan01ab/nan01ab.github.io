@@ -24,13 +24,13 @@ SPDK也是一个类似的framework，它的缺点是只支持单一的用户和�
 
  下面的图基本表示出了NVMeDirect的基本架构。在NVMeDirect中，一个叫做Admin Tool的工具控制，它是拥有root权限的。它管理应用对IO队列的访问。当一个应用请求一个IO队列的时候，在通过了权限检查之后。然后会给这个应用创建一个SQ和一个CQ，在讲其加上doorbell寄存器都映射到应用的内存空间的一个区域。这样，应用就可以通过直接访问这些内存区域来对这些队列进行操作，从而实现在user-space使用IO framwork。
 
- ![nvmed-arch](/assets/img/nvmed-arch.png)
+ <img src="/assets/img/nvmed-arch.png" alt="nvmed-arch" style="zoom:50%;" />
 
 ### 0x02 一些细节
 
   在上面的图中可以看出，应用对IO队列的操作使用了一个handle的抽象，handle和队列的映射存在不同的对应关系：1:1，1:N和N:1。Handle可以根据具体的情况设置不同的参数。Handle的抽象对提高灵活性很有帮助，比如可以通过一个handle绑定到不同的队列上来实现读写分离，减少相互的感染，另外也可以多个handle绑定到一个共享的队列上面。下面是一些提供的API:
 
-![nvmed-api](/assets/img/nvmed-api.png)
+<img src="/assets/img/nvmed-api.png" alt="nvmed-api" style="zoom:67%;" />
 
   在传统的IO栈中常见的Block缓存、IO调度器和IO completion线程之类的组件都是提供的。这里相比而言，应用可以根据自己的情况选择不同的设置，这样的灵活性就是实现在内核中的IO栈就高多了，
 
@@ -48,7 +48,7 @@ SPDK也是一个类似的framework，它的缺点是只支持单一的用户和�
 
 具体参考[1]。
 
-![nvmed-perf](/assets/img/nvmed-perf.png)
+<img src="/assets/img/nvmed-perf.png" alt="nvmed-perf" style="zoom:50%;" />
 
 ## 参考
 

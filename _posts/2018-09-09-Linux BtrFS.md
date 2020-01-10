@@ -31,7 +31,7 @@ BtrFS几个基本的知识：
 * Page, block，一般是4KB大小连续的区域，在不同的架构上可能存在些许的差别，不过一般都是4KB。Extent是连续的一组Block组成的，可以大大将少元数据的大小，它的大小是不固定了，这个方法改进了类型FFS，ext文件系统中使用bitmap管理Block的一些缺陷，特别是在现在的大容量的磁盘的环境下；
 * COW Friendly B-Trees，这个是一些COW的Btree的实现，这个相关的知识在另外一篇论文里面[2]，而且比较复杂，这个具体的算法的实现在这里的暂时略V(^_^)V；
 
-![btrfs-btree](/assets/img/btrfs-btree.png)
+<img src="/assets/img/btrfs-btree.png" alt="btrfs-btree" style="zoom:67%;" />
 
 * Checkpoints，一个Checkpoint可以看作是累积在内存中的更新一次性写入磁盘的一次操作，由一个递增的整数值表明。
 
@@ -77,7 +77,7 @@ BtrFS几个基本的知识：
 
   这里的信息可以参看[1]。在SSD上面的性能对比：
 
-![btrfs-perf](/assets/img/btrfs-perf.png)
+<img src="/assets/img/btrfs-perf.png" alt="btrfs-perf" style="zoom:50%;" />
 
 ## 参考
 

@@ -18,7 +18,7 @@ typora-root-url: ../
 
   为了支持分区，Megastore引入了Entity Group的概念，每一个Group都是独立地跨区域的同步复制。低层的数据保存在NoSQL中，实际使用的就是Bigtable。在一个entity group里面的entity单步骤的事务就可以处理，相关的提交的理解通过Paxos来进行复制。当操作需要跨越Entity Group是就需要2PC来完成事务的操作。
 
-![megastore-replica](/assets/img/megastore-replica.png)
+<img src="/assets/img/megastore-replica.png" alt="megastore-replica" style="zoom:67%;" />
 
   为了优化2PC的操作，Megastore使用异步消息的方式来处理，这些消息通过队列来完成。下面的图就表示了这种方式。这里要注意的是使用异步消息的两者之间的距离是逻辑上的，而不是物理上面的距离，也就是这里的其实就是在一个数据中心里面的，而在不同数据中的操作都是通过同步的复制来完成的。一个Entity Group里面的索引(Local Index,下面的图中有表现)服从ACID语义，而跨越Entity Group的Index一致性是一种弱的一致性。
 
@@ -26,7 +26,7 @@ typora-root-url: ../
 Note that we use asynchronous messaging between logically distant entity groups, not physically distant replicas. All network traffic between datacenters is from replicated operations, which are synchronous and consistent.
 ```
 
-![megasotre-across](/assets/img/megasotre-across.png)
+<img src="/assets/img/megasotre-across.png" alt="megasotre-across" style="zoom:50%;" />
 
 #### 复制
 
@@ -36,7 +36,7 @@ Note that we use asynchronous messaging between logically distant entity groups,
 - Fast Writes，使用基于类似master来实现单roundtrip的写入。Megastore这里实际使用的叫做Leader而是Master，它们之间的区别在与Megastore中的leader更加灵活，Megastore会为每个log position设置独立的Paxos状态机，它们的Leader不一定相同。Megastore会选择例客户端最近的副本做为leader，来提高性能。
 - Replica Types，Megastore讲副本类型分为为Full、Witness和Read-Only几种。Full可参与正常的操作，而Witness只用来保存预写的日志，Read-Only的顾名思义就是只用来读取的。
 
-![megastore-arch](/assets/img/megastore-arch.png)
+<img src="/assets/img/megastore-arch.png" alt="megastore-arch" style="zoom:50%;" />
 
 ### 概览
 
@@ -113,11 +113,7 @@ Queues provide transactional messaging between entity groups. They can be used f
 
 ### 更多的复制的内容
 
-   Megastore是乱序提交的，这样也就可能存在某些日志中是存在空洞的。这样Megastore必须处理这类情况。
-
-#### 读取
-
-  对于一个读取来说，必须有一个副本是“赶上”了最新的数据。缺失的就必须“追赶”上来。流程：
+   Megastore是乱序提交的，这样也就可能存在某些日志中是存在空洞的。这样Megastore必须处理这类情况。对于一个读取来说，必须有一个副本是“赶上”了最新的数据。缺失的就必须“追赶”上来。流程：
 
 * Query Local，根据前面提到的coordinator来查看这个副本的数据是否是最新的；
 
@@ -137,9 +133,7 @@ Queues provide transactional messaging between entity groups. They can be used f
 
 这里比较(´･_･`)，这里主要考虑的就是判断选中副本的数据完整性以及在不完整的情况下如何数据追赶。在正常的情况下，也就是副本数据完整的情况下，操作还是比较简单的。下面是读取的过程图，结合这个图理解更加好，
 
-![megastore-read](/assets/img/megastore-read.png)
-
-#### 写入
+<img src="/assets/img/megastore-read.png" alt="megastore-read" style="zoom:50%;" />
 
   对于写入来说，前面提到了写操作的前面会是一个current read的读取操作。在读取操作完成之后，它基于可以知道这样的一些信息：1. 下一个没有使用的log position，2. 最后一个写入的时间戳，3. 下一次写入的leader副本。流程：
 
@@ -149,7 +143,7 @@ Queues provide transactional messaging between entity groups. They can be used f
 * Invalidate，如果一个Group中的一个副本没有接受这个提交的值，那么就要将这个副本从coordinator移除，避免快速读取的时候出错；
 * Apply，将改动应用到就可能多的副本上面。如果选定的值和最初提交的值不同，那么像对应的客户端发挥冲突错误；
 
-![megastore-write](/assets/img/megastore-write.png)
+<img src="/assets/img/megastore-write.png" alt="megastore-write" style="zoom:50%;" />
 
   如前文所言，Coordinators会保存数据都是最新的Group，如果没有保持最新，那么就要将其从中移除。为了保证这里写入的正确性，在提交之前必须满足下面两个条件中的一个：1. 这个写入操作被使用的副本接受了；2. 没有接受最新数据得Group从Coordinators中被移除了。 Coordinators是一个机遇Chubby的实现。这里关于Coordinators可以参考[1].
 
@@ -157,7 +151,7 @@ Queues provide transactional messaging between entity groups. They can be used f
 
   这里的具体信息可以参考[1]，从下面的图和Spanner的论文中吐槽Megastore来看，它的latency还是比较大的：
 
-![megastore-latency](/assets/img/megastore-latency.png)
+<img src="/assets/img/megastore-latency.png" alt="megastore-latency" style="zoom:50%;" />
 
 ## 参考
 

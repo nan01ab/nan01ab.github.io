@@ -21,11 +21,11 @@ typora-root-url: ../
 
   满足这样的要求下，文件系统可以保证正确性，在Crash之后一定会是可以恢复的，但是可以导致磁盘空间“泄露”，这个通过额外的方法解决。Soft Updates通过追踪更新操作之间的依赖关系，来安排写入的顺序来保证一致性。Soft Updates在开始的时候准备使用DAG(有向有环图)来表示这些操作之间的依赖关系(在这些文件系统的操作之中，是很容易造成循环依赖的关系的)。但是在实际考虑之后发现这种方式操作的难度太大，转而使用了另外的方式。在Soft Updates中，依赖的关系是在很小的粒度上面保持的(在字段or指针基本的粒度)。对于每一个更新操作，都会保存之前和之后的版本，以及它依赖的更新操作的链表。
 
-![supdates-cyclic](/assets/img/supdates-cyclic.png)
+<img src="/assets/img/supdates-cyclic.png" alt="supdates-cyclic" style="zoom:67%;" />
 
   上面的图是一个循环依赖的例子。系统在一个目录下面创建文件A之后，会导致一个目录块到Inode块的依赖关系，前者依赖于后者，所以后者必须在前者之前持久化。之后的操作在该目录中删除了文件B，导致了一个Inode块到目录块的依赖关系。这样就形成了一个循环依赖的关系。这里Soft Upfates解决的方法是回滚操作，Soft Upfates写入的顺序是可以随意的。。加入这里要写入目录的数据块，由于存在被依赖者Inode的数据库，所以不能写入。这里就会暂时地回滚创建A的操作，就可以将其写入，之后在重新操作即可。这里实际上会导致目录块写入两次。
 
-![supdates-redo](/assets/img/supdates-redo.png)
+<img src="/assets/img/supdates-redo.png" alt="supdates-redo" style="zoom: 67%;" />
 
   上面的图显示了这样的操作过程。在内存中两个操作完成之后，形成了一个循环依赖的关系。为了写入目录块，写入的是删除文件B之后的目录块，内存中的目录块依赖于Inode块的信息还保留。下一次的操作就是将初始化的A的Inode的Inode块写入到磁盘，满足前面的3点的要求。最后再是写入了添加文件A的目录块更新，所有的依赖关系解除，操作完成。可以发现在这个过程中目录块写入了2次，在中间任何状态Crash的时候，文件系统是安全的，但是可能导致Inode的泄露。
 
@@ -51,7 +51,7 @@ Maintaining the dependencies described is sufficient to guarantee that the on-di
 
   这里的具体信息可以参看[1]，由于这篇Paper差不多是20年前的原因，里面测试使用的硬件在今天看来是古董了2333，
 
-![supdates-perf](/assets/img/supdates-perf.png)
+<img src="/assets/img/supdates-perf.png" alt="supdates-perf" style="zoom:67%;" />
 
 ## 参考
 

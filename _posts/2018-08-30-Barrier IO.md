@@ -32,7 +32,7 @@ a partial order is preserved if the relative position of the requests against a 
 
   最后面的顺序保证是现在的OS都默认不能确定的，为了保证操作之间一定的顺序，OS一般使用的方法是*Wait-on-Transfer*，这个带来了很大的开销，也很不利于现在的SSD并行性的发挥。此外，另外一个开销是*Transfer-and-Flush*，这里利用这种机制得目的是用来保证日志文件系统中日志之间和一个日志之内得一些操作得顺序，这里更加详细的信息可以参考相关日志式文件系统的资料。fsync在ext4文件系统中的操作流程：
 
-![baio-fsync-ext4](/assets/img/baio-fsync-ext4.png)
+<img src="/assets/img/baio-fsync-ext4.png" alt="baio-fsync-ext4" style="zoom:67%;" />
 
   上面的图中字母表示的含义:  D表示要写入存储设备的脏页，JC表示提交快(commit block)，JD表示合并之后的日志描述符和日志块(journal descriptor block and the log blocks )。上面体条形的不同颜色填充形状表示来不同的时间消耗。在ext4日志式文件系统中，数据块是先于日志持久化的。文件系统在放松出写入脏页集合D之后，这个线程就会等待直到DMA传输的完成，在图中下面的D阶段。然后就是触犯系统中的JBD线程来持久化日志，这个过程发送请求的线程又得进入睡眠。这里这样做的一个原因之一就是保证数据块集合在日志数据之前持久化。此外一个日志的事务通常有写入日志描述块和日志块以及写入提交块组成。这里也是得保证顺序的，
 
@@ -60,7 +60,7 @@ Within a transaction, JBD needs to ensure that JD is made durable ahead of JC. B
 
 3. 基于epoch的IO调度器。Epoch的界定以一个屏障写为基准，这里对应的顺序是I到D。这里就比前面的容易理解了。现在的Linux的调度器会对(不是所有的)请求进行重新排序。这里加入以barrier界定的epoch就是防止不同epoch之间的有顺序要求的请求被重新排序之后不能满足要求的顺序。而对于没有顺序要求的请求，则可以不用care这个epoch来重新排序。这里主要涉及到的是Block层IO调度器的修改，
 
-![baio-epoch](/assets/img/baio-epoch.png)
+<img src="/assets/img/baio-epoch.png" alt="baio-epoch" style="zoom:50%;" />
 
  经过了上面的三个部分的工作，就可以保证从IO请求被发出到被持久化之间的偏序关系是可以得到保留的。看起来这个工作一点都不容易。
 
@@ -78,7 +78,7 @@ Within a transaction, JBD needs to ensure that JD is made durable ahead of JC. B
 
 * 双模式日志，FS中日志事务的提交可以大体上分为两个任务，1. 发出JD和JC的写入请求，2. 使JD和JC持久化。这里将写入请求提交称为控制层面的操作，而数据块持久化的操作称为数据层面的操作。这两个工作在被分开，可以使用两个线程来完成操作。提交线程负责处理JD和JC的写入请求，使用写入屏障来保证它们按照顺序来持久化，由于不用等到数据被Flush，所以提交线程的写起请求操作可以是没有延时的。刷新线程负责发出flush命令和处理错误并重试，以及从事务列表中移除事务。刷新线程对不同的情况有不同的处理，对于fbarrier触发，则不发出flush命令，因为fbarrier并没有数据持久化的保证，而如果是fsync出发的话，就必须发出flush命令，在等待设备flush完成之后才从中事务列表中去除这个事务。这里将日志的操作分为了控制面的活动和数据面的活动，Paper中认为这个设计有着深远的意义，可以对目前的实现有着很大的改进。下面的图表示了之前的实现和现在的实现的对比。
 
-![baio-journal](/assets/img/baio-journal.png)
+<img src="/assets/img/baio-journal.png" alt="baio-journal" style="zoom: 50%;" />
 
 * 同步原语， 在执行fbarrier和fsync的时候，BarrierFS(Paper中改动之后的文件系统的名称)以流水线的方式处理D、JD和JC。对于D，可以是1个or多个的顺序保留写入，而JD和JC使用屏障写入(barrier write)。这样这里就有两个epoch: {D,JD}和{JC}(查看[1]对于顺序保留写入和屏障写入已经epoch的定义)，BarrierFS要确保它们之间的写入顺序。fbarrier调用会在文件系统发出了FC写入请求的时候的就返回，而fsync则要等到JC确保被持久化。而fdatabarrier和 fdatasync的调用由于只用处理数据部分，所以只有将D看作顺序保留写入而D中的最后一个写入看着是屏障写入，同样这两个之间的差别也和fbarrier和fsync的差别一样。
 
@@ -96,7 +96,7 @@ Within a transaction, JBD needs to ensure that JD is made durable ahead of JC. B
 
  这里具体的信息还是参考[1]。在一些数据库的应用对性能的提升还是非常大的。
 
-![baio-perf](/assets/img/baio-perf.png)
+<img src="/assets/img/baio-perf.png" alt="baio-perf" style="zoom:50%;" />
 
 ## 参考
 

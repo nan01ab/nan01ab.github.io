@@ -33,7 +33,7 @@ ECN还有更多的细节，可参考相关资料。
 2. 排队问题，长时间的流和短时间的流同时使用一个交换机端口时，导致排队，也导致短时间的数据被drop，及时没有被drop页导致了延时的增加；
 3. buffer的问题，不同的流使用不同的交换机短空，长时间的流占用了共享的buffer。
 
-![dctcp-problems](/assets/img/dctcp-problems.png)
+<img src="/assets/img/dctcp-problems.png" alt="dctcp-problems" style="zoom:50%;" />
 
 ### 0x03 DCTCP
 
@@ -57,7 +57,7 @@ cwnd ← cwnd × (1 − α/2)
 
 来更新cwnd。效果的部分数据:
 
-![dctcp-results](/assets/img/dctcp-results.png)
+<img src="/assets/img/dctcp-results.png" alt="dctcp-results" style="zoom:50%;" />
 
 ### 0x04 Deadline Driven Delivery 
 
@@ -76,7 +76,7 @@ The rate allocation description above assumes the router has the rate requests f
 
 结果的部分数据：
 
-![dctcp-d3-results](/assets/img/dctcp-d3-results.png)
+<img src="/assets/img/dctcp-d3-results.png" alt="dctcp-d3-results" style="zoom:50%;" />
 
 ### 0x05 D2TCP
 
@@ -114,13 +114,11 @@ w = w * (1 - p/2) if p > 0,
 
  这里可以看出来，如果没有被标记的包，a = 0，这样p就是0，行为和正常TCP的行为一样，如果a = 1，那么计算处理啊的w就是正常情况下的一半。具体的d如何处理可参加论文。Famma-correction函数的示意图:
 
-
-
-![dctcp-correction](/assets/img/dctcp-correction.png)
+<img src="/assets/img/dctcp-correction.png" alt="dctcp-correction" style="zoom:50%;" />
 
   具体分析这里省略了。结果的部分数据:
 
-![d2tcp-results](/assets/img/d2tcp-results.png)
+<img src="/assets/img/d2tcp-results.png" alt="d2tcp-results" style="zoom:50%;" />
 
 ## 参考
 

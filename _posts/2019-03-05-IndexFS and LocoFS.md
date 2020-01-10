@@ -12,7 +12,7 @@ typora-root-url: ../
 
  这Paper是关于利用KVS作为分布式文件系统的元数据存储的。之前就有一些Paper设计了利用类似LevelDB的Key-Value来实现单机的文件系统。比如TableFS[2]是利用LevelDB实现的一个用户空间文件系统，TableFS的论文里面只是简单的介绍了一些FS层次结构到KV的映射，但是没有谈到解决重命名以及文件夹移动等的问题，这个问题比较难处理。后面的BetrFS则将类似的思路般到了内核空间，相关的几篇Papers也重点讨论了重命名、移动文件文件夹等操作的实现。这里的IndexFS则是将环境放到了分布式文件系统下面，主要是用KVS存储分布式文件系统的元数据。
 
-![indexfs-arch](/assets/images/indexfs-arch.png)
+<img src="/assets/images/indexfs-arch.png" alt="indexfs-arch" style="zoom:67%;" />
 
 ### 0x01 基本架构
 
@@ -46,7 +46,7 @@ Evaluations show that LocoFS with eight nodes boosts the metadata throughput by 
 
  LocoFS可以看作是从前面的IndexFS改进而来的一个架构。架构上一个主要的变化就是目录的元数据和文件的元数据分开保存。在文件系统层次式的结构中，目录的操作是比较耗时的，而前在IndexFS的设计中，访问一个目录下面的一个文件可以需要访问多个元数据服务器。在LocoFS中，它认为目录的元数据是远少于文件的元数据的，一次将目录的元数据只保存到一个元数据服务器上面，就可以直接在一个服务器上面就完成查找一个路径下面文件的操作。另外和IndexFS一样，文件的元数据是保存到多个的元数据服务器上面的，
 
-![locofs-arch](/assets/images/locofs-arch.png)
+<img src="/assets/images/locofs-arch.png" alt="locofs-arch" style="zoom:67%;" />
 
 LocoFS的设计还有另外的一些特点，
 
@@ -82,7 +82,7 @@ LocoFS的设计还有另外的一些特点，
 
   这里的具体信息可以参看[3],
 
-![locofs-perf](/assets/images/locofs-perf.png)
+<img src="/assets/images/locofs-perf.png" alt="locofs-perf" style="zoom:67%;" />
 
 ## 参考
 

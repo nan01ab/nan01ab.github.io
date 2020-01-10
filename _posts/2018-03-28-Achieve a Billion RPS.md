@@ -19,7 +19,7 @@ typora-root-url: ../
 
 下面的表是一些KVS的例子，这些在论文中是测试的对象：
 
-![billion-examples](/assets/img/billion-examples.png)
+<img src="/assets/img/billion-examples.png" alt="billion-examples" style="zoom:50%;" />
 
  网站很多事从MICA这个系统出发讨论的，使用最好先阅读一下[2]。  
 
@@ -35,7 +35,7 @@ typora-root-url: ../
 * 开始系统的设计为核心和网络端口之间么有绑定，需要的网卡队列为NumCores × NumPorts，这个造成了大量的内部流量，另外就是不利于DDIO技术的发挥。之后系统优化为核心与端口存在绑定的关系，一个网络端口的数据由指定的核心处理，这样的优化可以使得系统在20个核心10个10GbE网卡的时候达到100MRPS的速度。在这个速度上面又遇到了瓶颈。
 * 然后使用Systemtap分析系统运行时的情况，发现一些NIC和处理器的一些信息的收集导致了比较大的overhead，通过降低这个统计信息收集的频率，系统可以实现RPS随着核心数量的增加接近线性增长。在24个核心的时候达到120 MRPS。
 
-![mica-120m](/assets/img/mica-120m.png)
+<img src="/assets/img/mica-120m.png" alt="mica-120m" style="zoom: 67%;" />
 
   上面图中的一些关于这个性能的进步过程中的一些信息，
 
@@ -47,11 +47,11 @@ typora-root-url: ../
 
   从下面的这个图看出其它的系统和MICA之间的差距是巨大的。
 
-![mica-comparison](/assets/img/mica-comparison.png)
+<img src="/assets/img/mica-comparison.png" alt="mica-comparison" style="zoom:67%;" />
 
  主要的原因分析从下面的这个时间消耗的比例图上面可以看出来，其它的系统实际花在处理请求的时间都只占一小部分。基本上使用内核网络栈和一般的Mutex的并发控制的方式都比较难实现高性能。
 
-![mica-time](/assets/img/mica-time.png)
+<img src="/assets/img/mica-time.png" alt="mica-time" style="zoom: 67%;" />
 
 #### 另外的几点
 

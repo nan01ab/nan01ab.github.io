@@ -26,11 +26,11 @@ We describe the following contributions:
 
    下面的这幅图大概表示了写入的流程，这幅图就是论文[2]的同样的一幅:
 
-![aurora-storage](/assets/img/aurora-storage.png)
+<img src="/assets/img/aurora-storage.png" alt="aurora-storage" style="zoom:50%;" />
 
    存储结点在接受到一个新的log记录的时候，它可能向前推进它的SCL(Segment Complete LSN，代表了这个结点知道的前面所有的log记录都已经收到的最大的LSN，也就是说在这个SCL记录之前的日志在这个结点上是完整的，不存在gap，这里习相关的一个概念就是Volume Complete LSN(VCL)，指的是存储层可以保证可以提供的redo log的最大的LSN，它之前的日志可能存在gap)。SCL会被当作ack的一部分发送给数据库实例，在这个实例收到了超过4个存储结点这个ACK之后，它自己也会将这个PGCL向前推进。在这里要引入Protection Group Complete LSN (PGCL)的概念，代表了一个数据段组(也就是在Aurora中数据分片保存，每个保存6份，这6份叫做一个组)。以下面的图举一个例子，在这些log记录中，级数LSN被保存在PG1钟，偶数的被保存在PG2中，在PG1中，可知它最大的PGCL是103，因为105还没有达到4个的标准，即使107已经达到的也不行。同理在PG2中这个值就是104。
 
-![aurora-consistency-point](/assets/img/aurora-consistency-point.png)
+<img src="/assets/img/aurora-consistency-point.png" alt="aurora-consistency-point" style="zoom:50%;" />
 
   VCL为了保证数据的持久化，只有SCL这些还是不够的，因为这里的SCL应用的对象是segment，并不能代表全局的所有的数据。存储层保证不大于这个VCL的日志已经提交的。一个事务可能不止产生一条的log，这一组的log中产生一条记录的操作就叫做min transaction(MTR)，而System Commit Number(SCN)指的就是这些log中LSN最大的，当这条记录都持久化之后，就能保证这个事务所有的日志都已经持久化了，这个的大小不会超过VCL。这里说的东西和在论文[2]中的没有多大的差别。下面的提交的时候异步的方法也就是去年的论文上面的东西，
 
@@ -42,7 +42,7 @@ We describe the following contributions:
 
 ​    这里要处理的第一个问题：数据中保存的一些数据是没有持久化的，比如之前说的PGCL和VCL。这个时候就要求从存储结点的SCL信息中将这些信息恢复出来，
 
-![aurora-vcl](/assets/img/aurora-vcl.png)
+<img src="/assets/img/aurora-vcl.png" alt="aurora-vcl" style="zoom:50%;" />
 
    在重建这些信息的时候，如果从一个read quorum中也无法重建出来，就表示这些写入的不完整的，当然这些不完整的日志对于的事务肯定也没有回复客户端为已经完成的。这些不不完整的日志会被截断，
 
@@ -70,7 +70,7 @@ The use of monotonically increasing consistency points – SCLs, PGCLs, PGMRPLs,
 
 ​    这里说的是Aurora中的成员变更的机制。这里使用了基于epoch的方法。在一个数据库治理和一个对等的存储结点请求一个存储结点的时候，都会带上这个epoch的值(Aurora这里有两个epoch概念，一个是数据卷的epoch，一个是Quorum成员的epoch，这里说的后者)。
 
-![aurora-membership](/assets/img/aurora-membership.png)
+<img src="/assets/img/aurora-membership.png" alt="aurora-membership" style="zoom:50%;" />
 
  以上面的图中使用G替代F说明为例：这里不是直接一步地将F替代，而是分为2步。1. 先将G加入这个Quorum中，变为2个write set：4/6 of ABCDEF 和
 4/6 of ABCDEG，读则是3/6 of ABCDEF OR 3/6 of ABCDEG。如果F在这个过程中重新正常工作，就可以变为原来的状态，如何G获取了需要的数据之后F还是不能工作的状态，这个时候就变为ABCDEG的状态。在这个过程中，write quorum都是可以满足的，不会影响正常工作，

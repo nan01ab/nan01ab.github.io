@@ -18,7 +18,7 @@ We synchronize the Adaptive Radix Tree (ART) using two such protocols, Optimisti
 
   各种的同步机制是一个可拓展性和复杂程度上的一个平衡:
 
-![art-sync-paradigm](/assets/img/art-sync-paradigm.png)
+<img src="/assets/img/art-sync-paradigm.png" alt="art-sync-paradigm" style="zoom: 33%;" />
 
    从这里看到，这里提高的方法中ROWEX和optimistic lock coupling在在没有特殊硬件的支持下这两个方面的平衡是最后的。近些年HTM被一些硬件支持(intel TSX，IBM Power 8, 9)，看起来更加好。 如果这里对ART不了解，可以先看一看[2]；如果对HTM不了解，可以看看网上的介绍文章，也能找到相关的论文；如果对 lock coupling不了解，可以先看一看[3]，(不过这篇论文很老了，比较难找，不过还是可以在网上找到的)，
 
@@ -35,7 +35,7 @@ We synchronize the Adaptive Radix Tree (ART) using two such protocols, Optimisti
 
   对于insert操作，和获取一般的lock相似，不过要额外做的是增加version number。read操作的时候在必要的时刻在进行检查，如上面的伪代码所示。另外对于delete操作，这里的问题和很多很多并发的数据结构一样，何时回收内存？这里采用的是常见的基于epoch的方法。
 
- ![art-sync-write](/assets/img/art-sync-write.png)
+ <img src="/assets/img/art-sync-write.png" alt="art-sync-write" style="zoom: 33%;" />
 
 ### 0x02 Read-Optimized Write EXclusion 
 
@@ -61,7 +61,7 @@ Path compression 是另外的一个问题，这个是ART用来节约内存的优
 To change the prefix of the node atomically, we store both the prefix and its length in a single 8 byte value, which can be changed atomically.
 ```
 
-![art-sync-path-compression](/assets/img/art-sync-path-compression.png)
+<img src="/assets/img/art-sync-path-compression.png" alt="art-sync-path-compression" style="zoom: 33%;" />
 
   这里的一个难点在与现在的硬件只支持一个CAS的操作，没有multi-CAS。为了解决这个问题，在每一个结点中添加一个level字段，保存了包括prefix在内的的结点的高度，结点一旦被创建就不会被修改了，reader根据这些信息适当处理结点被更新之后prefix的问题：
 

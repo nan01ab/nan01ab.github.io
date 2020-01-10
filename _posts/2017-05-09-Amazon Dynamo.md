@@ -24,7 +24,7 @@ Other Assumptions: Dynamo is used only by Amazon’s internal services. Its oper
 
 下面的表格总结了Dynamo要解决的问题，已经解决这个问题使用的技术和所具有的优点：
 
-![dynamo-techniques](/assets/img/dynamo-techniques.png)
+<img src="/assets/img/dynamo-techniques.png" alt="dynamo-techniques" style="zoom:50%;" />
 
 ### 接口
 
@@ -69,7 +69,7 @@ If the counters on the first object’s clock are less-than-or-equal to all of t
 
 Dynamo的客户端想要更新一个对象的时候必须指定这个对象的版本，这里之前提到了`put`操作的接口中包含了一个context的参数，这个参数重就包含了vector clock的信息。当处理一个读的请求时，Dynamo如果发现了数据版本的多个分支，它自己时不能处理，而是会将这些数据都返回给客户端，同时返回它们的context信息。然后使用这个context更新这个对象的操作将会被视为已经协调好了不同的版本分支之间的问题，这些将会被合并为一个。下面这幅图就表示了这个过程.
 
-![dynamo-version-reconcile](/assets/img/dynamo-version-reconcile.png)
+<img src="/assets/img/dynamo-version-reconcile.png" alt="dynamo-version-reconcile" style="zoom:67%;" />
 
  此外，这个vector clock的大小时不太可能增长到很大的，但在网络分裂之类的故障下，还是存在这个可能的，所以Dynamo处理了这种情况，使用的方法就是vector clock重的`(node, counter) `对增长到一定数量时，就把最后的一项去掉，这个会对系统产生什么样的影响还没有被彻底研究，但是没有出现过问题。
 
@@ -127,7 +127,7 @@ To prevent logical partitions, some Dynamo nodes play the role of seeds. Seeds a
 
 性能表现:
 
-![dynamo-performance](/assets/img/dynamo-performance.png)
+<img src="/assets/img/dynamo-performance.png" alt="dynamo-performance" style="zoom:50%;" />
 
 ## 参考
 

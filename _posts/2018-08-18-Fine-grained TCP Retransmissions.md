@@ -28,7 +28,7 @@ timeout = RTO × 2 ^ backoff
 
 模拟中这个RTO的最小值对性能的影响，可以看出来RTO的最小值对性能有着明显的影响(模拟情况):
 
-![fine-rto-simulation](/assets/img/fine-rto-simulation.png)
+<img src="/assets/img/fine-rto-simulation.png" alt="fine-rto-simulation" style="zoom:50%;" />
 
   Paper中的在实际情况中的测试，也显示出减小RTOmin对性能的影响。
 
@@ -44,7 +44,7 @@ timeout = (RTO + (rand(0.5) × RTO)) × 2 ^ backoff
 
 模拟结果：
 
-![rto-fine-rand](/assets/img/rto-fine-rand.png)
+<img src="/assets/img/rto-fine-rand.png" alt="rto-fine-rand" style="zoom:50%;" />
 
 ### 实现
 
@@ -70,7 +70,7 @@ In practice, these two potential consequences are mitigated by newer TCP feature
 
 在广域网上测试的数据 ：
 
-![rto-wide-erea](/assets/img/rto-wide-erea.png)
+<img src="/assets/img/rto-wide-erea.png" alt="rto-wide-erea" style="zoom: 33%;" />
 
 ## 参考
 

@@ -22,7 +22,7 @@ We implemented a prototype of our anti-caching proposal in a high-performance, m
 
 一个基本的对比图:
 
-![anticaching-overview](/assets/img/anticaching-overview.png)
+<img src="/assets/img/anticaching-overview.png" alt="anticaching-overview" style="zoom:50%;" />
 
  系统运行的时候，数据库会监控系统的内存使用情况，当内存使用达到一定的阈值之后，系统会选择一个”冷“的数据块驱逐到磁盘上面。由于一般的内存数据的数据都不像传统的数据一样时按page组织的。未来支持anti-cacing，这里将要被驱逐出去的数据组织成固定大小的数据块。系统会保存这些被驱逐出去的数据块的信息，在一个事务需要这些数据的时候，数据库会先通过一个“pre-pass” 模式去确定这个事务会访问哪些元组，当这个工作完成的时候，系统先将这个事务abort。然后再将这些在磁盘上面的数据取回来，在重启这些事务。在传统的数据库架构中，在buffer pool中的数据除了暂时还有持久化到磁盘上面的部分数据(这部分数据也在log中)，都是既在buffer pool中，又在磁盘上面。而anti-cahing架构数据库的数据同一时间只会在一个地方，不会同时存在磁盘和内存里面。
 
@@ -53,7 +53,7 @@ This eviction process continues until the block is full, at which point the tran
 
 #### Transaction Execution  & Block Retrieval 
 
-![anticaching-execute](/assets/img/anticaching-execute.png)
+<img src="/assets/img/anticaching-execute.png" alt="anticaching-execute" style="zoom: 67%;" />
 
   由于Paper里面测试的是内存数据库，如果一个事务要访问被驱逐出去的数据时，如果在事务执行的时候取回数据然后继续执行的话会阻碍到其它的事务执行。所以这里使用了另外的一种方式。
 

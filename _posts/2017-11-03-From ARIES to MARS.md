@@ -28,7 +28,7 @@ Once committed, the SSD hardware copies the final values from the log to their t
 
  atomic意味着对这些项的更改是原子的，不仅仅如此，EAW还支持对多个位置的原子修改。这里只讨论来EAW的基本特性，在后面会讨论它具体时怎么实现的，EAW基本接口:
 
-![mars-eaw-api](/assets/img/mars-eaw-api.png)
+<img src="/assets/img/mars-eaw-api.png" alt="mars-eaw-api" style="zoom:50%;" />
 
 #### Deconstructing ARIES
 
@@ -39,7 +39,7 @@ Once committed, the SSD hardware copies the final values from the log to their t
 3. ‘Steal’ policy，没有提交的事务更新的pages也能写入到磁盘上面(这个是为了支持"很大"的事务)，因为有undo log，这也是可以恢复的；
 4. 使用LSN (Log Sequence Numbers)来保证标记log，page是基本的管理单位；
 
-![mars-policy](/assets/img/mars-policy.png)
+<img src="/assets/img/mars-policy.png" alt="mars-policy" style="zoom:50%;" />
 
 #### Building MARS 
 
@@ -85,7 +85,7 @@ TODO
 We have implemented EAWs and MARS in a next-generation SSD to demonstrate that the overhead of EAWs is minimal compared to normal writes, and that they pro- vide large speedups for transactional updates to hash tables, B+trees, and large graphs. In addition, MARS outperforms ARIES by up to 3.7× while reducing software complexity.
 ```
 
-![mars-performance](/assets/img/mars-performance.png)
+<img src="/assets/img/mars-performance.png" alt="mars-performance" style="zoom: 50%;" />
 
 ## 参考
 

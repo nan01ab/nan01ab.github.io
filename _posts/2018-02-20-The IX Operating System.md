@@ -21,7 +21,7 @@ typora-root-url: ../
 
 ### 基本设计
 
- ![ix-arch](/assets/img/ix-arch.png)
+ <img src="/assets/img/ix-arch.png" alt="ix-arch" style="zoom: 33%;" />
 
  IX主要分为了3个部分，一个是运行在Linux内核里面的Dune模块，具体可以参考论文[2]，IX的data planes可以看作是一个特殊的OS(application-specific OSs)，运行在non-root的ring 0态中，最后的应用使用了libix的库，运行在ring 3中。这样的方式提供了一个安全的有效的直接访问硬件功能的方式。
 
@@ -45,7 +45,7 @@ Each memory pool is structured as arrays of identically sized objects, provision
 
 Dataplane提供的一些API:
 
-![ix-datalpane-api](/assets/img/ix-datalpane-api.png)
+<img src="/assets/img/ix-datalpane-api.png" alt="ix-datalpane-api" style="zoom: 33%;" />
 
    Elastic threads使用了3中异步非阻塞的机制和dataplane交互：
 
@@ -61,7 +61,7 @@ Batched system calls和event conditions都是使用由共享内存的，这样�
 
  IX在user-level提供的是libix的库，对底层的api做了封装，它提高了非常类似libevent的api和非阻塞的Posix的socket的操作(没有说这里是完全兼容的)，此外还提供了zero copy的API提高性能(这里和Arrakis很相似)。libix会自动合并多个写请求来实现批量处理(MegaPipe里面类似的操作)。
 
-![ix-app-execute](/assets/img/ix-app-execute.png)
+<img src="/assets/img/ix-app-execute.png" alt="ix-app-execute" style="zoom: 33%;" />
 
  上面的图很好地体现了IX的数据包的处理过程，
 
@@ -96,7 +96,7 @@ IX通过以下几点来实现多核的可拓展性，
 
 ### Evaluation  
 
-![ix-performance](/assets/img/ix-performance.png)
+<img src="/assets/img/ix-performance.png" alt="ix-performance" style="zoom:50%;" />
 
 ## 参考
 

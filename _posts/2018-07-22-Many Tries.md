@@ -41,7 +41,7 @@ typora-root-url: ../
 
   KISS-Tree是一种十分简单，易于实现，Larch-free的实现起来也比较简单(还是因为它足够简单)。KISS-Tree的主要缺点就是应用范围很有限，只能应用在32bit的整数的情况下，KISS-Tree在它适用的范围内还是非常优秀的，也可以在它思路之上拓展一下适用的范围。它将32bit的整数分为3个部分，有点像现在的多级页表的实现，但是它每一层的长度和实现的方式不同。
 
-![kisstree-overview](/assets/img/kisstree-overview.png)
+<img src="/assets/img/kisstree-overview.png" alt="kisstree-overview" style="zoom:67%;" />
 
 * 第一次层是虚拟的，长度为16bit，用来直接定位第二层；
 * 第二层长度为10bit，中间每一个元素为4byte，这样刚好时一页。这里利用了现在的操作系统按需分配的机制来避免分配没有使用的内存。另外一个就是指针压缩，需要把8byte的指针压缩为4byte，KISS-Tree这里使用方法是：32bit的值中间的26bit用来定位第三层中的哪一块，而剩下的6bit保存这个块的长度，这样直接就在32bit里面保存了2个部分的数据；
@@ -51,7 +51,7 @@ typora-root-url: ../
 
    x-fast trie是bitwise trie的一种变体[4]。 x-fast trie的值都保存在叶子节点上面，如果一个内部节点没有左子节点，那么它会保存一个指向右子树中最小的子节点。如果一个内部节点没有右子节点，那么它会保存一个指向左子树中最大节点的指针。另外，每一个叶子节点会保存一个指向前驱和后继的指针，形成一个双向链表，方便范围查找。另外，每一层的节点会保存为一个hash table。
 
-![Xfast-trie-exampl](/assets/img/Xfast-trie-exampl.png)
+<img src="/assets/img/Xfast-trie-exampl.png" alt="Xfast-trie-exampl" style="zoom:50%;" />
 
 ​                [图片来自维基百科]
 
@@ -59,7 +59,7 @@ typora-root-url: ../
 
    x-fast trie这样的多个的指针加上hash table会消耗大量的内存。y-fast trie是其在内存使用上面的一个改进。和前面的BURST-trie的思路一样，它也是在上面是一个x-fast trie，下面的部分使用查找树。
 
-![Y-fast-trie](/assets/img/Y-fast-trie.png)
+<img src="/assets/img/Y-fast-trie.png" alt="Y-fast-trie" style="zoom:50%;" />
 
 ​                       [图片来自维基百科]
 

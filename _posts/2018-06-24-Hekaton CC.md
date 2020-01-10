@@ -35,19 +35,17 @@ Lower isolation levels are easier to support.
 4. Postprocessing 阶段，如果一个事务以及提交来，则将之前设置为Begin Timestamp的字段设置为End Timestamp。如果abort了，则将两个时间戳字段都设置为无穷大，变得对事务“不可见”。在后面的操作中会被垃圾回收；
 5. 事务完成；
 
-
-
-![hekaton-format](/assets/img/hekaton-format.png)
+<img src="/assets/img/hekaton-format.png" alt="hekaton-format" style="zoom: 67%;" />
 
 #### 可见版本
 
  一个事务去更新一个版本数据的Version信息的时候，只有当这个版本为最新的版本的时候，才可以去更新。这里的判断方式就是这个版本的End字段为无穷大或者是对应的事务的为Abort。如果对应的事务是Active or Preparing状态，则是有写写的冲突，这里采用的是first-writer-wins的策略，另外一个事务得abort。在Begin字段和End字段包含的都是一个时间戳的时候，判断的方式很简单，就是看事务T读取的逻辑时间是不是在这个Begin和End的时间戳范围内。如果Begin字段为一个事务的ID，则判断起来麻烦一点，
 
-![hekaton-begin](/assets/img/hekaton-begin.png)
+<img src="/assets/img/hekaton-begin.png" alt="hekaton-begin" style="zoom:67%;" />
 
   另外当End字段包含的也是事务的ID的时候也会有对应的判断方法，
 
-![hekaton-end](/assets/img/hekaton-end.png)
+<img src="/assets/img/hekaton-end.png" alt="hekaton-end" style="zoom:67%;" />
 
   这里事务提交的时候，还要处理提交依赖的问题。一个事务依赖的事务abort的时候，这个事务也必须得abort。这里使用的是register-and-report的方法，依赖于事务T2的事务T1向T2注册依赖关系，当T2提交or abort的时候会通知T1。每一个事务包含一个CommitDepCounter的计数器，统计它还有多少没解决的依赖的事务。只有当这个计数器为0的时候这个事务才可以提交。
 
@@ -65,7 +63,7 @@ Lower isolation levels are easier to support.
 
 * 读取验证(read validation)，这里主要就是检查前面要求满足的两个条件。事务T会检查ReadSet里面的对象，确保可见的版本没有变化。检查Phantoms则通过ScanSet再次扫描查找。
 
-![hekaton-validation](/assets/img/hekaton-validation.png)
+<img src="/assets/img/hekaton-validation.png" alt="hekaton-validation" style="zoom:67%;" />
 
 * 等待依赖的事务提交，前面阶段成功之后等待事务T依赖的事务提交or abort。
 * 写日志，为了完成提交，事务T必须将WriteSet里面的信息写入持久化的Log中。
@@ -109,7 +107,7 @@ Lower isolation levels are easier to support.
 
   这里的具体信息可以参看[1],
 
-![hekaton-perf](/assets/img/hekaton-perf.png)
+<img src="/assets/img/hekaton-perf.png" alt="hekaton-perf" style="zoom:67%;" />
 
 ## 参考
 

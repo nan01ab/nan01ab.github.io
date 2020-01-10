@@ -26,7 +26,7 @@ CCEH effectively adapts its size as needed while guaranteeing failure-atomicity 
 
 而在Cacheline-Conscious Extendible Hashing中，为了平衡Directory和Bucket的大小，以及加快在Bucket中的查找，EECH使用了一种三层的寻址方式，在之前的两层之间加入了一层的Segment。
 
-  ![cceh-arch](/assets/images/cceh-arch.png)
+![cceh-arch](/assets/images/cceh-arch.png)
 
  在开始的时候，可能有多个的Directory指向同一个的Segment。 CCEH接下来要处理的问题就是如果解决Segment分裂的问题。这里设计到多步的操作，要注意操作的顺序。首先是要开辟一个新的Segment，将需要转移到这个Segment的数据拷贝过来。如下图所示。下一步是对Segment 4的操作，先改变对指针和local depth，然后在是改变原来Directory中的local depth。CCEH这样的设计有可能导致一些内存的浪费，也就是说一些Segment比较满，但是另外的一些还是很“空”。这里可以采用一些类似线性探测和Cuckoo Hashing的方法，不过这些方法又可能到来一些其它的缺点，要小心使用。另外，在Segment Split之后，旧Segment里面被转移出去的数据可以使用Lazy的方式去删除。Rehashing操作不仅仅是对Hash Table的一个扩张，也可能是收缩。在EECH中收缩的操作可扩张的操作的逻辑上是一样的，只是一些操作执行的顺序是相反的。
 
@@ -125,7 +125,7 @@ struct HashEntry {
 
  这里的详细信息可以参看[2]。uDepot在一个有26个NVMe设备的机器上面跑出的性能很惊人，
 
-![udepot-perf](/assets/images/udepot-perf.png)
+<img src="/assets/images/udepot-perf.png" alt="udepot-perf" style="zoom:67%;" />
 
 ## 参考
 

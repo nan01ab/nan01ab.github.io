@@ -45,7 +45,7 @@ Where Does the Time Go?. Figure 10 shows a timeline for a read of a small object
 * Thread handoffs: The timeline shows about 220ns in direct costs due to thread handoffs between the dispatch and worker threads. However, the handoffs also resulted in 24 additional L2 cache misses that are not visible in the figure.
 ```
 
-![ramcloud-timetake](/assets/img/ramcloud-timetake.png)
+<img src="/assets/img/ramcloud-timetake.png" alt="ramcloud-timetake" style="zoom:50%;" />
 
 ### 线性一致性的实现
 
@@ -79,7 +79,7 @@ Where Does the Time Go?. Figure 10 shows a timeline for a read of a small object
 
  这里的具体的信息可以参考[1],
 
-![ramcloud-perf](/assets/img/ramcloud-perf.png)
+<img src="/assets/img/ramcloud-perf.png" alt="ramcloud-perf" style="zoom: 67%;" />
 
 ## 参考
 

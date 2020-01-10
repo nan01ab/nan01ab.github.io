@@ -61,7 +61,7 @@ PCC的使用不需要路由器的支持，不需要对现在协议改动，也�
 
  监控模块会记录在每一个MI内发送的数据包的一些信息，在之后接受到SACK的时候可以用来计算性能指标数据。在下面的图中，监控数据包在时间T0到T0+Tm的范围内。为例确保有足够的数据包，这里的Tm设置为max{发送10个包的时间，一个在[1.7,2.2]中的均匀分布的随机的倍数乘以RTT}。PCC发送数据包不会等待性能结果，而是会继续发送。
 
-![pcc-monitor](/assets/images/pcc-monitor.png)
+<img src="/assets/images/pcc-monitor.png" alt="pcc-monitor" style="zoom:67%;" />
 
 #### 控制算法
 
@@ -81,7 +81,7 @@ PCC的使用不需要路由器的支持，不需要对现在协议改动，也�
 
  这里可以参看[1]
 
-![pcc-perf](/assets/images/pcc-perf.png)
+<img src="/assets/images/pcc-perf.png" alt="pcc-perf" style="zoom:67%;" />
 
 ## PCC Vivace: Online-Learning Congestion Control
 
@@ -119,7 +119,7 @@ $$
 
 这里的具体的信息可以参看[2],
 
-![pcc-vivace-perf](/assets/images/pcc-vivace-perf.png)
+<img src="/assets/images/pcc-vivace-perf.png" alt="pcc-vivace-perf" style="zoom:67%;" />
 
 ## 参考
 

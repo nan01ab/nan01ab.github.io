@@ -30,7 +30,7 @@ RLU provides support for multiple object updates in a single operation by combin
 
 下面以一个图来一步步解释：
 
-![rlu-principle](/assets/img/rlu-principle.png)
+<img src="/assets/img/rlu-principle.png" alt="rlu-principle" style="zoom:50%;" />
 
 ##### 第1部分
 
@@ -54,7 +54,7 @@ Another approach is to use fine-grained locks. In RLU, each object that a writer
 
 来看看伪代码，enjoy it:
 
-![rlu-pseudo-code](/assets/img/rlu-pseudo-code.png)
+<img src="/assets/img/rlu-pseudo-code.png" alt="rlu-pseudo-code" style="zoom:67%;" />
 
 ### 0x03 一个优化
 
@@ -74,7 +74,7 @@ On commit, instead of incrementing the global clock and executing RLU synchroniz
 
 Interval-Based Reclamation和Epoch-Based Reclamation很类似。EBR是一种基于时间的方式，记录线程回访问的最早数据的Epoch，之前的数据就可以安全地进行数据回收的操作。这个方式是很多KVS、数据系统中常用的一种方式。但是这种的一个缺点在于一个停顿的线程可能给内存的回收带来严重的负面影响。与EBR一样，IBR也会记录一个全局的Epoch。另外还会记录一个对象的birth epoch和retire epoch，这两个epoch代表了这个对象的生命周期。下面是一个示例的伪代码。和EBR不同的是，它记录分配内存的次数，每经过若干的次数，会增加epoch的计数。对象要释放的时候使用retier喊出，这里就会记录这个对象retire的epoch。在之后合适的时候进行内存回收的操作。
 
-![ibr-psudocode](/assets/img/ibr-psudocode.png)
+<img src="/assets/img/ibr-psudocode.png" alt="ibr-psudocode" style="zoom:50%;" />
 
 ### 0x11 评估
 

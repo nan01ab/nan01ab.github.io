@@ -16,7 +16,7 @@ typora-root-url: ../
 
  Bε-tree是Btree的一个写入优化的版本(保存在磁盘上时)，它的思路的是在一个内部节点不仅仅保存Key和指向下一层节点的指针。还包含了一部分的Buffer空间。数据添加的时候先添加到这个Buffer，在Buffer中数据的数量达到一定量的时候将其“下推”。Bε-tree这样的做的优化就是使得小数据量的写入可以先集中写，也可以实现在一个地方将写入累积其它，达到一定量的时候在写入下层对应的位置。 Bε-tree这样的做的缺点就是结构的复杂程度会提高，实现起来更加复杂。另外就是范围操作的时候可能麻烦不少。Bε-tree在BetrFS中得到了应用[3]，
 
-![betree-overview](/assets/img/betree-overview.png)
+<img src="/assets/img/betree-overview.png" alt="betree-overview" style="zoom:67%;" />
 
 ### 0x02 Write-Optimized B-Tree
 
@@ -26,7 +26,7 @@ typora-root-url: ../
 * 在去除了兄弟指针之后，WO-Btree就不同担心级联更新的问题，页面移动变得更加方便和低成本了。WO-Btree写入更新之后的Page是写入到一个新的位置，而不是就地更新，优点类似于COW。
 * 去除了兄弟节点可以对范围查找操作又一些不利。
 
-![wo-bree](/assets/img/wo-bree.png)
+<img src="/assets/img/wo-bree.png" alt="wo-bree" style="zoom:67%;" />
 
 ### 0x03 NV-Tree
 
@@ -36,7 +36,7 @@ typora-root-url: ../
 * 数据项在叶子节点无序保存，这个的设计简化了叶子节点一些操作，同时也降低了一致性的成本。
 * 内部节点使用缓存优化的格式，在NV-tree中，所有的内部节点按缓存行对齐保存在连续的内存中，使用偏移寻址而不是直接使用指针。这样的一个缺点就是内部节点需要添加or删除的时候会重建整个的内部节点。
 
-![nvtree-arch](/assets/img/nvtree-arch.png)
+<img src="/assets/img/nvtree-arch.png" alt="nvtree-arch" style="zoom:67%;" />
 
 ### 0x04 FP-Tree
 
@@ -145,7 +145,7 @@ During failure recovery, a slot+bitmap node may be in one of three consistent st
   clflush(dest)
   ```
 
-![clfbtree-node-2](/assets/img/clfbtree-node-2.png)
+<img src="/assets/img/clfbtree-node-2.png" alt="clfbtree-node-2" style="zoom: 67%;" />
 
 ## 参考
 

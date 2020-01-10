@@ -16,7 +16,7 @@ typora-root-url: ../
 
    BFQ保持每一个进程一个IO请求队列，不同于CFQ用RR的方式轮询这些队列的方法，BFQ给这些队列一个I/O budget，这个I/O budget代表了下次能写入到磁盘的扇区(这里是HHD上面的说法)的数量。这个I/O budget的计算时一个很复杂的过程，这里只会简单的说明，不会很具体的讨论。这个I/O budget主要和进程的行为有关。
 
-![bfq-arch](/assets/img/bfq-arch.png)
+<img src="/assets/img/bfq-arch.png" alt="bfq-arch" style="zoom:50%;" />
 
 一个基本的过程如下：
 

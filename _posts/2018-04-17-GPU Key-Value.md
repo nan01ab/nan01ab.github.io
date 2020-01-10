@@ -19,7 +19,7 @@ typora-root-url: ../
 * GPU的显存虽然带宽很高，但是延时也很高；
 * 为CPU+内存设计的数据结构不适应GPU+显存的工作环境；
 
-![megakv-arch](/assets/img/megakv-arch.png)
+<img src="/assets/img/megakv-arch.png" alt="megakv-arch" style="zoom:50%;" />
 
 这里就从这三个方面出来来看如何解决这几个问题并利用好GPU的优点：
 
@@ -27,7 +27,7 @@ typora-root-url: ../
 * GPU-optimized Cuckoo Hash Table as the Index Data Structure。index结构使用的在KVS中很常见的Cuckoo Hash Table。为了简化index，这里不会直接保存完整的key到GPU上面，而是使用一个32bits的签名信息，外加上一个内存上面的location ID，后者是内存上面的位置信息，保存了具体的数据。这里index的设计充分利用的GPU的并行特性，具体的信息可以参考[1].
 * Periodic GPU Scheduling for Bounded Latency，这里就是如何在批处理数量和延时之间的取舍，这里基本的方式是延时调度，下面的图是一个Batch Size和延时时间的一个关系图，
 
-![megakv-policy](/assets/img/megakv-policy.png)
+<img src="/assets/img/megakv-policy.png" alt="megakv-policy" style="zoom:50%;" />
 
 从吞吐的性能数据来看，Mega-KV还是很不错的，
 
@@ -47,7 +47,7 @@ MemcachedGPU achieves ∼10 GbE line-rate processing of ∼13 million requests p
 
 GNoM旨在让利用UDP的应用高效地运行在GPU上面。这里使用的就是Memcached。
 
-![mcgpu-arch](/assets/img/mcgpu-arch.png)
+<img src="/assets/img/mcgpu-arch.png" alt="mcgpu-arch" style="zoom:50%;" />
 
   上面的图表示GNoM包处理的流程图。上面中值得一看的是Rx GPUDriect的路径。在传统的数据包的处理中，要先经过GPU，将数据先放到内存中然后在传输到GPU上面处理，这样的缺点是显而易见的。这里的处理最大的一个特点就就是将接收的数据包直接传输到GPU来处理。不够在Paper中也指出，这个GPUDirect只支持部分的显卡，
 
@@ -62,11 +62,11 @@ GNoM旨在让利用UDP的应用高效地运行在GPU上面。这里使用的就�
 
 下面图比较简单的表现了mega-kv和memcachedGPU的不同点：
 
-![megakv-comparison](/assets/img/megakv-comparison.png)
+<img src="/assets/img/megakv-comparison.png" alt="megakv-comparison" style="zoom:50%;" />
 
 一些性能信息：
 
-![mcgpu-perf](/assets/img/mcgpu-perf.png) 
+<img src="/assets/img/mcgpu-perf.png" alt="mcgpu-perf" style="zoom:50%;" /> 
 
 ## DIDO -- Dynamic Pipelines for In-Memory Key-Value Stores on Coupled CPU-GPU Architectures
 
@@ -87,14 +87,14 @@ GNoM旨在让利用UDP的应用高效地运行在GPU上面。这里使用的就�
 
 下面的图就表示出了流水线不同部分在GPU上面运行的例子：
 
-![dido-pipeline](/assets/img/dido-pipeline.png)
+<img src="/assets/img/dido-pipeline.png" alt="dido-pipeline" style="zoom:67%;" />
 
 * Workload Profiler，这里就是发现系统当前的负载的特点，为后面的“动态”处理提供一些统计信息。
 * APU-Aware Cost Model，Paper中测试的环境使用的是AMD的APU。如前面所言，动态的流行先为的就是提供系统的整体性能。那么如何安排流行才能使得系统性能最好呢？这里使用的就是Cost Model的方法，通过对操作进行成本估计，选择成本最低的方法，这里具体的计算模型可以参考[2]。
 
 下面是一些性能信息：
 
-![dido-perf](/assets/img/dido-perf.png)
+<img src="/assets/img/dido-perf.png" alt="dido-perf" style="zoom:50%;" />
 
 ## 参考
 

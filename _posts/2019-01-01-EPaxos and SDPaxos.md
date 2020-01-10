@@ -12,19 +12,19 @@ typora-root-url: ../
 
    这篇Paper是关于Paxos算法的一个优化策略。这篇提出了一个Paxos的一种变体EPaxos。EPaxos侧重点在消除稳定/指定的Leader/Master的设计。EPaxos的基本思路就是为每一个客户端提交的Command指定一个Leader，同时处理好这样设计的冲突和依赖的关系，并加上了一些设计和实现上面的优化，
 
-![epaxos-message-flow](/assets/images/epaxos-message-flow.png)
+<img src="/assets/images/epaxos-message-flow.png" alt="epaxos-message-flow" style="zoom:67%;" />
 
 ### 0x01 基本设计
 
   EPaxos的设定和一般的Paxos没有很大的区别，在副本数量为2F+1的情况下，能够容忍F个副本的故障。在EPaxos中，存在两种不同的动作，一个是Committing另外一个是Executing，且它们的顺序不一定要相同(可以乱序提交)。另外在EPaxos中的一个重要的概念是Command Interference，两个Commands存在Command Interference即当两个的顺序必须按照一定的顺序进行，负责会得到不同的结果。EPaxos可以保证存在Command Interference的两个Commands C1 C2在客户端有着怎么样的顺序关系，在每个副本上面的执行的顺序也一定会是这样的顺序关系。deps是一个副本的列表，它(们)包含了与一个Command存在Interference的Command(s)，而seq则是序列号，用于打破循环依赖。
 
-![epaxos-basic](/assets/images/epaxos-basic.png)
+<img src="/assets/images/epaxos-basic.png" alt="epaxos-basic" style="zoom: 67%;" />
 
 * EPaxos中每个副本有一个唯一的ID，和常见的算法一样，为了处理新配置，EPaxos中也使用了epoch。所以在EPaxos中Ballot Number的格式是epoch.b.R，b是一个递增的自然数，R为副本ID。
 
 * 在上面的图1是一个例子。两个并发的更新操作更新不同的对象，不存在Interference，且各自选择了不同的Command Leader，按照EPaxos的Fast Path执行完毕。而两个并发的更新操作更新相同的对象，存在Interference，也选择了不同的Command Leader，则会产生冲突，则执行的是EPaxos中Slow Path。
 
-* 基本的EPaxos中，一个Fast Path的Quorum为2F个副本，可以优化为$F + \lfloor (F+1)/2 \rfloor​$。在Slow Path的处理中，一个Quorum的大小总是为F+1。
+* 基本的EPaxos中，一个Fast Path的Quorum为2F个副本，可以优化为$F + \lfloor (F+1)/2 \rfloor$。在Slow Path的处理中，一个Quorum的大小总是为F+1。
 
 * 正常操作的时候一个Command Leader接受到它为Leader的操作之后，向至少为一个Fast Path的Quorum发送PreAccept消息。副本在接受到这个消息之后，更新这个Command的deps和seq属性，然后回复Command Leader。Command Leader在收到了足够数量的回复，且更新之后的属性相同(另外的副本回复的属性可能已经被更新)，则可以提交这个操作。如果收到的属性存在不同，则选择一个有相同属性的多数副本的Quorum的属性，然后通知多数的副本接受这个属性，这一步操作也要等待多数副本的回复。之后Command Leader就可以回复客户端并发送异步的Commit的消息。
 
@@ -41,7 +41,7 @@ typora-root-url: ../
 
 * EPaxos中的恢复操作的逻辑比较复杂，这里也设计到Fast Path的Quorum可以优化到$F + \lfloor (F+1)/2 \rfloor$。另外这个优化在这篇Paper中没有详细地证明，而是在另外的一篇Thesis中。
 
-![epaxos-recovery](/assets/images/epaxos-recovery.png)
+<img src="/assets/images/epaxos-recovery.png" alt="epaxos-recovery" style="zoom:67%;" />
 
 EPaxos算法中还会有很多的内容和细节。
 

@@ -68,7 +68,7 @@ IOKernel忙轮询NIC的收入包队列，和应用的出队列，IOKernel可以�
 * 之后，网络子系统将请求转给一个中心话的Dispatcher。这个Dispatcher将会将这些请求排队，并将这些请求转发给对用的Worker Threads。为了实现抢占式调度和重新调度，Dispatcher会生成一个context。将请求发送给Worker之后，Worker处理请求。Woker线程运行在一个指定的核心上面。在处理完成之后，回复的网络处理可以在网络子系统处理，也可以在Worker这里就处理。
 * 对于抢占式的调度，Dispatcher通过时间戳来发送长时间运行的任务。需要进行抢占式调度的时候，Dispatcher会发送一个中断信号给对用的Worker线程。这个被抢占的请求会被重新排队。所以这里的抢占的效率和快速的上下文切换式Shinjuku设计的核心问题。
 
-![shinjuku-arch](/assets/images/shinjuku-arch.png)
+<img src="/assets/images/shinjuku-arch.png" alt="shinjuku-arch" style="zoom:67%;" />
 
 #### Fast Preemption
 

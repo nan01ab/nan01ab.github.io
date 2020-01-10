@@ -18,7 +18,7 @@ typora-root-url: ../
 
 CCP一个基本的架构如下，
 
-![ccp-arch](/assets/images/ccp-arch.png)
+<img src="/assets/images/ccp-arch.png" alt="ccp-arch" style="zoom:50%;" />
 
 
 
@@ -36,7 +36,7 @@ CCP一个基本的架构如下，
 
 这个DSL中包含的一些ACK的信息、一些Flow的信息，
 
-![ccp-dsl](/assets/images/ccp-dsl.png)
+<img src="/assets/images/ccp-dsl.png" alt="ccp-dsl" style="zoom: 67%;" />
 
 CCP中的onReport()提供了在用户空间处理来自数据面数据的方法，一个简单的AIMD的算法实现的逻辑在onReport中实现如下，
 
@@ -88,7 +88,7 @@ To use libccp, the datapath must provide callbacks to functions that: (1) set th
 
  这里的详细可以参看[1].
 
-![ccp-perf](/assets/images/ccp-perf.png)
+<img src="/assets/images/ccp-perf.png" alt="ccp-perf" style="zoom:67%;" />
 
 ## 参考
 

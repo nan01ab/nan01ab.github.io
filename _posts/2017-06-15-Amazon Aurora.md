@@ -44,11 +44,11 @@ These are each replicated 6 ways into Protection Groups (PGs) so that each PG co
 
    Aurora中最核心的一个概念就是The Log is Database了。在一般的MySQL写数据会写入多次，如LOG，数据Page，还有就是Double Write和BinLog等带来的写入，这样加起来就远远超过了数据原来的大小。这个在多副本的情况下变得更加严重(这个写放大的问题在很多的存储系统中都存在)，下面的一个图就是表示出了MySQL写入的数据:
 
-![aurora-mysql-io](/assets/img/aurora-mysql-io.png)
+<img src="/assets/img/aurora-mysql-io.png" alt="aurora-mysql-io" style="zoom:50%;" />
 
  FRM:  finally the metadata (FRM) files，这个的数据量比较小。而未来解决这个问题，在Aurora中，把大部分的东西都取消了，只需要写log即可。下面是一个实例图:
 
-![aurora-io](/assets/img/aurora-io.png)
+<img src="/assets/img/aurora-io.png" alt="aurora-io" style="zoom:50%;" />
 
  在数据库的redo log中，是包含了全部的数据信息的。也就是说只要有了redo log，就使用这个恢复出数据page来。在读取page的时候，如果这个page不是最新的，就需要存储层是用redo log构造出新的page来。
 
@@ -62,7 +62,7 @@ These are each replicated 6 ways into Protection Groups (PGs) so that each PG co
 
  存储的最重要的设计原则就是尽量减少前台的请求的响应时间，这里大部分的工作都是在后台完成的。在存储节点上面，有着不同的任务，Aurora根据目前系统额负载情况将CPU分配给哪些人物，比如在负载比较高的时候，就减少旧版本数据的回收之类的工作。下面的图表示了Aurora的数据流动：
 
-![aurora-storage](/assets/img/aurora-storage.png)
+<img src="/assets/img/aurora-storage.png" alt="aurora-storage" style="zoom:50%;" />
 
 步骤：
 
@@ -130,7 +130,7 @@ Once the database has established a read quorum for every PG it can recalculate 
 
 下面的图就表示了Aurora的整体的架构：
 
-![aurora-view](/assets/img/aurora-view.png)
+<img src="/assets/img/aurora-view.png" alt="aurora-view" style="zoom:50%;" />
 
 这里对MySQL进行了不少的修改(具体可参考论文[1])，计算和存储分离的架构。使用 Amazon Relational Database Service (RDS)作为控制面(control plane)，RDS在每一个结点上面部署了一个agent叫做HM(Host Manager (HM))，负责监控实例的健康状况，决定是否异常，需要被替换。每一个数据实例有一个写入结点和0到多个读取的结点组成，跨AZ部署,
 
@@ -148,7 +148,7 @@ The storage control plane uses the Amazon DynamoDB database service for persiste
 
 具体的信息可以参考论文[1].
 
-![aurora-performance](/assets/img/aurora-performance.png)
+<img src="/assets/img/aurora-performance.png" alt="aurora-performance" style="zoom:50%;" />
 
 ## 参考
 

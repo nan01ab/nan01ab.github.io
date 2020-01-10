@@ -76,7 +76,7 @@ Figure 3: TangoRegister: a linearizable, highly available and persistent registe
 
  这里具体的信息可以参看[1],
 
-![tango-perf](/assets/img/tango-perf.png)
+<img src="/assets/img/tango-perf.png" alt="tango-perf" style="zoom: 67%;" />
 
 ## vCorfu: A Cloud-Scale Object Store on a Shared Log
 
@@ -98,11 +98,11 @@ Figure 3: TangoRegister: a linearizable, highly available and persistent registe
 * 在vCorfu中，一个layout服务器保存了Log和Stream两个层面的地址空间到副本之间的映射关系，每一个副本保存的更新的数据是不同的。Log副本保存全局的更新信息，而Stream副本只会保存这个Stream的更新的信息。Stream将一个全局的Shared Log划分为多个Stream。
 * Layout表示了vCorfu中地址空间的划分，这里和Corfu的是很类似的。这些信息会使用一个基于Paxos的协议来确保所有的副本都一致同意这个Layout。和很多的系统中使用的Epoch方法一样，这个Layout也包含了一个Epoch 的信息，方便处理Layout的更新。
 
-![vcorfu-layout](/assets/img/vcorfu-layout.png)
+<img src="/assets/img/vcorfu-layout.png" alt="vcorfu-layout" style="zoom: 67%;" />
 
 * 在Corfu中，Sequencer负责处理token只是Log的，在vCorfu中，则包含了全局的Log和指定Stream两个层面的Token。
 
-![vcorfu-write-path](/assets/img/vcorfu-write-path.png)
+<img src="/assets/img/vcorfu-write-path.png" alt="vcorfu-write-path" style="zoom:67%;" />
 
 * vCorfu的materialized stream设计是的设计到多个Stream设计变得简单。为例原子地在多个Stream中追加数据，客户端先向Sequencer获取一个Log的Token和每个Stream的Token，然后先写Log的副本，再写每个Stream的副本，最后给每一个参与的副本发送提交的信息。
 * 与前面的Tango的设计比，vCorfu设计使得GC也变得简单，而在Tango中不能直接trim一个Stream，在vCorfu可直接这样操作。
@@ -111,7 +111,7 @@ Figure 3: TangoRegister: a linearizable, highly available and persistent registe
 
   vCorfu运行时的设计也基本是借鉴了前面的Tango的设计，在vCorfu的实现中使用的是Java，而Tango使用C++。开发者可以直接在vCorfu中保存任意的Java对象。和前面的Tango一样，利用vCorfu也可以实现List，Queue和Map之类的数据结构。另外vCorfu也和Tango一样，vCorfu也有事务的支持。
 
-![vcorfu-arch](/assets/img/vcorfu-arch.png)
+<img src="/assets/img/vcorfu-arch.png" alt="vcorfu-arch" style="zoom:67%;" />
 
   vCorfu的事务的设计和Tango中的有所不同，它利用Sequencer作为一个轻量级的事务管理器，
 
@@ -168,7 +168,7 @@ Figure 3: TangoRegister: a linearizable, highly available and persistent registe
 
  这里的具体信息可以参看[2],
 
-![vcorfu-perf](/assets/img/vcorfu-perf.png)
+<img src="/assets/img/vcorfu-perf.png" alt="vcorfu-perf" style="zoom:67%;" />
 
 ## 参考
 
