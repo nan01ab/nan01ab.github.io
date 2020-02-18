@@ -35,7 +35,7 @@ Paper中描述了TDSQL中支持不同的Temporal Data Model，
   We denote VT as a closed-open period [VT.st, VT.ed), and TT as [TT.st, TT.ed). VT.st, VT.ed, TT.st, TT.ed are four time instants. For valid-time, a record is either currently valid if VT.st ≤ current time < VT.ed, or historical valid if VT.ed ≤ current time, or future valid if VT.st > current time. For transaction time, a record is said to be a current record if TT.st ≤ current time < TT.ed, and a historical record if TT .ed ≤ current time.
   ```
 
- ### 0x01 基本架构
+### 0x01 基本架构
 
  在Temporal数据中，创建一个表有相关的SQL拓展。在查询上面也会有时间上的相关拓展，比如使用OVERLAPS、CONTAINS作为一个谓词在where语句种使用判断一个Temporal记录是否是复合查询条件的记录，等等。
 
@@ -70,7 +70,7 @@ FOR TT AS OF TIMESTAMP '2018-10-11 00:00:00'
 
 ### 0x02 存储和查询处理
 
- #### Temporal Data Storage
+#### Temporal Data Storage
 
  很显然如果将一条记录所有的变更都保存在一个表的空间之中的话，这个表会膨胀得很严重，一些操作如范围查询的性能也会很糟糕。TDSQL的思路是将目前的数据和历史的数据分开保存的思路。TDSQL的Temporal Data Storage实现上面利用来数据MVCC的机制，
 
