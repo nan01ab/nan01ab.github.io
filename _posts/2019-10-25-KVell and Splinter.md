@@ -64,7 +64,7 @@ Worker thread:
 
   Paper中给出的书看非常吓人。而且KVell这种不支持事务的系统和支持事务的系统比较性能，这种比较的意义有待商榷。具体内容可以参考[1]。
 
-##Splinter: Bare-Metal Extensions for Multi-Tenant Low-Latency Storage
+## Splinter: Bare-Metal Extensions for Multi-Tenant Low-Latency Storage
 
 ### 0x10 引言
 
