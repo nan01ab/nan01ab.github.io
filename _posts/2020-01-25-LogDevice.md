@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Ubiq and LogDevice, Distributed Log Processing and Store
+title: LogDevice -- A Distributed Data Store for Logs
 tags: [Distributed, Storage]
 excerpt_separator: <!--more-->
 typora-root-url: ../
@@ -56,16 +56,16 @@ Replication property作为元数据的一部分被保存。基本结构如下。
 
  在读取的时候，应用使用LogDevice Client下面这样的API进行读取操作。基本就是从一个起始点出发顺序读取。要读取的时候，就需要知道log的copyset。一个log的copyset在不同的epoch下面可能是不同的。这些元数据信息被保存到一个metadata log中。metadata log保存了一个log的数据库变化的log。Client从元数据中获取到copyset，然后发送[start, util]的信息到storage nodes，表示要读取这个范围内的数据。在读取的时候Client需要进行额外的一些工作，
 
-* **Flow control**，类似于TCP中的flow control概念。避免storage nodes过快的速率想Client发送数据。
-* **Re-ordering**，storage nodes发送过来的数据是乱序的，需要根据LSN进行重新排序。
-* **De-duplication**，不同的storage nodes可能发送重复的数据，需要进行去重的操作。
+* Flow control，类似于TCP中的flow control概念。避免storage nodes过快的速率想Client发送数据。
+* Re-ordering，storage nodes发送过来的数据是乱序的，需要根据LSN进行重新排序。
+* De-duplication，不同的storage nodes可能发送重复的数据，需要进行去重的操作。
 
 ```
 * startReading (log id, from log sequence number (LSN), until LSN = MAX) — non-prescriptive reading
 * read (count, records_out, gap_out) — records_out vector, gap_out vector is returned
 ```
 
- 在读取的时候，一个很重要的操作是gap detection。因为LogDevice只能保证LSN是递增的但是并不是连续的。LogDevice需要知道哪些LSN是实际上就不存在，而那些是数据丢失了。LogDevice的gap detection算法中，一个重要的概念称之为f-majority，f-majority就是任何一个copyset会交叉的数量，其值为|nodeset|-R+1。这样f-majority集合的补集就不能凑成一个完整的copyset。如果客户端从超过了|nodeset|-R+1接收到从来没有收到一个LSN的记录的信息，这样就不需要询问其它节点了，因为这样的LSN表示的记录肯定不能写入完成。如果客户端收到了一个大于之前等待的最小的LSN的正确的记录，而又有f-majority数量的节点回复了这个LSN，表明这个LSN不存在，则说明这个LSN的数据丢失了。在处理这里的时候，为了应对一些nodeset中机器故障case，引入Authoritative Status来拓展f-majority概念[2]。读取的时候LogDevice引入来single copy delivery (SCD)来进行优化，其基本思路是copyset中的节点经过一种shuffle算法来决定某一个节点发送实际的数据，而不用所有的节点发送。
+ 在读取的时候，一个很重要的操作是gap detection。因为LogDevice只能保证LSN是递增的但是并不是连续的。LogDevice需要知道哪些LSN是实际上就不存在，而那些是数据丢失了。LogDevice的gap detection算法中，一个重要的概念称之为f-majority，f-majority就是任何一个copyset会交叉的数量，其值为\|nodeset\|-R+1。这样f-majority集合的补集就不能凑成一个完整的copyset。如果客户端从超过了\|nodeset\|-R+1接收到从来没有收到一个LSN的记录的信息，这样就不需要询问其它节点了，因为这样的LSN表示的记录肯定不能写入完成。如果客户端收到了一个大于之前等待的最小的LSN的正确的记录，而又有f-majority数量的节点回复了这个LSN，表明这个LSN不存在，则说明这个LSN的数据丢失了。在处理这里的时候，为了应对一些nodeset中机器故障case，引入Authoritative Status来拓展f-majority概念[2]。读取的时候LogDevice引入来single copy delivery (SCD)来进行优化，其基本思路是copyset中的节点经过一种shuffle算法来决定某一个节点发送实际的数据，而不用所有的节点发送。
 
 ### 0x03 副本&容灾
 

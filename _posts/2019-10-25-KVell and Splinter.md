@@ -19,9 +19,9 @@ typora-root-url: ../
 * Share Nothing，主要就是内存中的一些数据结构为每个线程独立一份。比如内存的B-tree索引、IO队列、保存磁盘Free Blocks的List以及Page Cache等；
 * Do not sort on disk, but keep indexes in memory，数据直接按照写入的顺序写入磁盘，不对数据进行排序操作。索引都保存在内存中。这个实际上很常见，没什么特别的；
 * Aim for fewer syscalls, not for sequential I/O，前调为了更少的系统调用，而不是为了实现顺序IO。主要就是batch请求；
-* No commit log ，不使用Commit Log。虽然提供了性能，但是无法保证数据持久化；
+* No commit log ，不使用Commit Log。虽然提供了性能；
 
-接口方面，KVell和一般的有序的KV Store提供的结构基本相同。磁盘上面的空间被划分为4KB大小的块，数据项按照4KB的单位被划分为slab，这个和现在很多内存分配器的设计思路一致。这里的划分的粒度更大一些。不同尺寸的数据项被保存在不同的文件中。这里用很多管理内存的思路来管理磁盘空间。磁盘空闲的空间在内存中维护。另外的在内存的主要结构就是索引，还有就是Page Cache，都没有特别的地方。IO方面主要使用了Linux AIO。这里主要就是Client和Worker通过队列来提交请求，设置callback。根据不同的请求以及Page Cache的情况选择请求方式等。
+  接口方面，KVell和一般的有序的KV Store提供的结构基本相同。磁盘上面的空间被划分为4KB大小的块，数据项按照4KB的单位被划分为slab，这个和现在很多内存分配器的设计思路一致。这里的划分的粒度更大一些。不同尺寸的数据项被保存在不同的文件中。这里用很多管理内存的思路来管理磁盘空间。磁盘空闲的空间在内存中维护。另外的在内存的主要结构就是索引，还有就是Page Cache，都没有特别的地方。IO方面主要使用了Linux AIO。这里主要就是Client和Worker通过队列来提交请求，设置callback。根据不同的请求以及Page Cache的情况选择请求方式等。特别处理一点的就是更新的情况，更新没有超过一个Page的话可以利用上存储硬件写一个Page的原子性实现in place的更新，而如果是超过了一个Page，则需要在另外的地方写入新数据。
 
 ```
 
@@ -62,7 +62,7 @@ Worker thread:
 
 ### 0x02 评估
 
-  Paper中给出的书看非常吓人。而且KVell这种不保证持久化，不支持事务的系统和保证持久化、支持事务的系统比较性能，这种比较的意义有待商榷。具体内容可以参考[1].
+  Paper中给出的书看非常吓人。而且KVell这种不支持事务的系统和支持事务的系统比较性能，这种比较的意义有待商榷。具体内容可以参考[1]。
 
 ##Splinter: Bare-Metal Extensions for Multi-Tenant Low-Latency Storage
 
