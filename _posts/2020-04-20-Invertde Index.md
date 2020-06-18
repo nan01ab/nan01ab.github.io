@@ -25,7 +25,7 @@ typora-root-url: ../
 $$
 w_{q,t}= \ln(1+\frac{N}{f_t}), w_{d,t}=1+\ln f_{d,t}\\
 W_d=\sqrt{\sum_t{w_{d,t}^2}},W_q=\sqrt\sum_t{w_{q,t}^2},\\
-S_{q,d}=\frac{\sum_t{w_{d,t}\cdot w_{q,t}}}{W_d\cdot W_q}.
+S_{q,d}=\frac{\sum_t{w_{d,t}\cdot w_{q,t}}}{W_d\cdot W_q}. \\
 $$
 Paper中还提到了一些其它的计算方式，具体的信息可以参看[1]。总地来水，这些计算方式都依赖于前面提到数据。根据统计数据来对文档进行排序，进而得到与查询最匹配的doc。为了高效地根据这些信息对doc进行排序操作，获取查询的结果，Inverted Index由此而生，这里讨论了是Inverted Files，是Invented Index的主要结构，主要包含以下的概念，
 

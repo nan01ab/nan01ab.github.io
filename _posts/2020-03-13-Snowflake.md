@@ -1,6 +1,6 @@
 ---
 layout: page
-title:The Snowflake Data Warehouse
+title: The Snowflake Data Warehouse
 tags: [Distributed, Storage]
 excerpt_separator: <!--more-->
 typora-root-url: ../
