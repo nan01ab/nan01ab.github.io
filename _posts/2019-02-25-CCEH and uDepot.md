@@ -20,7 +20,7 @@ CCEH effectively adapts its size as needed while guaranteeing failure-atomicity 
 
 #### Extendible Hash Table
 
-  Extendible Hash Table(EHT)是一种可以实现rehashing操作为增量式的一个设计，在EHT中Hash寻址是一个两层是的方。第一层为 global depth，由于寻址Directory，而第二层为local depath，用于殉职具体的Bucket。不同的Directory使用的寻址的bit数量可以是不同的，这样的话有可能不同的Direvtory是指向同样的Bucket，而rehashing操作的时候多数的时候就是某个Bucket的操作，比如图中的B2满了之后，将其中的一个的local depth变为2，如果开辟一个新的Bucket，拷贝出需要转移的数据即可。当出现locol depth大于globel depth的时候，需要处理globel depth。
+  Extendible Hash Table(EHT)是一种可以实现rehashing操作为增量式的一个设计，在EHT中Hash寻址是一个两层式的。第一层为 global depth，由于寻址Directory，而第二层为local depath，用于寻址具体的Bucket。不同的Directory使用的寻址的bit数量可以是不同的，这样的话有可能不同的Direvtory是指向同样的Bucket，而rehashing操作的时候多数的时候就是某个Bucket的操作，比如图中的B2满了之后，将其中的一个的local depth变为2，如果开辟一个新的Bucket，拷贝出需要转移的数据即可。当出现locol depth大于globel depth的时候，需要处理globel depth。
 
 ![cceh-eht](/assets/images/cceh-eht.png)
 
