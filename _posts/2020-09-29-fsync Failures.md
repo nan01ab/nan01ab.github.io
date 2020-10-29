@@ -10,7 +10,7 @@ typora-root-url: ../
 
 ### 0x00 基本内容
 
-PostgreSQL之前有过一个丢失数据的BUG，这个BUG和fsync的错误相关。PostgreSQL使用来错误的错误处理测量，而Linux上面某些文件系统在fsync错误的时候可能会直接丢弃内存中的错误，这个时候重试操作可能是错误的方式。fsync的运作也可能产生一些错误，一般的系统也会有一些处理fsync的逻辑，POSIX对fsync发生错误的时候，具体的语义并没有明确的定义。是这篇Paper考察的几个开源的存储系统，认为它们的处理方式都存在一些缺陷。fysnc syscall可能返回多种类似的错误，不同的FS还存在一些细节的差别。一些errno比如ENOSPC、 EDQUOT、EBADF、EINVAL和EIO等。Paper中先测试了一些FS在Single Block Update、Multi Block Append两种workload发生一些错误的情况下，FS的一些行为。这里的错误是使用工具注入的。
+PostgreSQL之前有过一个丢失数据的BUG，这个BUG和fsync的错误相关。PostgreSQL使用来错误的方式处理fsync返回错误时的情况。Linux上面某些文件系统在fsync错误的时候可能会直接丢弃内存中的错误，这个时候重试操作可能是错误的方式。fsync的运作可能产生一些错误，一般的系统也会有一些处理fsync的逻辑，POSIX对fsync发生错误的时候，具体的语义并没有明确的定义。是这篇Paper考察的几个开源的存储系统，认为它们的处理方式都存在一些缺陷。fysnc syscall可能返回多种类似的错误，不同的FS还存在一些细节的差别。一些errno比如ENOSPC、 EDQUOT、EBADF、EINVAL和EIO等。Paper中先测试了一些FS在Single Block Update、Multi Block Append两种workload发生一些错误的情况下，FS的一些行为。这里的错误是使用工具注入的。
 
 ```
 Single Block Update:
