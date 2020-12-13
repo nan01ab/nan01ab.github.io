@@ -10,17 +10,11 @@ typora-root-url: ../
 
 ### 0x00 引言
 
-   这是我目前读过的最喜欢的一篇论文之一。首先，论文写的非常通俗易懂，即使你之前对Lock Schedule没有什么了解，通过这篇论文也能很清楚的知道Contention-Aware Lock Scheduling的原理。另外，这个算法不仅仅是一个理论上的，只存在于实验室中，这个算法已经被MySQL 8.0采用了。简直赞的不行，如此快速的在真正的实际的被广泛使用软件中得到应用，也侧面印证了这个研究very excellent。文章一步一步的说明思路，从简单的想法开始，最终得出来 Largest-Dependency-Set-First 和batched Largest-Dependency- Set-First 两种算法，很喜欢这样的写作套路，对于这篇paper中大量的数学化描述，只需要理解其中的关键部分就可以了。类似的套路的文章(举两个例子)有《Paxos Made Simple》，还有《The Operating System: Three Easy Pieces》这本书中的不少章节，都讲的很不错，强烈推荐。
+   这篇Paper是一篇比较有意思的Paper，这个算法已经被MySQL 8.0采用了。文章一步一步的说明思路，从简单的想法开始，最终得出来 Largest-Dependency-Set-First 和batched Largest-Dependency- Set-First 两种算法。
 
 ### 0x01 背景与动机 
 
-   简而言之就是：
-
-```
-Our goal is to find a lock scheduling algorithm under which the expected transaction latency is minimized.
-```
-
-  很不幸的是，这个问题是个NP问题，找到最优的解是不现实的。所以这里只能使用近似的方法。Paper中给出了一些概念，这里就不仔细去说这些概念了. 这里只说一下Dependency Graph，这对理解算法很重要：
+   简而言之就是：Our goal is to find a lock scheduling algorithm under which the expected transaction latency is minimized.很不幸的是，这个问题是个NP问题，找到最优的解是不现实的。所以这里只能使用近似的方法。Paper中给出了一些概念，这里就不仔细去说这些概念了. 这里只说一下Dependency Graph，这对理解算法很重要：
 
 #### Dependency Graph
 
@@ -76,9 +70,7 @@ Consider two transactions t1 and t2 in the system. If there is a path from t1 to
 
 ### 0x04 The bLDSF Algorithm 
 
-   bLDSF Algorithm来源于这样一个动机：LDSF algorithm中当一个shared lock被准许是，是给了所有的等待这个lock的txn，在一些情况下不是一个很好的策略。比如：在一个有很多shared lock的object上，只有当最后一个txn释放这个lock时，需要这个object上X lock的txn才能运行(和rwlock存在的一些问题很相似)。
-
-   bLDSF Algorithm解决这个问题的方式是：首先，找到一个等待一个X lock的txn，这个txn有最大的dependency set，记这个度量的值为p(具体的定义可以参考下面论文片段or直接看原论文) 。然后，找到在等待一些shared lock的事务，这些事务使得综合的等待最长，记这个度量为q。根据p q的大小关系决定那个先运行。简单的一个理解就是区分X 和 S锁，当要准许一个lock是，X只能给一个txn，计算一个度量值，S可以给一些txn，计算一个度量值，谁有利于事务平均等待时间更加少就准许那个lock。这个度量的值具体可以参考下面的论文片段，这里有是很多的符号，不好写到Markdown里面：
+   bLDSF Algorithm来源于这样一个动机：LDSF algorithm中当一个shared lock被准许是，是给了所有的等待这个lock的txn，在一些情况下不是一个很好的策略。比如：在一个有很多shared lock的object上，只有当最后一个txn释放这个lock时，需要这个object上X lock的txn才能运行(和rwlock存在的一些问题很相似)。 bLDSF Algorithm解决这个问题的方式是：首先，找到一个等待一个X lock的txn，这个txn有最大的dependency set，记这个度量的值为p(具体的定义可以参考下面论文片段or直接看原论文) 。然后，找到在等待一些shared lock的事务，这些事务使得综合的等待最长，记这个度量为q。根据p q的大小关系决定那个先运行。简单的一个理解就是区分X 和 S锁，当要准许一个lock是，X只能给一个txn，计算一个度量值，S可以给一些txn，计算一个度量值，谁有利于事务平均等待时间更加少就准许那个lock。这个度量的值具体可以参考下面的论文片段，这里有是很多的符号，不好写到Markdown里面：
 
 <img src="/assets/img/cals-bldsf.png" alt="cals-bldsf" style="zoom:67%;" />
 

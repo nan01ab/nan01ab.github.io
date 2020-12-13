@@ -119,8 +119,6 @@ IOKernel忙轮询NIC的收入包队列，和应用的出队列，IOKernel可以�
     The dispatcher maintains one queue per request type. If only one queue has pending requests, this policy operates just like the single queue policy described above. If more than one queue is non empty, the dispatcher must select a queue to serve when a worker becomes idle or a request is preempted.
   ```
 
-
-
 ### 0x13 评估
 
  这里的具体信息可以参看[2].

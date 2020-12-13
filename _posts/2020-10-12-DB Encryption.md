@@ -40,6 +40,8 @@ turning on encryption for the first time (initial encryption) and rotating encry
 
 * AEv2可以支持Deterministic (DET)的加密方式和Randomized (RND)方式。DET使用AES CBC模式，使用加密数据的SHA作为初始化向量IV；而END使用AES的Cipher Block Chaining (CBC) 模式，使用随机的IV。RND一般会更加安全，所以一些v2的功能只支持了END。在enclave-enabled的情况下，可以支持 equality, range 和 pattern matching queries (LIKE predicate)等操作。在加密之外，每个加密的value还会包含一个HMAC，用来保证数据的完整性(data in-tegrity)。用于避免一些恶意的client添加进去比如 random byte作为加密数据。
 
+* 如果是在后面通过DDL来开启加密。在一个column的数据开启加密的时候，。还有一个问题就是key rotation，难免要处理一些key泄露的问题。CMK的rotation不会要求重新加密数据，但是其加密的CEKs是需要的。为了避免一次性重新加密所有，这里支持CEKs可以临时支持由多个的CMK加密。一个CEK的rotation则需要重新加密数据的操作。之前已经是加密的话而且现在可以只用enclave的话，这个直接在数据库就可以操作。可以使用enclave的时候，这里使用一个在enclave中运行的encryption oracle来加密数据，这个encryption oracle通过driver对query text的签名来鉴权。这个签名为一个query text加上CEKs，通过shared secre来计算出签名。负责的话key rotation应该是需要client的参与。
+
 ### 0x01 基本设计
 
 SQL ServervAlways Encrypted的基本架构如下图。在client端进行加密解密的操作，这些操作有数据库driver进行，对于应用是透明的。SQL Server中另外添加了一个新的api sp_describe_parameter_encryption，这个api输出包含了加密的一些信息，比如加密之后的CEK以及CMK的元信息等，
