@@ -66,7 +66,7 @@ Q11 If there is any inconsistency introduced due to fsync failure, can fsck dete
 
 * Btrfs在data block写入失败的时候，不会有ext4和XFS存在的问题，Btrfs可以恢复到之前的状态。在写入log tree故障的时候会导致fsync故障，而写入metadata故障会导致FS进入readonly模式，但是前面的fsync会成功。在Multi Block Append操作下面，第一个append操作失败之后，Btrefs会恢复到之前的状态，但是后面继续append操作时候，会导致这个文件出现一个hole。而且这里Btrfs deterministic block allocator 会下次分配的时候还是分配到这个block，如果这个写入故障时暂时的，结果就是产生了一个hole，否则的话后面的写入操作会继续失败。
 
-![](/assets/png/fsync-fss.png)
+<img src="/assets/png/fsync-fss.png" style="zoom:90%;" />
 
  这里FS都会有写入data block时候导致将page cache中标记为clean的问题。可能和一些认为不同，这个并不是VFS层造成的，而是错误的clear_page_dirty_for_io使用方式。
 
@@ -98,7 +98,7 @@ BufferCache=Evict: One or more clean pages are evicted.
 * SQLite，在rollback journal模式和SQLite WAL模式下面都可能发生错误，WAL模式下面表现更好一些；
 * PostgreSQL，在下面的table中看来，PostgreSQL是表现得最好的。在default模式即WAL使用page cache的情况下，可能有FalseFailure的问题。 和前面的app一样，OldVersion 和 KeyNotFound Error其实一般由同样的原因导致，错误不同看key之前存在与否。在使用DirectIO模式下面，WAL不使用page cache，不会有FalseFailures的错误。
 
-![](/assets/png/fsync-app.png)
+<img src="/assets/png/fsync-app.png" style="zoom:90%;" />
 
 ### 0x03 Discussion
 

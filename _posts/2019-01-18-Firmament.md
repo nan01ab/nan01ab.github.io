@@ -34,11 +34,11 @@ typora-root-url: ../
 
  Firmament的基本架构如下图。在有了最小费用最大流的基本思路之后，之后最主要的问题就是如何对集群的情况进行图的建模，并将调度的问题抽象问最小费用最大流求解的问题。
 
-![firmament-arch](/assets/images/firmament-arch.png)
+<img src="/assets/images/firmament-arch.png" alt="firmament-arch" style="zoom:80%;" />
 
  Firmament中一个建模的例子如下图。在Firmament中，一个flow网络是一个有向图。一条边由一个原点直线一个目的点，并拥有一个容量和一个费用值。在下面的图中，有这样的基本节点，1. Ti,j代表了第j个job的第i个task，是这个图中的一个源，2. 一个特殊的节点S，称之为Seek Node，最终沿着这些有向边都会到达S节点。这样的话调度问题就是抽象为从Ti,j出发，以最小费用最大流的方式得到节点S。3. M类型的节点代表了机器，4. U节点则是aggregator node，类似于一个队列，保存暂时没有调度的任务。
 
-![firmament-example](/assets/images/firmament-example.png)
+<img src="/assets/images/firmament-example.png" alt="firmament-example" style="zoom:80%;" />
 
  容量和费用都是Firmament来定义，另外加上aggregator node这样的节点。 在这样的基本模型上面，可以抽象出非常大有非常灵活的调度策略，Paper中举了几个例子，
 
@@ -56,7 +56,7 @@ typora-root-url: ../
     Costs on the arcs to machines are the sum of the request and the currently used bandwidth, which incentivizes balanced utilization. We use this policy to illustrate Firmament’s potential to make highquality decisions, but a production policy would be more complex and extend it with a priority notion and additional resource dimensions
   ```
 
-![firmament-policy](/assets/images/firmament-policy.png)
+<img src="/assets/images/firmament-policy.png" alt="firmament-policy" style="zoom:80%;" />
 
 ### 0x02 MCMF算法 和 对于调度和系统实现
 
@@ -75,7 +75,7 @@ typora-root-url: ../
  Firmament’s MCMF solver always speculatively executes cost scaling and relaxation, and picks the solution offered by whichever algorithm finishes first. In the common case, this is relaxation; having cost scaling as well guarantees that Firmament’s placement latency does not grow unreasonably large in challenging situations.
 ```
 
-![firmament-algorithm](/assets/images/firmament-algorithm.png)
+<img src="/assets/images/firmament-algorithm.png" alt="firmament-algorithm" style="zoom:80%;" />
 
 处理基本的MCMF算法之外，Paper中还提出了在集群调度这样的环境中，对这样的一些MCMF算法的优化策略，
 

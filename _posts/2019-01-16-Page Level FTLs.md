@@ -46,7 +46,7 @@ LazyFTL的基本思路如下。总体上讲Flash的存储空间分为4个部分�
 
 LazyFTL的主要的思路就是通过引入这两个额外来减少多GMT和MBA的操作次数。在合适的时候，这两个区域的Block会被转化到DBA区域中去，转换操作的基本流程如下：1. 从CBA和UBA中选择一个转发成本最低的，这里主要就是根据需要更新GMT中页的数量，2. 收集相关页的信息，更新映射表，3. 移除UMT中的映射数据项。
 
-![lazyftl-arch](/assets/images/lazyftl-arch.png)
+<img src="/assets/images/lazyftl-arch.png" alt="lazyftl-arch" style="zoom:67%;" />
 
 ```
 Input: P: new data to be written
@@ -103,7 +103,7 @@ Input: P: new data to be written
 
   和前面的LazyFTL一样，TPFTL也是优化DFTL存在的一些问题。不过两者出发的思路不同。在TPFTL中，translation  page中Cache在SRAM中的被组织了一个page-level的LRU list。在每个Page下面，组织的是保存在这个translation page下面的entry的LRU list。
 
-![tpftl-arch](/assets/images/tpftl-arch.png)
+<img src="/assets/images/tpftl-arch.png" alt="tpftl-arch" style="zoom:67%;" />
 
   在这样的设计下面，TPFTL引入了几个替换策略，
 
@@ -119,7 +119,7 @@ Input: P: new data to be written
 
  这里的具体信息可以参看[3],
 
-![tpftl-perf](/assets/images/tpftl-perf.png)
+<img src="/assets/images/tpftl-perf.png" alt="tpftl-perf" style="zoom:67%;" />
 
 ## 参考
 

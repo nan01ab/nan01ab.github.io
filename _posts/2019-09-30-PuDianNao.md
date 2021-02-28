@@ -1,7 +1,7 @@
 ---
 layout: page
 title: DianNao, DaDianNao and PuDianNao, Machine Learning Accelerator
-tags: [Computer Architecture]
+tags: [Architecture]
 excerpt_separator: <!--more-->
 typora-root-url: ../
 ---

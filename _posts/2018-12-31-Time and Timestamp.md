@@ -96,9 +96,7 @@ TRANSITION:
 A DTP-enabled device can be implemented with additional logic on top of the DTP-enabled ports. The logic maintains the 106-bit global counter as shown in Algorithm 2, which computes the maximum of the local counters of all ports in the device. The computation can be optimized with a tree-structured circuit to reduce latency, and can be performed in a deterministic number of cycles. 
 ```
 
-
-
-![dtp-low-level](/assets/img/dtp-low-level.png)
+<img src="/assets/img/dtp-low-level.png" alt="dtp-low-level" style="zoom:67%;" />
 
 ### 0x03 评估
 
@@ -131,7 +129,7 @@ Finally, HUYGENS exploits a natural network effect—the idea that a group of pa
 * 数据中心的一些特点，现在的很多数据中心网络使用的是FatTree或者是类似的方式，对于两端AB之间的通信线路具有对称性。另外在网络两点之间存在诸多的可行的路线，及时在网络利用率比较高的情况下，也能找到没什么排队的路线；
 * Coded probes，这个Coded probes操作是HUYGENS算法的第一步，它的做法就是间隔s的时间给同一个目的端发送两个数据包，接受端测量接受到两者的时间差，和发送的间隔差s比较。这里只会选择发送间隔个接受间隔的误差在规定的范围内的数据，而讲误差太大的数据丢弃。这个方法是用来更加精确地测量OWD；
 
-![dtp-coded-probes](/assets/img/dtp-coded-probes.png)
+<img src="/assets/img/dtp-coded-probes.png" alt="dtp-coded-probes" style="zoom: 80%;" />
 
 * Support Vector Machines，通过使用支持向量机，第一步获取的数据经过SVM的处理用来更加精确地估计两这个之间的OWD。
 
@@ -223,7 +221,7 @@ def get_ordo_boundary(num_cpus):
 
 利用Ordo的API改造RLU的一个例子，多原有逻辑的改动是很小的，
 
-![ordo-rlu](/assets/img/ordo-rlu.png)
+<img src="/assets/img/ordo-rlu.png" alt="ordo-rlu" style="zoom:80%;" />
 
 ### 0x22 评估
 

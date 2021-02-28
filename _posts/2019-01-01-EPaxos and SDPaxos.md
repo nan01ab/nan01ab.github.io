@@ -49,7 +49,7 @@ EPaxos算法中还会有很多的内容和细节。
 
   这里的具体信息可以参看[1],
 
-![epaxos-perf](/assets/images/epaxos-perf.png)
+<img src="/assets/images/epaxos-perf.png" alt="epaxos-perf" style="zoom:67%;" />
 
 ## SDPaxos: Building Efficient Semi-Decentralized Geo-replicated State Machines
 ### 0x10 引言
@@ -64,7 +64,7 @@ We implemented a prototype of SDPaxos, and compared its performance with typical
 
   SDPaxos的基本思路是复制和定序分离，复制使用的是类似EPaxos中的方法，每次客户端的请求都是指定一个Command Leader来处理，但是处理请求顺序的是一个中心化的Sequencer节点处理。这个看起来就是一个更折中的方法。由于定序带来的开销比复制小的多，这个定序的中心节点的负载也会小于Multi-Paxos/Raft中的Leader/Master。下面的图是一个SDPaxos执行流程的示例，
 
-![sdpaxos-message-flow](/assets/images/sdpaxos-message-flow.png)
+<img src="/assets/images/sdpaxos-message-flow.png" alt="sdpaxos-message-flow" style="zoom:67%;" />
 
 * 在SDPaxos中，Instance的定义和一般的没有什么不同。不过这里它分为了C-instance和O-instance，分别对应复制和顺序。在图3中，一个副本R0在收到了一个客户端的请求之后，它就成为这个客户端的这个请求的Command Leader，选择一个C-instance，然后使用C-accept操作将这个请求复制到其它的副本。同时，R2作为Sequencer在收到了这个信息是的时候，R2提出这个请求的O-instance，然后发送O-accept给其它的副本(带有全局slot的信息)。其它的副本在收到了C-instance和O-instance之正常情况下分别回复C-ACK和O-ACK给R0，在收到了多数的副本的两个ACK回复之后，既可广播C-commit和O-commit信息。
 
@@ -117,7 +117,7 @@ We implemented a prototype of SDPaxos, and compared its performance with typical
 
 下面的图表示的节点上面的O-instance。故障两个之后中间的空洞(只会是是1个)可以根据其它节点O-instance及C-instance的信息恢复，
 
-![sdpaxos-five](/assets/images/sdpaxos-five.png)
+<img src="/assets/images/sdpaxos-five.png" alt="sdpaxos-five" style="zoom:67%;" />
 
 #### 恢复
 
@@ -166,7 +166,7 @@ SDPaxos另外的一些优化的策略，
 
   这里的具体信息可以参看[1],
 
-![sdpaxos-perf](/assets/images/sdpaxos-perf.png)
+<img src="/assets/images/sdpaxos-perf.png" alt="sdpaxos-perf" style="zoom:67%;" />
 
 ## 参考
 

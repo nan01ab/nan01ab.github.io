@@ -16,7 +16,7 @@ typora-root-url: ../
 ... Multiple instances of Ananta have been deployed in the Windows Azure public cloud with combined bandwidth capacity exceeding 1Tbps. It is serving traffic needs of a diverse set of tenants, including the blob, table and relational storage services. With its scale-out data plane we can easily achieve more than 100Gbps throughput for a single public IP address. 
 ```
 
-![ananta-arch](/assets/images/ananta-arch.png)
+<img src="/assets/images/ananta-arch.png" alt="ananta-arch" style="zoom:67%;" />
 
 ### 0x01 基本架构
 
@@ -65,11 +65,11 @@ typora-root-url: ../
 
   前面的Ananta中的SMux的两个主要的功能，一个是对于每一个VIP，将其流量分配给每一个的DIP，另外一个是使用IP-in-IP的封装的方式使得数据包可以正确地转发到指定的DIP。这些功能其实都可以在现在的商用的交换机上实现。Duet这里的一个核心的设计就是基于交换机的Mux的设计。下面的图是HMux的一个示意图，一个包到达HMux之后，使用流水线处理的方式，这里的核心就是三个表，在下面的图有表示。包转发的时候根据最前面的Forwarding Table找到对个ECMP的下一跳，后面的Tunneling Table用于实现IP-in-IP的封装。HMux可以实现很高的性能，但是比起SMux，在灵活性方面有一些的不足，所有这里Duet使用HMux和SMux组合工作的方式。另外，交换机上面的内存的空间是很有效的，就可能出现需要的数据无法全部保存到交换机里面。
 
-![duet-switch](/assets/images/duet-switch.png)
+<img src="/assets/images/duet-switch.png" alt="duet-switch" style="zoom:67%;" />
 
  为了解决交换机内存有限的问题，Duet使用的分区的方式，这里主要就是两种方式，一个是将VIP到DIP的映射分割保存到多台的交换机上面，每一个交换机只会保存保存一小部分的VIP，且这部分VIP对应的的DIP都会保存。另外一个就是使用BGP协议来声明那些VIP被赋予到了一个交换机，这些的话其它的交换机就可以将这些VIP的数据包转发到对应的交换机。这样分区的一个好处就是良好的可拓展性，可以很好地应对流量的快速增长。HMux的一个主要的缺点也是这样分区的方式导致的灵活性的不足。
 
-![duet-arch](/assets/images/duet-arch.png)
+<img src="/assets/images/duet-arch.png" alt="duet-arch" style="zoom:67%;" />
 
   所以Duet处理部署了HMux之外，还在一些普通的服务器上面部署SMux。与HMux不同，由于SMux不同担心内存空间太少的问题，它会关联到所有的VIP，这里和Ananta是一样的。在某个HMux故障之后，相关流量会被分配到SMux。HMux和SMux使用相同的方法选择DIP。
 
@@ -100,13 +100,13 @@ $$
 
   SilkRoad是前面Duet的优化。Duet基于硬件实现的Mux在很大程度上优化来Ananta的性能表现，但是SilkRoad认为Duet 优化得还不够彻底，SilkRoad则将可能地将逻辑放到服务器上实现。SilkRoad认为现在的交换机中内存已经有了很大的增长，可以保存更加多的内容，它将VIPTable(即VIP到DIP的映射)和ConnTable(即连接信息)都保存到交换机上面。这样SilkRoad就要解决两个问题，一个是将保存了数百万连接信息的ConnTable保存到几十MB的内存中，另外一个就是在可能频繁有DIP更新的情况下实现Per-Connection Consistency(PCC)。SilkRoad的一个基本的架构如下图，
 
-![silkroad-arch](/assets/images/silkroad-arch.png)
+<img src="/assets/images/silkroad-arch.png" alt="silkroad-arch" style="zoom:67%;" />
 
 ### 0x21 Scaling to Millions of Connections
 
  为了将数百万的连接的信息保存到几十MB的内存中，下面的图中表示了SilkRoad的这部分的一个设计。ConnTable中不会实际保存连接信息的5-Tuple，而是只保存了一个16bits的Hash值。这样就可以将几十bytes的信息压缩到2bytes。这样带来一个问题就是会存在的Hash冲突，这里Hash冲突的可能性大约为0.01%。SilkRoad使用多级匹配的方式来处理Hash冲突。为了识别存在Hash冲突，SilkRoad利用了连接的SYN包，在收到了一个SYN包的时候，如果发现对应位置的Hash槽以及存在了数据，就得将这个数据和之前存的数据都移入到下一个Stage，然后使用不同的Hash函数来消解这里的冲突。如果发生冲突，会增加几个毫秒的时间来处理。
 
-![silkroad-tables](/assets/images/silkroad-tables.png)
+<img src="/assets/images/silkroad-tables.png" alt="silkroad-tables" style="zoom:67%;" />
 
   另外一个压缩空间的就是VIP到DIP的映射，这里使用带版本信息的DIP Pool来保存映射关系，而不是直接保存DIP，用于减少需要保存数据的数量。每次这个DIP Pool更新的时候，都是创建一个新的Pool，前面的Pool在没有连接使用的时候就可以回收。SilkRaod认为这里使用一个6bit的版本信息就可以满足要求，
 
@@ -128,13 +128,13 @@ $$
 
 3. TransitTable中的连接信息都添加到ConnTable之后，清除TransitTable，结束操作。
 
-![silkroad-pcc](/assets/images/silkroad-pcc.png)
+<img src="/assets/images/silkroad-pcc.png" alt="silkroad-pcc" style="zoom:67%;" />
 
 ### 0x23 评估
 
   这里的详细信息可以参看[3]，
 
-![silkroad-perf](/assets/images/silkroad-perf.png)
+<img src="/assets/images/silkroad-perf.png" alt="silkroad-perf" style="zoom:67%;" />
 
 ## 参考
 

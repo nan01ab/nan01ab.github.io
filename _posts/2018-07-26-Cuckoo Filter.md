@@ -154,7 +154,7 @@ $$
 where α increases with b. For example, when b = 4 so 1/α ≈ 1.05, Eq. (7) shows cuckoo filters are asymptotically better (by a constant factor) than Bloom filters, which require 1.44 log2 (1/ε) bits or more for each item.
 ```
 
-<img src="/assets/img/cuckoo-filter-fpr.png" alt="cuckoo-filter-fpr" style="zoom:50%;" />
+<img src="/assets/img/cuckoo-filter-fpr.png" alt="cuckoo-filter-fpr" style="zoom:40%;" />
 
 这里的结论:
 
@@ -186,7 +186,7 @@ print(len(s))
 
 具体的信息参考[1]
 
-![cuckoo-filter-space](/assets/img/cuckoo-filter-space.png)
+<img src="/assets/img/cuckoo-filter-space.png" alt="cuckoo-filter-space" style="zoom:50%;" />
 
 ## 参考
 

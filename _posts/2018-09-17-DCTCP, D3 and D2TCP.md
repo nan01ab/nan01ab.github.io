@@ -16,7 +16,7 @@ typora-root-url: ../
 
  ECN就是显示的拥塞通知。对于IPv4，它使用了DiffServ字段最右边的两个bits来标示(在一些早一点的书上，可以发现说这里是预留给以后的功能的，目前没有使用，当然现在是已经使用了)，在IPv6上Traffic Class字段的最后两个bits。
 
-![dctcp-header](/assets/img/dctcp-header.png)
+<img src="/assets/img/dctcp-header.png" alt="dctcp-header" style="zoom:50%;" />
 
 ​    这里只给出了IPv4的header，图片来源于维基百科。
 
@@ -33,7 +33,7 @@ ECN还有更多的细节，可参考相关资料。
 2. 排队问题，长时间的流和短时间的流同时使用一个交换机端口时，导致排队，也导致短时间的数据被drop，及时没有被drop页导致了延时的增加；
 3. buffer的问题，不同的流使用不同的交换机短空，长时间的流占用了共享的buffer。
 
-<img src="/assets/img/dctcp-problems.png" alt="dctcp-problems" style="zoom:50%;" />
+<img src="/assets/img/dctcp-problems.png" alt="dctcp-problems" style="zoom:40%;" />
 
 ### 0x03 DCTCP
 

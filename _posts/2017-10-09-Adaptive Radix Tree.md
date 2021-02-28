@@ -37,7 +37,7 @@ ART可以做到 With 32 bit keys, for example, a radix tree using s = 1 has 32 l
 
 • Multi-value leaves: The values are stored in one of four different leaf node types, which mirror the structure of inner nodes, but contain values instead of pointers.
 
-• Combined pointer/value slots: If values fit into point- ers, no separate node types are necessary. Instead, each pointer storage location in an inner node can either store a pointer or a value. Values and pointers can be distinguished using one additional bit per pointer or with pointer tagging.
+• Combined pointer/value slots: If values fit into pointers, no separate node types are necessary. Instead, each pointer storage location in an inner node can either store a pointer or a value. Values and pointers can be distinguished using one additional bit per pointer or with pointer tagging.
 ```
 
  对于inner Node，不仅仅可以表示一个串的一个字符，还可以是一个prefix，这样可以在一些情况下减少树的高度，节约内存，也可以提高缓存友好性。综合这些之后，基本的搜索算法如下：
@@ -45,9 +45,11 @@ ART可以做到 With 32 bit keys, for example, a radix tree using s = 1 has 32 l
 ```
 search (node, key, depth) 
   if node==NULL
-	return NULL if isLeaf(node)
-  if leafMatches(node, key, depth) return node
-	return NULL
+	  return NULL 
+	if isLeaf(node)
+    if leafMatches(node, key, depth) 
+      return node
+	  return NULL
   if checkPrefix(node,key,depth)!=node.prefixLen
      return NULL 
   depth=depth+node.prefixLen 
