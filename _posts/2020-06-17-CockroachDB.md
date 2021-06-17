@@ -10,7 +10,7 @@ typora-root-url: ../
 
 ### 0x00 事务
 
-与上面Taurus Database的Paper相比，这篇Paper描述的CockroachDB数据库的架构师模仿Spanner的架构。Paper的内容没有太多新的内容，因为CockroachDB主要的技术都是已经被网上有了相当多的描述，这篇Paper类似于一个总结。看这篇Paper需要对CockroachDB(CRDB)已经有了一些的了解。事务这里首先就设计到了在CRDB中事务操作的基本逻辑和写入事务两个核心的优化。CRDB中，一个事务从一个gateway节点接受到SQL请求，这个节点会负责和客户端进行交互，另外有作为一个 transaction coordinator 。对于一个coordinator事务相关的部分操作逻辑如下。这个描述地很简洁，一些细节方面就里面设计到很多的，具体可以参考网络上面能够找到的资料。这里按照Paper中的描述来说明一些事物操作的基本流程已经一些主要的优化。从coordinator的角度来看，这里已经是SQL转化为来若干的KV层面的请求。一般的逻辑下面，下一个操作的发出得等到上一个操作发挥，另外就是操作得复制到足够的节点上面才能认为是完成了。为了优化这两个问题，CRDB引入的优化就是Write Pipelining 和 Parallel Commits：Write Pipelining可以使得一个操作在没有复制完成之前就返回，而 Parallel Commits使得commit操作可以和write pipeline replicate操作不符进行。
+与上面Taurus Database的Paper相比，这篇Paper描述的CockroachDB数据库的架构师模仿Spanner的架构。Paper的内容没有太多新的内容，因为CockroachDB主要的技术都是已经被网上有了相当多的描述，这篇Paper类似于一个总结。看这篇Paper需要对CockroachDB(CRDB)已经有了一些的了解。事务这里首先就设计到了在CRDB中事务操作的基本逻辑和写入事务两个核心的优化。CRDB中，一个事务从一个gateway节点接受到SQL请求，这个节点会负责和客户端进行交互，另外有作为一个 transaction coordinator 。对于一个coordinator事务相关的部分操作逻辑如下。这个描述地很简洁，一些细节方面就里面设计到很多的，具体可以参考网络上面能够找到的资料。这里按照Paper中的描述来说明一些事物操作的基本流程已经一些主要的优化。从coordinator的角度来看，这里已经是SQL转化为来若干的KV层面的请求。一般的逻辑下面，下一个操作的发出得等到上一个操作发挥，另外就是操作得复制到足够的节点上面才能认为是完成了。为了优化这两个问题，CRDB引入的优化就是Write Pipelining 和 Parallel Commits：Write Pipelining可以使得一个操作在没有复制完成之前就返回，而 Parallel Commits使得commit操作可以和write pipeline replicate操作并行进行。
 
 * Write Pipelining。这里讨论的一般的事务情况形如这样的操作:
 
@@ -22,7 +22,7 @@ typora-root-url: ../
   CommitTxn;
   ```
 
-  不同的操作一般的情况下就是先后执行。最直接的方式是每次操作都成功之后在执行下一个操作，这样的方式性能方面会有比较大的问题。另外的实现方式，和很多相关的系统使用的一种思路是将写入操作的数据先保存到本地，然后在Commit的时候一起去写入，这样避免了一些分布式的操作。而这里使用的方式是Write Pipelining，即每个操作可以直接返回结构，然后异步的执行操作。在Commit的时候再去评估一个操作是否成功，这个也利用了这个BeginTxn然后在执行操作最后执行Commit操作上面的特点。所以在这种情况下，Coordinator需要知道目前正在操作中的操作，记录在inflightOps中。CRDB使用MVCC的方式，这里在开始的时候也是获取了一个时间戳。这里的时间戳也是从本地获取的，和一些类似的系统使用一个中心化的时间戳分配服务不同，也和CRDB主要参考的Spanner的TrueTime有所不同，不需要特殊的硬件支持。一个操作在不是commit操作的情况下，且和前面的操作没有重叠，这个操作就可以pipeline执行。如果一个操作和前面的操作有重叠，就需要等待前面的操作被复制完成，这个称之为pipeline stall。实际的操作被发送到Leaseholder来执行。这里注意的是Leaseholder操作可能返回一个更大的时间戳ts，这种情况下，需要检查对应的key在ts到返回的ts中间的这段时间也没有改动，如果没有更新这个txnTs，如果有这个事务就被认为是操作失败，可能需要重试操作。
+  不同的操作一般的情况下就是先后执行。最直接的方式是每次操作都成功之后在执行下一个操作，这样的方式性能方面会有比较大的问题。另外的实现方式，和很多相关的系统使用的一种思路是将写入操作的数据先保存到本地，然后在Commit的时候一起去写入，这样避免了一些分布式的操作。而这里使用的方式是Write Pipelining，即每个操作可以直接返回结果，然后异步的执行操作。在Commit的时候再去评估一个操作是否成功，这个也利用了这个BeginTxn然后在执行操作最后执行Commit操作上面的特点。所以在这种情况下，Coordinator需要知道目前正在操作中的操作，记录在inflightOps中。CRDB使用MVCC的方式，这里在开始的时候也是获取了一个时间戳。这里的时间戳也是从本地获取的，和一些类似的系统使用一个中心化的时间戳分配服务不同，也和CRDB主要参考的Spanner的TrueTime有所不同，不需要特殊的硬件支持。一个操作在不是commit操作的情况下，且和前面的操作没有重叠，这个操作就可以pipeline执行。如果一个操作和前面的操作有重叠，就需要等待前面的操作被复制完成，这个称之为pipeline stall。实际的操作被发送到Leaseholder来执行。这里注意的是Leaseholder操作可能返回一个更大的时间戳ts，这种情况下，需要检查对应的key在ts到返回的ts中间的这段时间也没有改动，如果没有更新这个txnTs，如果有这个事务就被认为是操作失败，可能需要重试操作。
 
 * Parallel Commits操作则使得commit的操作可以异步执行。体现在下面算法中的最后两步。一个如果一个事务的所有写入内容都被复制完成之后，后面的commit操作是一定能够完成的。所以到了这里就可以先返回成功再去实际地commit。为了实现这个功能，CRDB引入了一个staging的事务状态，表示一个事务操作的所有写入是否都复制完成了。这个优化取得的效果很明显，
 
@@ -32,7 +32,7 @@ typora-root-url: ../
 
 ![](/assets/png/crdb-txn-cor.png)
 
-对于Leaseholder，接受到一个请求是先校验自己的lease，然后获取需要的latch。并等待起以来的操作的复制操作完成。低于非只读的操作，还需要更新op.ts，这里设计到CRDB另外的一些逻辑。执行操作完成之后，对于非commit操作执行可以结果。而后面对于非只读的操作，在去复制操作和将操作apply到本地的存储引擎。之后释放latch。需要的时候返回commit的结果。
+对于Leaseholder，接受到一个请求是先校验自己的lease，然后获取需要的latch。并等待起以来的操作的复制操作完成。对于非只读的操作，还需要更新op.ts，这里设计到CRDB另外的一些逻辑。执行操作完成之后，对于非commit操作执行可以结果。而后面对于非只读的操作，在去复制操作和将操作apply到本地的存储引擎。之后释放latch。需要的时候返回commit的结果。
 
 ![](/assets/png/crdb-leaseholder.png)
 
@@ -48,14 +48,14 @@ typora-root-url: ../
   Write-write conflicts may also lead to deadlocks in cases where different transactions have written intents in differ- ent orders. CRDB employs a distributed deadlock-detection algorithm to abort one transaction from a cycle of waiters.
   ```
 
-这里的Read Refreshes比较有意思。前面提到的冲突处理的时候会有调整commit ts的逻辑，但是这里需要处理另外的一些问题。调整一个事务的read timestamp Ta到一个更大的ts Tb，需要保证在(ta,tb]这个区间内，读取的数据没有被更新。这里是应该为了实现可重复读，满足这里隔离级别的要求。如果发生了更新的情况，则可能进行重试 。对于交互性的事务如果返回了一部分结果给客户端的，则不能重试。为了处理读取这些的keys的事务的信息，这里使用的方式维护一个事务的read set。一个łread refresh请求需要验证在给定的时间区间内没有被更新。这里一个写入事务是如何知道读取事务的信息的，查了一些资料是在leaseholder中的锁逻辑中处理的。
+这里的Read Refreshes比较有意思。前面提到的冲突处理的时候会有调整commit ts的逻辑，但是这里需要处理另外的一些问题。调整一个事务的read timestamp Ta到一个更大的ts，tb，需要保证在(ta,tb]这个区间内，读取的数据没有被更新。这里是应该为了实现可重复读，满足这里隔离级别的要求。如果发生了更新的情况，则可能进行重试 。对于交互性的事务如果返回了一部分结果给客户端的，则不能重试。为了处理读取这些的keys的事务的信息，这里使用的方式维护一个事务的read set。一个łread refresh请求需要验证在给定的时间区间内没有被更新。这里一个写入事务是如何知道读取事务的信息的，查了一些资料是在leaseholder中的锁逻辑中处理的。
 
 #### Follower Reads
 
- CRDB使用Follower Reads来实现一些只读事务的操作，需要在SQL加上一些指示性的东西。满足Follower Reads要满足这样的一些条件，一个是对于一个时间戳为ts的事务，他可以读取的数据不会在后面被更新，另外一个就是要去这个non-leaseholder replica已经有了这些数据。也就是要去满足non-leaseholder replica执行一个时间戳为ts的只读事务的时候，leaseholder不能在执行比这个ts还还要小的写入操作，另外就是这个non-leaseholder replica 的raft log的prefix要足够支持执行这个事务。为了满足这些条件，每个leaseholder会记录下进行中的操作，并周期性地通知一个closed timestamp，表示不会在接受小于这个closed timestamp的写入事务，
+ CRDB使用Follower Reads来实现一些只读事务的操作，需要在SQL加上一些指示性的东西。满足Follower Reads要满足这样的一些条件，一个是对于一个时间戳为ts的事务，可以读取的数据不会在后面被更新，另外一个就是要去这个non-leaseholder replica已经有了这些数据。也就是要去满足non-leaseholder replica执行一个时间戳为ts的只读事务的时候，leaseholder不能在执行比这个ts还还要小的写入操作，另外就是这个non-leaseholder replica 的raft log的prefix要足够支持执行这个事务。为了满足这些条件，每个leaseholder会记录下进行中的操作，并周期性地通知一个closed timestamp，表示不会在接受小于这个closed timestamp的写入事务，
 
 ```
-  Closed timestamps, alongside Raft log indexes at the time, are exchanged periodically between replicas. Fol- lower replicas use the state built up from received updates to determine if they have all the data needed to serve consistent reads at a given timestamp. For efficiency reasons the closed timestamp and the corresponding log indexes are generated at the node level (as opposed to the Range level).
+  Closed timestamps, alongside Raft log indexes at the time, are exchanged periodically between replicas. Follower replicas use the state built up from received updates to determine if they have all the data needed to serve consistent reads at a given timestamp. For efficiency reasons the closed timestamp and the corresponding log indexes are generated at the node level (as opposed to the Range level).
 ```
 
 ### 0x01 Clock Synchronization
