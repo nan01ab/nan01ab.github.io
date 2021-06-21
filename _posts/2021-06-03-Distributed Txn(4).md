@@ -10,7 +10,7 @@ typora-root-url: ../
 
 ### 0x10 TiDB Async Commit
 
-  前面提到TiDB使用的方式基本沿用了Percolator的方式，这种方式的一个特点是网络交互次数较多。Async Commit顾名思义就是将2PC中，第2步的commit操作异步话，意味着返回给client就prepare完成即可以了。Percolator的方式中，一个事务的状态有primary key确定，如果要改成异步commit的话，意味着需要在prepare这一步完成之后，就可以知道事务的状态。考虑一个prepare返回协调者就crash的情况：一种情况是协调者知道了事务可以正常commit，但是没来得及commit，也可能参与者都返回了ok但是还没有收到就crash；另外一种情况是协调者收到了不能commit的信息，但是也没有来得及abort。后面其它的操作看到了这个事务遗留下来的信息，需要可以从其中恢复出来，这样就需要：
+  前面提到TiDB使用的方式基本沿用了Percolator的方式，这种方式的一个特点是网络交互次数较多。Async Commit顾名思义就是将2PC中，第2步的commit操作异步化，意味着返回给client就prepare完成即可以了。Percolator的方式中，一个事务的状态有primary key确定，如果要改成异步commit的话，意味着需要在prepare这一步完成之后，就可以知道事务的状态。考虑一个prepare返回协调者就crash的情况：一种情况是协调者知道了事务可以正常commit，但是没来得及commit，也可能参与者都返回了ok但是还没有收到就crash；另外一种情况是协调者收到了不能commit的信息，但是也没有来得及abort。后面其它的操作看到了这个事务遗留下来的信息，需要可以从其中恢复出来，这样就需要：
 
 * 这个事务是可以commit还是不可以commit。一个操作在看到一个状态不确定的数据时候，就需要知道对应事务所有写入数据的状态。由于之前在非primary key上面保存了primary key，这样继续在primary key的信息里面，保存上这次事务其它的keys，就可以根据这个信息取一一询问。这里可以看出这种方式适合OLTP的应用场景，对大事务不是很适合；
 * 可以commit的时候，和这个事务commit ts是什么。这里对commit ts有两个要求：一个是这个commit ts必须体现事务之间的commit的顺序，另外一个是这个commit ts不能太大，因为后面读操作的时候能改立即读取到committed的数据，又读取操作获取的start ts是从TSO而来，这样要求commit ts不能大于TSO已经分配的ts+1。为了实现这些要求，这里在TiKV上维护了一个max ts，另外在prewrite操作的时候，这个请求携带了一个从TOS获取的prewrite ts。KV的节点在收到请求之后，如果本地的max ts小于这个prewrite ts，需要增大这个ts。KV节点持久化prewrite的数据，并记录下min commit ts为max ts。KV节点给DB节点返回的时候，会带上这个min commit ts。事务commit的时候，选择commits为min commit ts中最大的一个。
@@ -50,7 +50,7 @@ typora-root-url: ../
 
 * 读取操作的时候要稍微复杂一些，从最新到老的读起。遇到一个commit列不为nil的，且这个版本的commit ts小于目前事务的start ts，则直接表明其读取到了一个合适的值。如果commit列为nil，则可能事务已经commit，也可能还没有commit，需要读取commit table判断。读取如果commit table的时候，如果其中没有对应记录，则事务可能已经abort or 还在进行中。在合适的时候这里会尝试一个强制abort的操作，需要使用CAS的方式将这个start ts对应值置为abort。如果CAS失败，则可能是前面的事务已经committed，重新读取这个状态。如果成功强制abort，则这个版本的数据被忽略。Reader尝试abort事务的时候，可能是之前的事务在这个过程中已经完成了事务commit，已经commit table数据的清理。这样就需要在设置了强制abort之后，再去读一下数据，如果数据被commit，则需要将之前写入事务的abort状态删除。
 
- 另外一个优化设计单个key操作的优化，主要增加了下面的一些API。对于brc和br，实现就是下层使用的HBase的Get操作。区别在返回version与否，而brc就是单个key的写入，wc操作则是单个key的CAS操作。对于bwc操作，遇到了前面处于不明确状态的写入，则会直接abort，降低额外操作带来的开销，另外会和wc的操作，其会生成对应key一个新版本的数据，这个版本号/timestamp要求比之前已经commit的要大，而且要求和不走fast path的事务之间的冲突能够检查出来。Omid的做法是：将时间戳范围两个部分，一部分为global version，一部分sequencer number。bwc操作会读取对应key最新的版本，并将其增加其commits ts并写入，如果超过了sequencer number能够表示的范围，则需要abort。这个时候可以再走之前的事务路径重试。另外的问题涉及到冲突检测的。这里的处理方式是维护一个max version，不小于key已经commit的版本，put操作会增加这个max version，读操作也会增加max version到不小于读操作的timestmap，普通的写事务操作的时候，检查通过判断max version和事务的timestamp，要求max version不大于这个事务的时间戳。另外fast path的写入可能导致读不符合snapshot的语义(出现了新的可以满足snapshot要求的版本?)，使用fast path commit之后，Omid的三怕手头的语义就是有了一些变化。
+ 另外一个优化设计单个key操作的优化，主要增加了下面的一些API。对于brc和br，实现就是下层使用的HBase的Get操作。区别在返回version与否，而brc就是单个key的写入，wc操作则是单个key的CAS操作。对于bwc操作，遇到了前面处于不明确状态的写入，则会直接abort，降低额外操作带来的开销，另外会和wc的操作，其会生成对应key一个新版本的数据，这个版本号/timestamp要求比之前已经commit的要大，而且要求和不走fast path的事务之间的冲突能够检查出来。Omid的做法是：将时间戳范围两个部分，一部分为global version，一部分sequencer number。bwc操作会读取对应key最新的版本，并将其增加其commits ts并写入，如果超过了sequencer number能够表示的范围，则需要abort。这个时候可以再走之前的事务路径重试。另外的问题涉及到冲突检测的。这里的处理方式是维护一个max version，不小于key已经commit的版本，put操作会增加这个max version，读操作也会增加max version到不小于读操作的timestmap，普通的写事务操作的时候，检查通过判断max version和事务的timestamp，要求max version不大于这个事务的时间戳。另外fast path的写入可能导致读不符合snapshot的语义(出现了新的可以满足snapshot要求的版本?)，使用fast path commit之后，Omid的snapshot的语义就是有了一些变化。
 
 ```
 brc(key) – begins an FP transaction, reads key within it, and commits.
